@@ -1,5 +1,11 @@
 package SNAKE_PC.demo.repository.producto;
 
-public class CagoriaRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import SNAKE_PC.demo.model.producto.Categoria;
+
+public interface CagoriaRepository extends JpaRepository<Categoria, Long> {
+
     
+
 }

@@ -1,5 +1,12 @@
 package SNAKE_PC.demo.repository.usuario;
 
-public class DireccionRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import SNAKE_PC.demo.model.usuario.Direccion;
+
+public interface DireccionRepository extends JpaRepository<Direccion, Long> {
+
+    
+
     
 }

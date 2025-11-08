@@ -1,5 +1,12 @@
 package SNAKE_PC.demo.repository.usuario;
 
-public class RegionRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import SNAKE_PC.demo.model.usuario.Region;
+
+public interface RegionRepository extends JpaRepository<Region, Long> {
+
+    
+
     
 }

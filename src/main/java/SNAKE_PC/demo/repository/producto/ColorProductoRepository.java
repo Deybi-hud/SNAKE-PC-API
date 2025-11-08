@@ -1,5 +1,12 @@
 package SNAKE_PC.demo.repository.producto;
 
-public class ColorProductoRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import SNAKE_PC.demo.model.producto.ColorProducto;
+
+public interface ColorProductoRepository extends JpaRepository<ColorProducto, Long>{
+
+    
+
     
 }

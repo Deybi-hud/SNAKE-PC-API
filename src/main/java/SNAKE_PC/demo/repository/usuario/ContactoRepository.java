@@ -1,5 +1,12 @@
 package SNAKE_PC.demo.repository.usuario;
 
-public class ContactoRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import SNAKE_PC.demo.model.usuario.Contacto;
+
+public interface ContactoRepository extends JpaRepository<Contacto, Long> {
+
+    
+
     
 }
