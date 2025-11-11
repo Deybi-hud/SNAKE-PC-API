@@ -146,7 +146,6 @@ public class ContactoService {
         if(comuna.getId() == null){
             comuna = comunaRepository.save(comuna);
         }
-
         nuevaDireccion.setComuna(comuna);
         Direccion direccionGuardada = direccionRepository.save(nuevaDireccion);
         Direccion direccionAnterior =  contacto.getDireccion();
