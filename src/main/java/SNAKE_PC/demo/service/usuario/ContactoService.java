@@ -6,20 +6,18 @@ import org.springframework.stereotype.Service;
 import SNAKE_PC.demo.model.usuario.Comuna;
 import SNAKE_PC.demo.model.usuario.Contacto;
 import SNAKE_PC.demo.model.usuario.Direccion;
+import SNAKE_PC.demo.model.usuario.Region;
 import SNAKE_PC.demo.model.usuario.RolUsuario;
-import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.usuario.ComunaRepository;
 import SNAKE_PC.demo.repository.usuario.ContactoRepository;
 import SNAKE_PC.demo.repository.usuario.DireccionRepository;
+import SNAKE_PC.demo.repository.usuario.RegionRepository;
 import SNAKE_PC.demo.repository.usuario.RolRepository;
 import jakarta.transaction.Transactional;
 
 @Service 
 @Transactional
 public class ContactoService {
-
-    @Autowired
-    private UsuarioService usuarioService;
 
     @Autowired
     private ContactoRepository contactoRepository;
@@ -33,9 +31,12 @@ public class ContactoService {
     @Autowired  
     private ComunaRepository comunaRepository;
 
+    @Autowired
+    private RegionRepository regionRepository;
 
-    public Contacto guardarContactoSinRegistro(Contacto contacto,Usuario usuario, RolUsuario rol,
-        Direccion direccion, Comuna comuna, Long UsuarioId) {
+
+    public Contacto guardarContactoSinRegistro(Contacto contacto,
+        Direccion direccion, String nombreRegion, String nombreComuna) {
 
         if(contactoRepository.existsByTelefono(contacto.getTelefono())){
             throw new RuntimeException("El contacto con teléfono " + contacto.getTelefono() + " ya existe.");
@@ -46,23 +47,31 @@ public class ContactoService {
         if(contacto.getNombre() == null || contacto.getApellido() == null){
             throw new RuntimeException("El contacto debe agregar un nombre y un apellido.");
         }
-        if(contacto.getDireccion() == null){
-            throw new RuntimeException("El contacto debe tener una dirección asociada.");
-        }
         if(direccion.getCalle() == null|| direccion.getNumero() == null){
             throw new RuntimeException("La dirección debe tener calle y número.");
         }
-        if(comuna == null){
-            throw new RuntimeException("La comuna no puede ser nula.");
+        if(nombreComuna== null || nombreRegion == null){
+            throw new RuntimeException("Comuna y región requeridos");
         }
-        if(comuna.getId() == null){
-            comuna = comunaRepository.save(comuna);
-        }
+       
+        Region region = regionRepository.findByNombreRegion(nombreRegion)
+            .orElseGet(()-> {
+                Region nuevaRegion = new Region();
+                nuevaRegion.setNombreRegion(nombreRegion);
+                return regionRepository.save(nuevaRegion);
+            });
+        
+        Comuna comuna = comunaRepository.findByNombreComunaAndRegion(nombreComuna, region)
+            .orElseGet(()->{
+                Comuna nuevaComuna = new Comuna();
+                nuevaComuna.setNombreComuna(nombreComuna);
+                nuevaComuna.setRegion(region);
+                return comunaRepository.save(nuevaComuna);
+            });
 
         direccion.setComuna(comuna);
         Direccion nuevaDireccion = direccionRepository.save(direccion);
-
-
+        
         RolUsuario rolInvitado = rolUsuarioRepository.findByNombreRol("Invitado")
                 .orElseGet(()->{
                     RolUsuario nuevoRol = new RolUsuario();
@@ -76,56 +85,6 @@ public class ContactoService {
         nuevoContacto.setTelefono(contacto.getTelefono());
         nuevoContacto.setDireccion(nuevaDireccion);
         nuevoContacto.setRolUsuario(rolInvitado);
-
-        return contactoRepository.save(nuevoContacto);
-    }
-
-
-    public Contacto registrarCliente(Contacto contacto,Usuario usuario, RolUsuario rolUsuario,
-        Direccion direccion, Comuna comuna) {
-
-            if(contactoRepository.existsByTelefono(contacto.getTelefono())){
-                throw new RuntimeException("El contacto con teléfono " + contacto.getTelefono() + " ya existe.");
-            }
-            if(contacto.getTelefono() == null){
-                throw new RuntimeException("Debe tener un teléfono asociado.");
-            }
-            if(contacto.getNombre() == null || contacto.getApellido() == null){
-                throw new RuntimeException("Debe agregar un nombre y un apellido.");
-            }
-            if(contacto.getDireccion() == null){
-                throw new RuntimeException("Debe tener una dirección asociada.");
-            }
-            if(direccion.getCalle() == null|| direccion.getNumero() == null){
-                throw new RuntimeException("La dirección debe tener calle y número.");
-            }
-            if(comuna == null){
-                throw new RuntimeException("La comuna no puede ser nula.");
-            }
-            if(comuna.getId() == null){
-                comuna = comunaRepository.save(comuna);
-            }
-
-            direccion.setComuna(comuna);
-            Direccion nuevaDireccion = direccionRepository.save(direccion);
-
-            Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
-
-            RolUsuario nuevoCliente = rolUsuarioRepository.findByNombreRol("Cliente")
-                    .orElseGet(()->{
-                        RolUsuario nuevoRol = new RolUsuario();
-                        nuevoRol.setNombreRol("Cliente");
-                        return rolUsuarioRepository.save(nuevoRol);
-                    });
-            
-            Contacto nuevoContacto = new Contacto();
-            nuevoContacto.setNombre(contacto.getNombre());
-            nuevoContacto.setApellido(contacto.getApellido());
-            nuevoContacto.setTelefono(contacto.getTelefono());
-            nuevoContacto.setUsuario(nuevoUsuario);
-            nuevoContacto.setDireccion(nuevaDireccion); 
-            nuevoContacto.setRolUsuario(nuevoCliente);
-
 
         return contactoRepository.save(nuevoContacto);
     }
