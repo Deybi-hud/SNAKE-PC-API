@@ -28,6 +28,7 @@ public class SessionService {
 
 
 //-------------------------------------------- Login Service -------------------------------------------------
+
     public Map <String, Object> login(String usernameOrEmail, String contrasena){
         Optional<Usuario> usuarioOpt = usuarioRepository.findByNombreUsuario(usernameOrEmail)
             .or(()-> usuarioRepository.findByEmail(usernameOrEmail));
@@ -57,22 +58,22 @@ public class SessionService {
         return response;
     }
 
-
-//---------------------------------------------- Logout Service --------------------------------------------------
+//-------------------------------------------- Logout Service --------------------------------------------------
 
     public Map<String, Object> cerrarSesion(Long usuarioId){
         if(sesionesActivas.containsKey(usuarioId)){
             sesionesActivas.remove(usuarioId);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("mensaje", "Sesión cerrada correctamente");
-        return response;
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("mensaje", "Sesión cerrada correctamente");
+            return response;
         }
         throw new RuntimeException("No hay sesión activa para este usuario");
     }
 
-//---------------------------------------------- Desactivar Cuenta ------------------------------------------------
+//------------------------------------------- Desactivar Cuenta ------------------------------------------------
+
   public Map<String, Object> desactivarCuenta(Long id, String token){
         String tokenActivo = sesionesActivas.get(id);
         if(tokenActivo == null || tokenActivo.equals(token)){
@@ -106,4 +107,5 @@ public class SessionService {
     }
 
 //------------------------------------------- Listar sesiones por actividad ---------------------------------------
+
 }
