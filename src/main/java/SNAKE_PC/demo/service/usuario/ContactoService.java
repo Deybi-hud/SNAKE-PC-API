@@ -35,8 +35,7 @@ public class ContactoService {
     private RegionRepository regionRepository;
 
 
-    public Contacto guardarContactoSinRegistro(Contacto contacto,
-        Direccion direccion, String nombreRegion, String nombreComuna) {
+    public Contacto guardarContactoSinRegistro(Contacto contacto, Direccion direccion, String nombreComuna, String nombreRegion) {
 
         if(contactoRepository.existsByTelefono(contacto.getTelefono())){
             throw new RuntimeException("El contacto con teléfono " + contacto.getTelefono() + " ya existe.");
@@ -50,19 +49,19 @@ public class ContactoService {
         if(direccion.getCalle() == null|| direccion.getNumero() == null){
             throw new RuntimeException("La dirección debe tener calle y número.");
         }
-        if(nombreComuna== null || nombreRegion == null){
-            throw new RuntimeException("Comuna y región requeridos");
+        if(nombreComuna == null || nombreRegion == null){
+            throw new RuntimeException("Comuna y región requeridas");
         }
-       
+
         Region region = regionRepository.findByNombreRegion(nombreRegion)
-            .orElseGet(()-> {
+            .orElseGet(() -> {
                 Region nuevaRegion = new Region();
                 nuevaRegion.setNombreRegion(nombreRegion);
                 return regionRepository.save(nuevaRegion);
             });
-        
+
         Comuna comuna = comunaRepository.findByNombreComunaAndRegion(nombreComuna, region)
-            .orElseGet(()->{
+            .orElseGet(() -> {
                 Comuna nuevaComuna = new Comuna();
                 nuevaComuna.setNombreComuna(nombreComuna);
                 nuevaComuna.setRegion(region);
@@ -71,7 +70,7 @@ public class ContactoService {
 
         direccion.setComuna(comuna);
         Direccion nuevaDireccion = direccionRepository.save(direccion);
-        
+
         RolUsuario rolInvitado = rolUsuarioRepository.findByNombreRol("Invitado")
                 .orElseGet(()->{
                     RolUsuario nuevoRol = new RolUsuario();

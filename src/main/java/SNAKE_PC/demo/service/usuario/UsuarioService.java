@@ -49,9 +49,9 @@ public class UsuarioService {
     private PasswordEncoder passwordEncoder;
 
 //--------------------------- Métodos para registrar  ----------------------------------------
-    public Usuario registrarUsuario(Usuario usuario, String confirmarContrasena) {
+   public Usuario registrarUsuario(Usuario usuario, String confirmarContrasena) {
         if(usuarioRepository.existsByUsername(usuario.getNombreUsuario())){
-            throw new RuntimeException("El usuario con ID " + usuario.getId() + " ya existe.");
+            throw new RuntimeException("El nombre de usuario ya existe.");
         }
         if(usuarioRepository.existsByEmail(usuario.getCorreo())){
             throw new RuntimeException("El correo " + usuario.getCorreo() + " ya está en uso.");
@@ -209,23 +209,24 @@ public class UsuarioService {
 
 //------------------------------------- Método para eliminar información de contacto ---------------------------
 
-    public Map<String, Object> eliminarInformacionContacto(Long contactoId){
+   public Map<String, Object> eliminarInformacionContacto(Long contactoId){
         Contacto contacto = contactoRepository.findById(contactoId)
             .orElseThrow(()-> new RuntimeException("Contacto no encontrado"));
 
-            Usuario usuario = contacto.getUsuario();
-            Direccion direccion = contacto.getDireccion();
+        Usuario usuario = contacto.getUsuario();
+        Direccion direccion = contacto.getDireccion();
 
         Map<String, Object> direccionInfo = new HashMap<>();
         if(direccion != null){
             direccionInfo.put("calle", direccion.getCalle());
-            direccionInfo.put("numero",direccion.getNumero());
+            direccionInfo.put("numero", direccion.getNumero());
+            direccionInfo.put("comunaObjeto", direccion.getComuna());
+
             if(direccion.getComuna() != null){
-                direccionInfo.put("comunaObjeto", direccion.getComuna());
                 direccionInfo.put("comunaNombre", direccion.getComuna().getNombreComuna());
                 if(direccion.getComuna().getRegion() != null){
                     direccionInfo.put("regionObjeto", direccion.getComuna().getRegion());
-                    direccionInfo.put("nombreRegion",direccion.getComuna().getRegion().getNombreRegion());
+                    direccionInfo.put("nombreRegion", direccion.getComuna().getRegion().getNombreRegion());
                 }
             }
         }
