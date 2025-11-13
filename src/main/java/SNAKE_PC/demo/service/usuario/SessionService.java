@@ -16,6 +16,7 @@ import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
 import jakarta.transaction.Transactional;
 
+@SuppressWarnings("null")
 @Service
 @Transactional
 public class SessionService {

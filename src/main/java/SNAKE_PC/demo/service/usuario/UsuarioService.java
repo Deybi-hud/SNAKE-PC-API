@@ -22,7 +22,7 @@ import SNAKE_PC.demo.repository.usuario.RegionRepository;
 import SNAKE_PC.demo.repository.usuario.RolRepository;
 import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
 import jakarta.transaction.Transactional;
-
+@SuppressWarnings("null")
 @Service
 @Transactional
 public class UsuarioService {
