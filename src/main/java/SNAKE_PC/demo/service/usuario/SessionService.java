@@ -33,7 +33,7 @@ public class SessionService {
     // ---------------------------- LOGIN SERVICE -------------------------------------------------
     public Map<String, Object> login(String usernameOrEmail, String contrasena) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByNombreUsuario(usernameOrEmail)
-            .or(() -> usuarioRepository.findByEmail(usernameOrEmail));
+            .or(() -> usuarioRepository.findByCorreo(usernameOrEmail));
             
         if(usuarioOpt.isEmpty()) {
             throw new RuntimeException("Usuario no encontrado");

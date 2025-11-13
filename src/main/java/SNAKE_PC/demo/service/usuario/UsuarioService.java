@@ -53,7 +53,7 @@ public class UsuarioService {
         if(usuarioRepository.existsByUsername(usuario.getNombreUsuario())){
             throw new RuntimeException("El nombre de usuario ya existe.");
         }
-        if(usuarioRepository.existsByEmail(usuario.getCorreo())){
+        if(usuarioRepository.existsByCorreo(usuario.getCorreo())){
             throw new RuntimeException("El correo " + usuario.getCorreo() + " ya está en uso.");
         }
         if(!usuario.getContrasena().equals(confirmarContrasena)){
@@ -174,7 +174,7 @@ public class UsuarioService {
          if (!usuario.getNombreUsuario().equals(usuarioActualizado.getNombreUsuario()) && usuarioRepository.existsByUsername(usuarioActualizado.getNombreUsuario())) {
         throw new RuntimeException("El nombre de usuario ya está en uso");
     }
-        if (!usuario.getCorreo().equals(usuarioActualizado.getCorreo()) && usuarioRepository.existsByEmail(usuarioActualizado.getCorreo())) {
+        if (!usuario.getCorreo().equals(usuarioActualizado.getCorreo()) && usuarioRepository.existsByCorreo(usuarioActualizado.getCorreo())) {
         throw new RuntimeException("El correo ya está en uso");
         }
 
@@ -198,7 +198,7 @@ public class UsuarioService {
     }
 
     public Optional<Usuario> findByEmail(String email) {
-        return usuarioRepository.findByEmail(email);
+        return usuarioRepository.findByCorreo(email);
     }
 
     public Usuario obtenerDatosDeUsuario(Long usuarioId) {
