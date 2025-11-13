@@ -1,6 +1,5 @@
 package SNAKE_PC.demo.model.producto;
 
-
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -17,12 +16,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name ="producto")
+@Table(name = "producto")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Producto {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,16 +35,16 @@ public class Producto {
     @Column(name = "precio", nullable = false)
     private Double precio;
 
-    @Column(name ="sku", nullable = false, unique = true)
+    @Column(name = "sku", nullable = false, unique = true)
     private String sku;
 
     @ManyToOne
     @JoinColumn(name = "id_productoCategoria", nullable = false)
-    private ProductoCategoria productoCategoria;    
+    private ProductoCategoria productoCategoria;
 
     @ManyToOne
     @JoinColumn(name = "id_marca", nullable = false)
-    private Marca marca;    
+    private Marca marca;
 
     @ManyToOne
     @JoinColumn(name = "id_dimension")
@@ -59,9 +58,6 @@ public class Producto {
     @JoinColumn(name = "id_refrigeracion")
     private Refrigeracion refrigeracion;
 
-    @OneToMany(mappedBy = "producto")
-    private List<Imagen> imagenes;
-    
     @OneToMany(mappedBy = "producto")
     private List<ColorProducto> colores;
 }

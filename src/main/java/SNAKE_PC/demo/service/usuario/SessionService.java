@@ -16,6 +16,7 @@ import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
 import jakarta.transaction.Transactional;
 
+@SuppressWarnings("null")
 @Service
 @Transactional
 public class SessionService {
@@ -32,7 +33,7 @@ public class SessionService {
     // ---------------------------- LOGIN SERVICE -------------------------------------------------
     public Map<String, Object> login(String usernameOrEmail, String contrasena) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByNombreUsuario(usernameOrEmail)
-            .or(() -> usuarioRepository.findByEmail(usernameOrEmail));
+            .or(() -> usuarioRepository.findByCorreo(usernameOrEmail));
             
         if(usuarioOpt.isEmpty()) {
             throw new RuntimeException("Usuario no encontrado");

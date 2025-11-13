@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "refrigeracion")
 @Data
-@AllArgsConstructor  
+@AllArgsConstructor
 @NoArgsConstructor
 public class Refrigeracion {
 
@@ -23,5 +23,5 @@ public class Refrigeracion {
 
     @Column(name = "tipo", nullable = false)
     private String tipo;
-    
+
 }

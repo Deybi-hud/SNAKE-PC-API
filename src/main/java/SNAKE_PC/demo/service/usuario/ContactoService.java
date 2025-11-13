@@ -14,7 +14,7 @@ import SNAKE_PC.demo.repository.usuario.DireccionRepository;
 import SNAKE_PC.demo.repository.usuario.RegionRepository;
 import SNAKE_PC.demo.repository.usuario.RolRepository;
 import jakarta.transaction.Transactional;
-
+@SuppressWarnings("null")
 @Service 
 @Transactional
 public class ContactoService {
