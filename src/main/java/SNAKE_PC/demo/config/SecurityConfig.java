@@ -20,15 +20,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers(
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
-                    "/swagger-ui.html"
+                    "/swagger-ui.html",
+                    "/doc/**"
                 ).permitAll()
-                .anyRequest().authenticated()
-            )
-            .httpBasic(basic -> {});
+                .anyRequest().permitAll()
+            );
         return http.build();
     }
 }
