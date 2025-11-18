@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import SNAKE_PC.demo.model.producto.Categoria;
 import SNAKE_PC.demo.model.producto.Producto;
+import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.producto.CategoriaRepository;
 import SNAKE_PC.demo.repository.producto.MarcaRepository;
 import SNAKE_PC.demo.repository.producto.ProductoCategoriaRepository;
@@ -24,80 +25,96 @@ public class ProductoService {
     private ProductoRepository productoRepository;
 
     @Autowired
-    private CategoriaRepository categoriaRepository;
+    private MarcaRepository marcaRepository;
 
     @Autowired
-    private MarcaRepository marcaRepository;
+    private CategoriaRepository categoriaRepository;
 
     @Autowired
     private ProductoCategoriaRepository productoCategoriaRepository;
 
     public List<Producto> findAll() {
-        return productoRepository.findAll();
+        List<Producto> productos = productoRepository.findAll();
+        return productos;
     }
 
-    public Producto findById(long id) {
-        return productoRepository.findById(id).orElse(null);
+    public Producto findById(Long id) {
+        Producto producto = productoRepository.findById(id).orElse(null);
+        if (producto == null) {
+            throw new IllegalArgumentException("Producto no encontrado.");
+        }
+        return producto;
     }
 
-    public Producto save(Producto producto) {
+    public Producto saveProducto(Producto producto) {
+        // Validar que marca existe
+        if (producto.getMarca() != null && producto.getMarca().getId() != null) {
+            if (!marcaRepository.existsById(producto.getMarca().getId())) {
+                throw new IllegalArgumentException("La marca no existe");
+            }
+        }
+        
+        // Validar que categoría existe
+        if (producto.getProductoCategoria() != null && producto.getProductoCategoria().getId() != null) {
+            if (!categoriaRepository.existsById(producto.getProductoCategoria().getId())) {
+                throw new IllegalArgumentException("La categoría no existe");
+            }
+        }
+        
         return productoRepository.save(producto);
     }
 
-    public void delete(long id) {
+    public void deleteProducto(Long id) {
+        Producto producto = productoRepository.findById(id).orElse(null);
+        if (producto == null) {
+            throw new IllegalArgumentException("Producto no encontrado.");
+        }
         productoRepository.deleteById(id);
     }
 
-    public Producto patchProducto(Long id, Producto producto) {
-        Optional<Producto> productoOptional = productoRepository.findById(id);
-        if (productoOptional.isPresent()) {
-            Producto productoUpdate = productoOptional.get();
+    public Producto partialUpdateProducto(Producto producto) {
+        Producto existingProducto = productoRepository.findById(producto.getId()).orElse(null);
+        if (existingProducto == null) {
+            throw new IllegalArgumentException("Producto no encontrado.");
+        }
+        if (existingProducto != null) {
             if (producto.getNombreProducto() != null) {
-                productoUpdate.setNombreProducto(producto.getNombreProducto());
+                existingProducto.setNombreProducto(producto.getNombreProducto());
             }
             if (producto.getStock() != null) {
-                productoUpdate.setStock(producto.getStock());
+                existingProducto.setStock(producto.getStock());
             }
+
             if (producto.getPrecio() != null) {
-                productoUpdate.setPrecio(producto.getPrecio());
+                existingProducto.setPrecio(producto.getPrecio());
             }
+
             if (producto.getSku() != null) {
-                productoUpdate.setSku(producto.getSku());
+                existingProducto.setSku(producto.getSku());
             }
-            return productoRepository.save(productoUpdate);
-        } else {
-            return null;
+
+            if (producto.getProductoCategoria() != null) {
+                existingProducto.setProductoCategoria(producto.getProductoCategoria());
+            }
+
+            if (producto.getMarca() != null) {
+                existingProducto.setMarca(producto.getMarca());
+            }
+
+            if (producto.getDimension() != null) {
+                existingProducto.setDimension(producto.getDimension());
+            }
+
+            if (producto.getEspecificacion() != null) {
+                existingProducto.setEspecificacion(producto.getEspecificacion());
+            }
+
+            return productoRepository.save(existingProducto);
         }
+        throw new IllegalArgumentException("Producto no encontrado.");
     }
 
-    public Producto creaProducto(Producto producto, String nombreCategoria, String colorProducto){
-        if(producto.getNombreProducto() == null){
-            throw new RuntimeException("Debe ingresar el nombre del producto");
-        }
-        if(producto.getStock() <= 0){
-            throw new RuntimeException("Debe ingresar un número positivo");
-        }
-        if(producto.getPrecio() <= 0){
-            throw new RuntimeException("El precio del producto no puede ser 0");
-        }
-        if(producto.getSku() == null){
-            throw new RuntimeException("El producto debe tener un sku");
-        }
-        if(nombreCategoria == null || colorProducto == null){
-            throw new RuntimeException("Debe ingresar categoria del producto y un color a su producto");
-        }
-        
-       
-        Categoria nuevaCategoria = categoriaRepository.findByNombreCategoria(nombreCategoria)
-            .orElseGet(()->{
-                Categoria cat = new Categoria();
-                cat.setNombreCategoria(nombreCategoria);
-                return categoriaRepository.save(cat);
-            });
-        nuevaCategoria.setNombreCategoria(nombreCategoria);
-        
-       
-
-        return productoRepository.save(producto);
+    public Producto updateProducto(Producto producto) {
+        return saveProducto(producto);
     }
 }

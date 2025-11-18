@@ -1,6 +1,7 @@
 package SNAKE_PC.demo.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,18 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Pedidos", description = "Gestión de pedidos")
 public class PedidoController {
 
-    @Autowired(required = false)
+    @Autowired
     private PedidoService pedidoService;
+
+    @GetMapping
+    @Operation(summary = "Listar todos los pedidos", description = "Obtiene la lista de todos los pedidos registrados")
+    public ResponseEntity<List<Pedido>> listarPedidos() {
+        List<Pedido> pedidos = pedidoService.findAll();
+        if (pedidos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(pedidos);
+    }
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener detalles de un pedido", description = "Obtiene la información de un pedido específico")
@@ -37,13 +48,8 @@ public class PedidoController {
                 error.put("error", "El ID del pedido debe ser mayor a 0");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
-
-            if (pedidoService == null) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "Servicio de pedidos no disponible");
-                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
-            }
-            return ResponseEntity.ok("Pedido encontrado");
+            Pedido pedido = pedidoService.findById(id);
+            return ResponseEntity.ok(pedido);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
@@ -60,13 +66,8 @@ public class PedidoController {
                 error.put("error", "El pedido no puede ser nulo");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
-
-            if (pedidoService == null) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "Servicio de pedidos no disponible");
-                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
-            }
-            return ResponseEntity.status(HttpStatus.CREATED).body("Pedido creado");
+            Pedido nuevoPedido = pedidoService.savePedido(pedido);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
@@ -83,19 +84,13 @@ public class PedidoController {
                 error.put("error", "El ID del pedido debe ser mayor a 0");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
-
             if (pedido == null) {
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "El pedido no puede ser nulo");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
-
-            if (pedidoService == null) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "Servicio de pedidos no disponible");
-                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
-            }
-            return ResponseEntity.ok("Pedido actualizado");
+            Pedido pedidoActualizado = pedidoService.updatePedido(id, pedido);
+            return ResponseEntity.ok(pedidoActualizado);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
@@ -112,13 +107,8 @@ public class PedidoController {
                 error.put("error", "El ID del pedido debe ser mayor a 0");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
-
-            if (pedidoService == null) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "Servicio de pedidos no disponible");
-                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
-            }
-            return ResponseEntity.ok("Pedido cancelado");
+            pedidoService.deletePedido(id);
+            return ResponseEntity.ok("Pedido cancelado correctamente");
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
