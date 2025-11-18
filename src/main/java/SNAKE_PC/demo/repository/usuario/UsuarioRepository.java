@@ -17,7 +17,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
   boolean existsByCorreo(String correo);
 
-  boolean existsByUsername(String nombreUsuario);
+  boolean existsByNombreUsuario(String nombreUsuario);
 
   @Query("SELECT u FROM Usuario u " +
       "LEFT JOIN FETCH u.contactos c " +

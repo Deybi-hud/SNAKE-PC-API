@@ -20,7 +20,7 @@ import jakarta.transaction.Transactional;
 @Service
 @Transactional
 public class SessionService {
-    
+
     @Autowired
     private UsuarioRepository usuarioRepository;
 
@@ -30,18 +30,19 @@ public class SessionService {
     private Map<Long, String> sesionesActivas = new ConcurrentHashMap<>();
     private Map<Long, LocalDateTime> expiracionSesiones = new ConcurrentHashMap<>();
 
-    // ---------------------------- LOGIN SERVICE -------------------------------------------------
-    public Map<String, Object> login(String usernameOrEmail, String contrasena) {
-        Optional<Usuario> usuarioOpt = usuarioRepository.findByNombreUsuario(usernameOrEmail)
-            .or(() -> usuarioRepository.findByCorreo(usernameOrEmail));
-            
-        if(usuarioOpt.isEmpty()) {
+    // ---------------------------- LOGIN SERVICE
+    // -------------------------------------------------
+    public Map<String, Object> login(String nombreUsuarioOrCorreo, String contrasena) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByNombreUsuario(nombreUsuarioOrCorreo)
+                .or(() -> usuarioRepository.findByCorreo(nombreUsuarioOrCorreo));
+
+        if (usuarioOpt.isEmpty()) {
             throw new RuntimeException("Usuario no encontrado");
         }
 
         Usuario usuario = usuarioOpt.get();
-        
-        if(!usuario.isActivo()) {
+
+        if (!usuario.isActivo()) {
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("cuentaDesactivada", true);
@@ -49,8 +50,8 @@ public class SessionService {
             response.put("mensaje", "Tu cuenta está desactivada. ¿Quieres reactivarla?");
             return response;
         }
-        
-        if(!passwordEncoder.matches(contrasena, usuario.getContrasena())) {
+
+        if (!passwordEncoder.matches(contrasena, usuario.getContrasena())) {
             throw new RuntimeException("Contraseña incorrecta");
         }
 
@@ -66,16 +67,17 @@ public class SessionService {
         response.put("correo", usuario.getCorreo());
         response.put("sessionId", sessionId);
         response.put("mensaje", "Login exitoso");
-        
+
         return response;
     }
 
-    // ---------------------------- LOGOUT SERVICE -------------------------------------------------
+    // ---------------------------- LOGOUT SERVICE
+    // -------------------------------------------------
     public Map<String, Object> cerrarSesion(Long usuarioId) {
-        if(sesionesActivas.containsKey(usuarioId)) {
+        if (sesionesActivas.containsKey(usuarioId)) {
             sesionesActivas.remove(usuarioId);
             expiracionSesiones.remove(usuarioId);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("mensaje", "Sesión cerrada correctamente");
@@ -84,18 +86,19 @@ public class SessionService {
         throw new RuntimeException("No hay sesión activa para este usuario");
     }
 
-    // ---------------------------- DESACTIVAR CUENTA ---------------------------------------------
+    // ---------------------------- DESACTIVAR CUENTA
+    // ---------------------------------------------
     public Map<String, Object> desactivarCuenta(Long id, String sessionId) {
         // Verificar que la sesión pertenece al usuario que desactiva
         String sessionIdActivo = sesionesActivas.get(id);
-        if(sessionIdActivo == null || !sessionIdActivo.equals(sessionId)) {
+        if (sessionIdActivo == null || !sessionIdActivo.equals(sessionId)) {
             throw new RuntimeException("No tienes permiso para desactivar esta cuenta");
         }
-        
-        Usuario usuario = usuarioRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if(!usuario.isActivo()) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (!usuario.isActivo()) {
             throw new RuntimeException("La cuenta ya está desactivada");
         }
 
@@ -103,7 +106,7 @@ public class SessionService {
         usuarioRepository.save(usuario);
 
         // Cerrar sesión
-        if(verificarSesionActiva(id)) {
+        if (verificarSesionActiva(id)) {
             cerrarSesion(id);
         }
 
@@ -116,32 +119,34 @@ public class SessionService {
         return response;
     }
 
-    // ---------------------------- VERIFICAR SESIÓN ACTIVA ---------------------------------------
+    // ---------------------------- VERIFICAR SESIÓN ACTIVA
+    // ---------------------------------------
     public boolean verificarSesionActiva(Long usuarioId) {
-        if(!sesionesActivas.containsKey(usuarioId)) {
+        if (!sesionesActivas.containsKey(usuarioId)) {
             return false;
         }
-        
+
         // Verificar expiración
         LocalDateTime expiracion = expiracionSesiones.get(usuarioId);
-        if(expiracion != null && LocalDateTime.now().isAfter(expiracion)) {
+        if (expiracion != null && LocalDateTime.now().isAfter(expiracion)) {
             sesionesActivas.remove(usuarioId);
             expiracionSesiones.remove(usuarioId);
             return false;
         }
-        
+
         return true;
     }
 
-    // ---------------------------- OBTENER INFORMACIÓN DE SESIÓN --------------------------------
+    // ---------------------------- OBTENER INFORMACIÓN DE SESIÓN
+    // --------------------------------
     public Map<String, Object> obtenerInfoSesion(Long usuarioId) {
-        if(!verificarSesionActiva(usuarioId)) {
+        if (!verificarSesionActiva(usuarioId)) {
             throw new RuntimeException("Sesión no activa o expirada");
         }
-        
+
         Usuario usuario = usuarioRepository.findById(usuarioId)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-            
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
         Map<String, Object> info = new HashMap<>();
         info.put("usuarioId", usuario.getId());
         info.put("nombreUsuario", usuario.getNombreUsuario());
@@ -149,38 +154,40 @@ public class SessionService {
         info.put("sessionId", sesionesActivas.get(usuarioId));
         info.put("expiracion", expiracionSesiones.get(usuarioId));
         info.put("activo", usuario.isActivo());
-        
+
         return info;
     }
 
-    // ---------------------------- RENOVAR SESIÓN ------------------------------------------------
+    // ---------------------------- RENOVAR SESIÓN
+    // ------------------------------------------------
     public Map<String, Object> renovarSesion(Long usuarioId, String sessionId) {
-        if(!verificarSesionActiva(usuarioId)) {
+        if (!verificarSesionActiva(usuarioId)) {
             throw new RuntimeException("Sesión no activa");
         }
-        
+
         String sessionIdActivo = sesionesActivas.get(usuarioId);
-        if(!sessionIdActivo.equals(sessionId)) {
+        if (!sessionIdActivo.equals(sessionId)) {
             throw new RuntimeException("Token de sesión inválido");
         }
-        
+
         // Renovar expiración
         expiracionSesiones.put(usuarioId, LocalDateTime.now().plusHours(2));
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("mensaje", "Sesión renovada");
         response.put("nuevaExpiracion", expiracionSesiones.get(usuarioId));
-        
+
         return response;
     }
 
-    // ---------------------------- LISTAR SESIONES ACTIVAS ---------------------------------------
+    // ---------------------------- LISTAR SESIONES ACTIVAS
+    // ---------------------------------------
     public List<Map<String, Object>> obtenerSesionesActivas() {
         List<Map<String, Object>> sesiones = new ArrayList<>();
-        
-        for(Map.Entry<Long, String> entry : sesionesActivas.entrySet()) {
-            if(verificarSesionActiva(entry.getKey())) {
+
+        for (Map.Entry<Long, String> entry : sesionesActivas.entrySet()) {
+            if (verificarSesionActiva(entry.getKey())) {
                 Map<String, Object> sesionInfo = new HashMap<>();
                 sesionInfo.put("usuarioId", entry.getKey());
                 sesionInfo.put("sessionId", entry.getValue());
@@ -188,34 +195,36 @@ public class SessionService {
                 sesiones.add(sesionInfo);
             }
         }
-        
+
         return sesiones;
     }
 
-    // ---------------------------- LIMPIAR SESIONES EXPIRADAS ------------------------------------
+    // ---------------------------- LIMPIAR SESIONES EXPIRADAS
+    // ------------------------------------
     public void limpiarSesionesExpiradas() {
         List<Long> sesionesExpiradas = new ArrayList<>();
-        
-        for(Map.Entry<Long, LocalDateTime> entry : expiracionSesiones.entrySet()) {
-            if(LocalDateTime.now().isAfter(entry.getValue())) {
+
+        for (Map.Entry<Long, LocalDateTime> entry : expiracionSesiones.entrySet()) {
+            if (LocalDateTime.now().isAfter(entry.getValue())) {
                 sesionesExpiradas.add(entry.getKey());
             }
         }
-        
-        for(Long usuarioId : sesionesExpiradas) {
+
+        for (Long usuarioId : sesionesExpiradas) {
             sesionesActivas.remove(usuarioId);
             expiracionSesiones.remove(usuarioId);
         }
     }
 
-    // ---------------------------- MÉTODOS AUXILIARES --------------------------------------------
+    // ---------------------------- MÉTODOS AUXILIARES
+    // --------------------------------------------
     private String generarSessionId() {
-        return "SESS_" + System.currentTimeMillis() + "_" + 
-               String.valueOf(Math.random()).substring(2, 15);
+        return "SESS_" + System.currentTimeMillis() + "_" +
+                String.valueOf(Math.random()).substring(2, 15);
     }
 
     public boolean validarSession(Long usuarioId, String sessionId) {
-        if(!verificarSesionActiva(usuarioId)) {
+        if (!verificarSesionActiva(usuarioId)) {
             return false;
         }
         String sessionIdActivo = sesionesActivas.get(usuarioId);
