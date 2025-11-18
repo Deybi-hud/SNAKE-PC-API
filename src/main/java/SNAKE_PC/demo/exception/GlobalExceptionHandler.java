@@ -15,9 +15,11 @@ import jakarta.validation.ConstraintViolationException;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
+            org.springframework.http.HttpHeaders headers,
+            org.springframework.http.HttpStatusCode statusCode,
             WebRequest request) {
         
         List<ErrorResponse.FieldError> errores = new ArrayList<>();
