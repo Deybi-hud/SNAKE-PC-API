@@ -19,7 +19,7 @@ public class UsuarioService {
 
 
 
-    public Usuario save(Usuario usuario){
+    public Usuario save(Usuario usuario,String confirmarContrasena){
         if(usuario.getCorreo() != null){
             validarCorreo(usuario.getCorreo());
         } else {
@@ -27,7 +27,7 @@ public class UsuarioService {
         }
         
         if(usuario.getContrasena() != null){
-            validarContrasena(usuario);
+            validarContrasena(usuario, confirmarContrasena);
             usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
         } else {
             throw new RuntimeException("La contraseña es obligatoria");
@@ -51,13 +51,17 @@ public class UsuarioService {
 
     }
 
-    public void validarContrasena(Usuario usuario) {
+    public void validarContrasena(Usuario usuario, String confirmarContrasena) {
         String password = usuario.getContrasena();
         
         if(password == null || password.trim().isEmpty()) {
             throw new RuntimeException("La contraseña no puede estar vacía");
         }
-        
+
+        if (!password.equals(confirmarContrasena)) {
+            throw new RuntimeException("Las contraseñas no coinciden");
+        }
+
         if(password.length() < 8) {
             throw new RuntimeException("La contraseña debe tener mínimo 8 caracteres");
         }
