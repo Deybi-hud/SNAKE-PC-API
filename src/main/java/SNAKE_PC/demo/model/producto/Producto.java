@@ -36,19 +36,19 @@ public class Producto {
     private String sku;
 
     @ManyToOne
-    @JoinColumn(name = "id_productoCategoria", nullable = false)
+    @JoinColumn(name = "id_productoCategoria", nullable = true)
     private ProductoCategoria productoCategoria;
 
     @ManyToOne
-    @JoinColumn(name = "id_marca", nullable = false)
+    @JoinColumn(name = "id_marca", nullable = true)
     private Marca marca;
 
     @ManyToOne
-    @JoinColumn(name = "id_dimension")
+    @JoinColumn(name = "id_dimension", nullable = true)
     private Dimension dimension;
 
     @ManyToOne
-    @JoinColumn(name = "id_especificacion")
+    @JoinColumn(name = "id_especificacion", nullable = true)
     private Especificacion especificacion;
 
 }

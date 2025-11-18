@@ -33,7 +33,7 @@ public class ProductoController {
     @GetMapping
     @Operation(summary = "Esta api llama a todos los productos", description = "Esta api se encarga de obtener todos los productos")
     public ResponseEntity<List<Producto>> listar() {
-        List<Producto> productos = productoService.findAll();
+        List<Producto> productos = productoService.buscarTodo();
         if (productos.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -48,7 +48,7 @@ public class ProductoController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID debe ser mayor a 0");
             }
 
-            Producto producto = productoService.findById(id);
+            Producto producto = productoService.buscarPorId(id);
             return ResponseEntity.ok(producto);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
@@ -66,7 +66,7 @@ public class ProductoController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El nombre del producto es obligatorio");
             }
 
-            Producto nuevoProducto = productoService.saveProducto(producto);
+            Producto nuevoProducto = productoService.guardarProducto(producto);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
@@ -86,7 +86,7 @@ public class ProductoController {
             }
 
             producto.setId(id);
-            Producto updateProducto = productoService.saveProducto(producto);
+            Producto updateProducto = productoService.guardarProducto(producto);
             if (updateProducto == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -103,9 +103,9 @@ public class ProductoController {
             if (id == null || id <= 0) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID del producto debe ser mayor a 0");
             }
-            
+
             producto.setId(id);
-            Producto updatedProducto = productoService.partialUpdateProducto(producto);
+            Producto updatedProducto = productoService.actualizacionParcialProducto(producto);
             return ResponseEntity.ok(updatedProducto);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
@@ -120,7 +120,7 @@ public class ProductoController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID del producto debe ser mayor a 0");
             }
 
-            productoService.deleteProducto(id);
+            productoService.borrarProducto(id);
             return ResponseEntity.ok("Producto eliminado correctamente");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());

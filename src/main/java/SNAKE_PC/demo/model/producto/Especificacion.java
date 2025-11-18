@@ -20,18 +20,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class Especificacion {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "frecuencia", nullable = false)
+    @Column(name = "frecuencia", nullable = true)
     private String frecuencia;
 
-    @Column(name = "capacidad", nullable = false)
+    @Column(name = "capacidad", nullable = true)
     private String capacidadAlmacenamiento;
 
-    @Column(name = "consumo", nullable = false)
+    @Column(name = "consumo", nullable = true)
     private String consumo;
 
     @OneToMany(mappedBy = "especificacion")

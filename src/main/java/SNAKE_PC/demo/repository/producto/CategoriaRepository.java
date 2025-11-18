@@ -10,6 +10,6 @@ import SNAKE_PC.demo.model.producto.Categoria;
 @Repository
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 
-    Optional<Categoria>findByNombreCategoria(String nombreCategoria);
+    Optional<Categoria> findByNombreCategoria(String nombreCategoria);
 
 }
