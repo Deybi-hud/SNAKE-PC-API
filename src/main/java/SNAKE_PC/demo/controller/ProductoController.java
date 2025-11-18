@@ -40,8 +40,13 @@ public class ProductoController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Esta api llama a un productos por su id", description = "esta api se encarga de obtener a un productos por id")
-    public ResponseEntity<Producto> buscar(@PathVariable long id) {
+    public ResponseEntity<?> buscar(@PathVariable long id) {
         try {
+            // Validar ID
+            if (id <= 0) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID debe ser mayor a 0");
+            }
+            
             Producto producto = productoService.findById(id);
             return ResponseEntity.ok(producto);
         } catch (Exception e) {
@@ -53,42 +58,75 @@ public class ProductoController {
     @Operation(summary = "Esta api actualiza un producto", description = "esta api se encarga de actualizar a un producto existente")
     public ResponseEntity<?> agregar(@RequestBody Producto producto) {
         try {
+            // Validar datos obligatorios
+            if (producto == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El producto no puede ser nulo");
+            }
+            if (producto.getNombreProducto() == null || producto.getNombreProducto().isBlank()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El nombre del producto es obligatorio");
+            }
+            
             Producto nuevoProducto = productoService.save(producto);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se puedo guardar");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
         }
     }
 
     @PostMapping("/{id}")
     @Operation(summary = "Esta api actualiza un producto", description = "esta api se encarga de actualizar a un producto existente")
-    public ResponseEntity<Producto> updateProducto(@PathVariable Long id, @RequestBody Producto producto) {
-        Producto updateProducto = productoService.save(producto);
-        if (updateProducto == null) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> updateProducto(@PathVariable Long id, @RequestBody Producto producto) {
+        try {
+            // Validar ID
+            if (id == null || id <= 0) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID del producto debe ser mayor a 0");
+            }
+            
+            // Validar datos obligatorios
+            if (producto == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El producto no puede ser nulo");
+            }
+            
+            producto.setId(id);
+            Producto updateProducto = productoService.save(producto);
+            if (updateProducto == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(updateProducto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
         }
-        return ResponseEntity.ok(updateProducto);
     }
 
     @PatchMapping("/{id}")
     @Operation(summary = "Esta api actualiza parcialmente un producto", description = "esta api se encarga de actualizar parcialmente a un producto existente")
-    public ResponseEntity<Producto> patchProducto(@PathVariable Long id, @RequestBody Producto producto) {
+    public ResponseEntity<?> patchProducto(@PathVariable Long id, @RequestBody Producto producto) {
         try {
+            // Validar ID
+            if (id == null || id <= 0) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID del producto debe ser mayor a 0");
+            }
+            
             Producto updateProducto = productoService.patchProducto(id, producto);
             return ResponseEntity.ok(updateProducto);
         } catch (Exception e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
         }
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "Esta api elimina a un producto", description = "esta api se encarga de eliminar a un producto existente")
     public ResponseEntity<?> eliminar(@PathVariable Long id){
         try{
+            // Validar ID
+            if (id == null || id <= 0) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID del producto debe ser mayor a 0");
+            }
+            
             productoService.delete(id);
-            return ResponseEntity.ok("Se a eliminado");
+            return ResponseEntity.ok("Producto eliminado correctamente");
         }catch(Exception e){
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
         }
     }
 }
