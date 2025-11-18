@@ -5,7 +5,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.Base64;
 import SNAKE_PC.demo.model.usuario.Comuna;
 import SNAKE_PC.demo.model.usuario.Contacto;
 import SNAKE_PC.demo.model.usuario.Direccion;
@@ -43,13 +46,17 @@ public class UsuarioContactoService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public Contacto RegistrarCliente(Contacto contacto, String nombreUsuario, String correo, String contrasena, String confrimarContrasena, String calle, String numero, Long comunaId, Long idRol){
+    public Contacto RegistrarCliente(Contacto contacto, MultipartFile imagen, String nombreUsuario, String correo, String contrasena, 
+                                    String confrimarContrasena, String calle, String numero, Long comunaId, Long idRol) throws IOException{
 
         if(!contrasena.equals(confrimarContrasena)){
             throw new RuntimeException("Las contraseñas no coinciden");
         }
 
+        byte[] imagenBytes = imagen.getBytes();
+        String base64 = Base64.getEncoder().encodeToString(imagenBytes);
         Usuario usuario = new Usuario();
+        usuario.setImagenUsuario(base64);
         usuario.setNombreUsuario(nombreUsuario);
         usuario.setCorreo(correo);
         usuario.setContrasena(contrasena);
