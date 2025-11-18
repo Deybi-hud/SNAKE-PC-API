@@ -12,4 +12,5 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 
         Optional<Region> findByNombreRegion(String nombreRegion);
 
+        boolean existsByNombreRegion(String nombreRegion);
 }
