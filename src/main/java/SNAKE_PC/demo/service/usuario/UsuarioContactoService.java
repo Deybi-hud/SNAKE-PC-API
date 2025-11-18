@@ -43,16 +43,17 @@ public class UsuarioContactoService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public Contacto RegistrarCliente(Contacto contacto, String correo, String contrasena, String confrimarContrasena, String calle, String numero, Long comunaId, Long idRol){
+    public Contacto RegistrarCliente(Contacto contacto, String nombreUsuario, String correo, String contrasena, String confrimarContrasena, String calle, String numero, Long comunaId, Long idRol){
 
         if(!contrasena.equals(confrimarContrasena)){
             throw new RuntimeException("Las contraseñas no coinciden");
         }
 
         Usuario usuario = new Usuario();
+        usuario.setNombreUsuario(nombreUsuario);
         usuario.setCorreo(correo);
         usuario.setContrasena(contrasena);
-        Usuario nuevoUsuario = usuarioService.save(usuario);
+        Usuario nuevoUsuario = usuarioService.save(usuario, confrimarContrasena);
 
         Comuna comuna = comunaRepository.findById(comunaId)
             .orElseThrow(()-> new RuntimeException("Comuna no valida"));
@@ -85,12 +86,8 @@ public class UsuarioContactoService {
             throw new RuntimeException("El telefono ya está registrado");
         }
         if(contacto.getDireccion().getComuna() == null){
-            throw new RuntimeException("Debe seleccionar una comuna");
+            throw new RuntimeException("Debe seleccionar una comuna"); 
         }
-        if(contacto.getUsuario().getCorreo() != null || contacto.getUsuario().getContrasena() != null){
-
-        }
-
         return contactoRepository.save(contacto);
     }
 

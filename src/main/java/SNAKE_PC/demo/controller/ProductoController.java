@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import SNAKE_PC.demo.model.producto.Producto;
-import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.service.producto.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
