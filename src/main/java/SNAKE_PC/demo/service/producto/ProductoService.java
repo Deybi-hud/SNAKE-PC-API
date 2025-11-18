@@ -7,11 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import SNAKE_PC.demo.model.producto.Categoria;
-import SNAKE_PC.demo.model.producto.Color;
-import SNAKE_PC.demo.model.producto.ColorProducto;
 import SNAKE_PC.demo.model.producto.Producto;
 import SNAKE_PC.demo.repository.producto.CategoriaRepository;
-import SNAKE_PC.demo.repository.producto.ColorRepository;
 import SNAKE_PC.demo.repository.producto.MarcaRepository;
 import SNAKE_PC.demo.repository.producto.ProductoCategoriaRepository;
 import SNAKE_PC.demo.repository.producto.ProductoRepository;
@@ -31,9 +28,6 @@ public class ProductoService {
 
     @Autowired
     private MarcaRepository marcaRepository;
-
-    @Autowired
-    private ColorRepository colorRepository;
 
     @Autowired
     private ProductoCategoriaRepository productoCategoriaRepository;
@@ -93,14 +87,7 @@ public class ProductoService {
             throw new RuntimeException("Debe ingresar categoria del producto y un color a su producto");
         }
         
-        Color color = colorRepository.findByNombreColor(colorProducto)
-            .orElseGet(()-> {
-                Color nuevoColor = new Color();
-                nuevoColor.setNombreColor(colorProducto);
-                return colorRepository.save(nuevoColor);
-            });
-        color.setNombreColor(colorProducto);
-
+       
         Categoria nuevaCategoria = categoriaRepository.findByNombreCategoria(nombreCategoria)
             .orElseGet(()->{
                 Categoria cat = new Categoria();

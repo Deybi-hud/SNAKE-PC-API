@@ -54,10 +54,4 @@ public class Producto {
     @JoinColumn(name = "id_especificacion")
     private Especificacion especificacion;
 
-    @ManyToOne
-    @JoinColumn(name = "id_refrigeracion")
-    private Refrigeracion refrigeracion;
-
-    @OneToMany(mappedBy = "producto")
-    private List<ColorProducto> colores;
 }
