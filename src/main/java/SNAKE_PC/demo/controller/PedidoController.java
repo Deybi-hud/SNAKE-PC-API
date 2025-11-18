@@ -15,24 +15,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import SNAKE_PC.demo.dto.pedido.PedidoActualizarDTO;
-import SNAKE_PC.demo.dto.pedido.PedidoCrearDTO;
 import SNAKE_PC.demo.model.pedido.Pedido;
 import SNAKE_PC.demo.service.pedido.PedidoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("api/v1/pedidos")
-@Tag(name = "Pedidos", description = "Gestión de pedidos y órdenes de compra")
+@Tag(name = "Pedidos", description = "Gestión de pedidos")
 public class PedidoController {
 
     @Autowired(required = false)
     private PedidoService pedidoService;
 
     @GetMapping("/{id}")
-    @Operation(summary = "Obtener detalles de un pedido", description = "Obtiene la información completa de un pedido específico")
+    @Operation(summary = "Obtener detalles de un pedido", description = "Obtiene la información de un pedido específico")
     public ResponseEntity<?> obtenerPedido(@PathVariable Long id) {
         try {
             if (id == null || id <= 0) {
@@ -55,19 +52,20 @@ public class PedidoController {
     }
 
     @PostMapping
-    @Operation(summary = "Crear un nuevo pedido", description = "Crea un nuevo pedido para un cliente con validaciones completas")
-    public ResponseEntity<?> crearPedido(@Valid @RequestBody PedidoCrearDTO pedidoDTO) {
+    @Operation(summary = "Crear un nuevo pedido", description = "Crea un nuevo pedido para un cliente")
+    public ResponseEntity<?> crearPedido(@RequestBody Pedido pedido) {
         try {
+            if (pedido == null) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "El pedido no puede ser nulo");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            }
+
             if (pedidoService == null) {
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "Servicio de pedidos no disponible");
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
             }
-            
-            Pedido pedido = new Pedido();
-            pedido.setFechaPedido(pedidoDTO.getFechaPedido());
-            pedido.setNumeroPedido(pedidoDTO.getNumeroPedido());
-            
             return ResponseEntity.status(HttpStatus.CREATED).body("Pedido creado");
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
@@ -77,12 +75,18 @@ public class PedidoController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Actualizar un pedido", description = "Actualiza la información de un pedido existente")
-    public ResponseEntity<?> actualizarPedido(@PathVariable Long id, @Valid @RequestBody PedidoActualizarDTO pedidoDTO) {
+    @Operation(summary = "Actualizar un pedido", description = "Actualiza la información de un pedido")
+    public ResponseEntity<?> actualizarPedido(@PathVariable Long id, @RequestBody Pedido pedido) {
         try {
             if (id == null || id <= 0) {
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "El ID del pedido debe ser mayor a 0");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            }
+
+            if (pedido == null) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "El pedido no puede ser nulo");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
 
