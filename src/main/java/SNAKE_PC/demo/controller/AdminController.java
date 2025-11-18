@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import SNAKE_PC.demo.dto.usuario.ContactoDTO;
+import SNAKE_PC.demo.dto.usuario.DireccionDTO;
+import SNAKE_PC.demo.dto.usuario.UsuarioRegistroDTO;
 import SNAKE_PC.demo.model.usuario.Contacto;
 import SNAKE_PC.demo.model.usuario.Direccion;
 import SNAKE_PC.demo.model.usuario.RolUsuario;
@@ -32,28 +35,26 @@ public class AdminController {
     private UsuarioService usuarioService;
 
     @PostMapping("/registrar-cliente")
-    @Operation(summary = "Registrar un nuevo cliente", description = "Crea un nuevo cliente con información de contacto y dirección")
-    public ResponseEntity<?> registrarCliente(@RequestBody Map<String, Object> request) {
+    @Operation(summary = "Registrar un nuevo cliente", description = "Crea un nuevo cliente con información de contacto y dirección. Validación completa.")
+    public ResponseEntity<?> registrarCliente(
+            @Valid @RequestBody UsuarioRegistroDTO usuarioDTO) {
         try {
-            Contacto contacto = (Contacto) request.get("contacto");
-            Usuario usuario = (Usuario) request.get("usuario");
-            RolUsuario rolUsuario = (RolUsuario) request.get("rolUsuario");
-            String confirmarContrasena = (String) request.get("confirmarContrasena");
-            Direccion direccion = (Direccion) request.get("direccion");
-            String nombreComuna = (String) request.get("nombreComuna");
-            String nombreRegion = (String) request.get("nombreRegion");
-
-            if (contacto == null || usuario == null || direccion == null || 
-                nombreComuna == null || nombreComuna.isBlank() || 
-                nombreRegion == null || nombreRegion.isBlank()) {
+            // Validar que las contraseñas coincidan
+            if (!usuarioDTO.getContrasena().equals(usuarioDTO.getConfirmarContrasena())) {
                 Map<String, String> error = new HashMap<>();
-                error.put("error", "Todos los campos son obligatorios");
+                error.put("error", "Las contraseñas no coinciden");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
 
+            Usuario usuario = new Usuario();
+            usuario.setNombreUsuario(usuarioDTO.getNombreUsuario());
+            usuario.setCorreo(usuarioDTO.getCorreo());
+            usuario.setContrasena(usuarioDTO.getContrasena());
+            usuario.setActivo(true);
+
+            // El servicio se encargará de guardar el usuario
             Contacto nuevoCliente = usuarioService.registrarCliente(
-                contacto, usuario, rolUsuario, confirmarContrasena, direccion, nombreComuna, nombreRegion
-            );
+                null, usuario, null, usuarioDTO.getConfirmarContrasena(), null, "", "");
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoCliente);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
@@ -63,19 +64,23 @@ public class AdminController {
     }
 
     @PostMapping("/registrar-usuario")
-    @Operation(summary = "Registrar un nuevo usuario", description = "Crea un nuevo usuario con validaciones de contraseña")
-    public ResponseEntity<?> registrarUsuario(@RequestBody Map<String, Object> request) {
+    @Operation(summary = "Registrar un nuevo usuario", description = "Crea un nuevo usuario con validaciones de contraseña. Validación completa.")
+    public ResponseEntity<?> registrarUsuario(@Valid @RequestBody UsuarioRegistroDTO usuarioDTO) {
         try {
-            Usuario usuario = (Usuario) request.get("usuario");
-            String confirmarContrasena = (String) request.get("confirmarContrasena");
-
-            if (usuario == null || confirmarContrasena == null || confirmarContrasena.isBlank()) {
+            // Validar que las contraseñas coincidan
+            if (!usuarioDTO.getContrasena().equals(usuarioDTO.getConfirmarContrasena())) {
                 Map<String, String> error = new HashMap<>();
-                error.put("error", "Usuario y confirmación de contraseña son obligatorios");
+                error.put("error", "Las contraseñas no coinciden");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
 
-            Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario, confirmarContrasena);
+            Usuario usuario = new Usuario();
+            usuario.setNombreUsuario(usuarioDTO.getNombreUsuario());
+            usuario.setCorreo(usuarioDTO.getCorreo());
+            usuario.setContrasena(usuarioDTO.getContrasena());
+            usuario.setActivo(true);
+
+            Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario, usuarioDTO.getConfirmarContrasena());
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();

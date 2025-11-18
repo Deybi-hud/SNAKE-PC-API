@@ -14,10 +14,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import SNAKE_PC.demo.dto.usuario.CambiarContrasenaDTO;
+import SNAKE_PC.demo.dto.usuario.UsuarioActualizarDTO;
 import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.service.usuario.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("api/v1/clientes")
@@ -48,7 +51,7 @@ public class ClienteController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar datos de un cliente", description = "Actualiza la información básica del cliente")
-    public ResponseEntity<?> actualizarCliente(@PathVariable Long id, @RequestBody Usuario usuario) {
+    public ResponseEntity<?> actualizarCliente(@PathVariable Long id, @Valid @RequestBody UsuarioActualizarDTO usuarioDTO) {
         try {
             if (id == null || id <= 0) {
                 Map<String, String> error = new HashMap<>();
@@ -56,7 +59,11 @@ public class ClienteController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
 
+            Usuario usuario = new Usuario();
             usuario.setId(id);
+            usuario.setNombreUsuario(usuarioDTO.getNombreUsuario());
+            usuario.setCorreo(usuarioDTO.getCorreo());
+
             Usuario clienteActualizado = usuarioService.actualizarUsuario(usuario);
             return ResponseEntity.ok(clienteActualizado);
         } catch (Exception e) {
@@ -68,7 +75,7 @@ public class ClienteController {
 
     @PutMapping("/{id}/contrasena")
     @Operation(summary = "Cambiar contraseña del cliente", description = "Permite al cliente cambiar su contraseña")
-    public ResponseEntity<?> cambiarContrasena(@PathVariable Long id, @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> cambiarContrasena(@PathVariable Long id, @Valid @RequestBody CambiarContrasenaDTO cambiarContrasenaDTO) {
         try {
             if (id == null || id <= 0) {
                 Map<String, String> error = new HashMap<>();
@@ -76,22 +83,17 @@ public class ClienteController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
 
-            String contrasenaActual = request.get("contrasenaActual");
-            String nuevaContrasena = request.get("nuevaContrasena");
-
-            if (contrasenaActual == null || contrasenaActual.isBlank()) {
+            if (!cambiarContrasenaDTO.getNuevaContrasena().equals(cambiarContrasenaDTO.getConfirmarNuevaContrasena())) {
                 Map<String, String> error = new HashMap<>();
-                error.put("error", "La contraseña actual es obligatoria");
+                error.put("error", "Las contraseñas no coinciden");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
 
-            if (nuevaContrasena == null || nuevaContrasena.isBlank()) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "La nueva contraseña es obligatoria");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-            }
-
-            Usuario clienteActualizado = usuarioService.actualizarContrasena(id, contrasenaActual, nuevaContrasena);
+            Usuario clienteActualizado = usuarioService.actualizarContrasena(
+                id, 
+                cambiarContrasenaDTO.getContrasenaActual(), 
+                cambiarContrasenaDTO.getNuevaContrasena()
+            );
             return ResponseEntity.ok(clienteActualizado);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
