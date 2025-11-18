@@ -12,7 +12,7 @@ import SNAKE_PC.demo.model.usuario.Usuario;
 @Repository
 public interface ContactoRepository extends JpaRepository<Contacto, Long> {
 
-    boolean existsByTelefono(Integer id);
+    boolean existsByTelefono(String id);
 
     boolean existsByDireccion(Direccion direccion);
 

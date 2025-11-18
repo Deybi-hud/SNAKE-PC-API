@@ -30,7 +30,7 @@ public class Contacto {
     private String apellido;
 
     @Column(name = "Telefono", nullable = false, unique = true)
-    private Integer telefono;
+    private String telefono;
 
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = true)

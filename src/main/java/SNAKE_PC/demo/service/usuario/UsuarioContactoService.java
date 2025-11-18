@@ -78,7 +78,7 @@ public class UsuarioContactoService {
         if(contacto.getTelefono() == null){
             throw new RuntimeException("Debe ingresar un telefono");
         }
-        if(contacto.getTelefono() > 9){
+        if(contacto.getTelefono().length() != 9){
             throw new RuntimeException("Debe ingresar solo 9 digitos");
         }
         if(contactoRepository.existsByTelefono(contacto.getTelefono())){

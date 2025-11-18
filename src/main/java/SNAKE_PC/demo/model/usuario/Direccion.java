@@ -27,7 +27,7 @@ public class Direccion {
     private String calle;
 
     @Column(name = "numero", nullable = false)
-    private Integer numero;
+    private String numero;
     
     @ManyToOne
     @JoinColumn(name = "id_comuna", nullable = false)
