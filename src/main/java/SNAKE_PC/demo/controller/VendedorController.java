@@ -67,7 +67,7 @@ public class VendedorController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
 
-            Producto nuevoProducto = productoService.save(producto);
+            Producto nuevoProducto = productoService.saveProducto(producto);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
@@ -93,7 +93,7 @@ public class VendedorController {
             }
 
             producto.setId(id);
-            Producto productoActualizado = productoService.save(producto);
+            Producto productoActualizado = productoService.saveProducto(producto);
             return ResponseEntity.ok(productoActualizado);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
@@ -112,7 +112,8 @@ public class VendedorController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
 
-            Producto productoActualizado = productoService.patchProducto(id, producto);
+            producto.setId(id);
+            Producto productoActualizado = productoService.partialUpdateProducto(producto);
             return ResponseEntity.ok(productoActualizado);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
