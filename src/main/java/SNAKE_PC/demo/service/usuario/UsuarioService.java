@@ -16,9 +16,6 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-
-
-
     public Usuario save(Usuario usuario,String confirmarContrasena){
         if(usuario.getCorreo() != null){
             validarCorreo(usuario.getCorreo());
