@@ -22,7 +22,9 @@ import SNAKE_PC.demo.repository.usuario.RolRepository;
 @Service
 public class UsuarioContactoService {
 
-    private final UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
     
     @Autowired
     private ContactoRepository contactoRepository;
@@ -42,9 +44,6 @@ public class UsuarioContactoService {
     @Autowired 
     private RolRepository rolRepository;
 
-    UsuarioContactoService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
-    }
 
     public Contacto RegistrarCliente(Contacto contacto, MultipartFile imagen, String nombreUsuario, String correo, String contrasena, 
                                     String confrimarContrasena, String calle, String numero, Long comunaId, Long idRol) throws IOException{
@@ -85,6 +84,9 @@ public class UsuarioContactoService {
         }
         if(contacto.getTelefono() == null){
             throw new RuntimeException("Debe ingresar un telefono");
+        }
+        if(!contacto.getTelefono().matches("\\d+")){
+            throw new RuntimeException("El teléfono solo puede contener números");
         }
         if(contacto.getTelefono().length() != 9){
             throw new RuntimeException("Debe ingresar solo 9 digitos");
@@ -145,6 +147,8 @@ public class UsuarioContactoService {
             .orElseThrow(()-> new RuntimeException("Usuario no encontrado"));
     }
 
+
+//--------------------------------- Para listar siendo admin ---------------------------------------------------
     public List<Contacto> findAll(){
         return contactoRepository.findAll();
     }

@@ -22,7 +22,7 @@ public class DireccionService {
 
     public void validarDireccion(Direccion direccion){
         if(direccion.getNumero() == null || direccion.getNumero().trim().isEmpty()){
-            throw new RuntimeException("Debe ingresar al menos 2 dígitos para la direccion");
+            throw new RuntimeException("Debe ingresar al menos 1 dígitos para la direccion");
         }
         if(direccion.getCalle() == null || direccion.getCalle().trim().isEmpty()){
             throw new RuntimeException("Debe ingresar el nombre de la calle para el envio");
