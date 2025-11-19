@@ -6,11 +6,17 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import SNAKE_PC.demo.model.pedido.Pedido;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
+
+    List<Pedido> findByFechaPedido(LocalDate fechaPedido);
+    List<Pedido> findByFechaPedidoBetween(LocalDate fechaInicio, LocalDate fechaFin);
+    List<Pedido> findByFechaPedidoBetweenOrderByFechaPedidoDesc(LocalDate fechaInicio, LocalDate fechaFin);
     
     // ✅ 1. PEDIDOS DE UN USUARIO ESPECÍFICO (por ID de usuario)
     @Query("SELECT p FROM Pedido p WHERE p.contacto.usuario.id = :usuarioId")
@@ -32,6 +38,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     Optional<Pedido> findByNumeroPedido(String numeroPedido);
     
     // ✅ 6. PEDIDOS RECIENTES (últimos 30 días)
-    @Query("SELECT p FROM Pedido p WHERE p.fechaPedido >= CURRENT_DATE - 30 ORDER BY p.fechaPedido DESC")
-    List<Pedido> findPedidosRecientes();
+    @Query("SELECT p FROM Pedido p WHERE p.fechaPedido >= :fechaLimite ORDER BY p.fechaPedido DESC")
+    List<Pedido> findPedidosRecientes(@Param("fechaLimite") LocalDate fechaLimite);
 }

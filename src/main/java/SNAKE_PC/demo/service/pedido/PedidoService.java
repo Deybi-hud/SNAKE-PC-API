@@ -14,6 +14,7 @@ import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
 import SNAKE_PC.demo.repository.producto.ProductoRepository;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -215,6 +216,61 @@ public class PedidoService {
         
         return pedido;
     }
+
+        public List<Pedido> obtenerPedidosDelDia() {
+        LocalDate hoy = LocalDate.now();
+        return pedidoRepository.findByFechaPedido(hoy);
+    }
+
+    // ✅ PEDIDOS DEL MES ACTUAL
+    public List<Pedido> obtenerPedidosDelMes() {
+        LocalDate inicioMes = LocalDate.now().withDayOfMonth(1);
+        LocalDate finMes = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+        return pedidoRepository.findByFechaPedidoBetween(inicioMes, finMes);
+    }
+
+    // ✅ PEDIDOS POR RANGO DE FECHAS
+    public List<Pedido> obtenerPedidosPorRangoFechas(LocalDate fechaInicio, LocalDate fechaFin) {
+        return pedidoRepository.findByFechaPedidoBetween(fechaInicio, fechaFin);
+    }
+
+    // ✅ ESTADÍSTICAS DEL DÍA
+    public Map<String, Object> obtenerEstadisticasDelDia() {
+        List<Pedido> pedidosDelDia = obtenerPedidosDelDia();
+        
+        long totalPedidos = pedidosDelDia.size();
+        double totalVentas = pedidosDelDia.stream()
+            .mapToDouble(pedido -> calcularTotalPedido(pedido.getId()))
+            .sum();
+        
+        Map<String, Object> estadisticas = new HashMap<>();
+        estadisticas.put("fecha", LocalDate.now());
+        estadisticas.put("totalPedidos", totalPedidos);
+        estadisticas.put("totalVentas", totalVentas);
+        estadisticas.put("pedidos", pedidosDelDia);
+        
+        return estadisticas;
+    }
+
+    // ✅ ESTADÍSTICAS DEL MES
+    public Map<String, Object> obtenerEstadisticasDelMes() {
+        List<Pedido> pedidosDelMes = obtenerPedidosDelMes();
+        
+        long totalPedidos = pedidosDelMes.size();
+        double totalVentas = pedidosDelMes.stream()
+            .mapToDouble(pedido -> calcularTotalPedido(pedido.getId()))
+            .sum();
+        
+        Map<String, Object> estadisticas = new HashMap<>();
+        estadisticas.put("mes", LocalDate.now().getMonth().toString());
+        estadisticas.put("anio", LocalDate.now().getYear());
+        estadisticas.put("totalPedidos", totalPedidos);
+        estadisticas.put("totalVentas", totalVentas);
+        estadisticas.put("pedidos", pedidosDelMes);
+        
+        return estadisticas;
+    }
+
 
     // ✅ MÉTODOS PRIVADOS
     private String generarNumeroPedido() {
