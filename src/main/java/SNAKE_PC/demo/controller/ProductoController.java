@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import SNAKE_PC.demo.model.producto.Producto;
@@ -56,7 +57,15 @@ public class ProductoController {
 
     @PostMapping("/agregar")
     @Operation(summary = "Esta api agrega un producto", description = "esta api se encarga de agregar a un producto existente")
-    public ResponseEntity<?> agregar(@RequestBody Producto producto) {
+    public ResponseEntity<?> agregar(@RequestBody Producto producto,
+            @RequestParam String marcaNombre,
+            @RequestParam String categoriaNombre,
+            @RequestParam String frecuencia,
+            @RequestParam String capacidad,
+            @RequestParam String consumo,
+            @RequestParam Long idMarca,
+            @RequestParam Long idCategoria,
+            @RequestParam Long idEspecificacion) {
         try {
             if (producto == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El producto no puede ser nulo");
@@ -65,7 +74,8 @@ public class ProductoController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El nombre del producto es obligatorio");
             }
 
-            Producto nuevoProducto = productoService.guardarProducto(producto);
+            Producto nuevoProducto = productoService.guardarProducto(producto, marcaNombre, categoriaNombre,
+                    frecuencia, capacidad, consumo, idMarca, idCategoria, idEspecificacion);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
@@ -74,7 +84,15 @@ public class ProductoController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Esta api actualiza un producto", description = "esta api se encarga de actualizar a un producto existente")
-    public ResponseEntity<?> updateProducto(@PathVariable Long id, @RequestBody Producto producto) {
+    public ResponseEntity<?> updateProducto(@PathVariable Long id, @RequestBody Producto producto,
+            @RequestParam String marcaNombre,
+            @RequestParam String categoriaNombre,
+            @RequestParam String frecuencia,
+            @RequestParam String capacidad,
+            @RequestParam String consumo,
+            @RequestParam Long idMarca,
+            @RequestParam Long idCategoria,
+            @RequestParam Long idEspecificacion) {
         try {
             if (id == null || id <= 0) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID del producto debe ser mayor a 0");
@@ -85,7 +103,8 @@ public class ProductoController {
             }
 
             producto.setId(id);
-            Producto updateProducto = productoService.guardarProducto(producto);
+            Producto updateProducto = productoService.guardarProducto(producto, marcaNombre, categoriaNombre,
+                    frecuencia, capacidad, consumo, idMarca, idCategoria, idEspecificacion);
             if (updateProducto == null) {
                 return ResponseEntity.notFound().build();
             }

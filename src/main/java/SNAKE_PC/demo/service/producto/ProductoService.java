@@ -158,7 +158,10 @@ public class ProductoService {
         return productoRepository.save(existingProducto);
     }
 
-    public Producto actualizarProducto(Producto producto) {
-        return guardarProducto(producto);
+    public Producto actualizarProducto(Producto producto, String marcaNombre, String categoriaNombre,
+            String frecuencia, String capacidad, String consumo, Long idMarca, Long idCategoria,
+            Long idEspecificacion) {
+        return guardarProducto(producto, marcaNombre, categoriaNombre, frecuencia, capacidad, consumo,
+                idMarca, idCategoria, idEspecificacion);
     }
 }
