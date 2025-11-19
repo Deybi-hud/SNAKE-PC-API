@@ -60,7 +60,7 @@ public class ProductoService {
         if (producto.getNombreProducto() == null) {
             throw new RuntimeException("El nombre del producto no puede estar vacio.");
         }
-        if (producto.getStock() == null || producto.getStock() <= 0) {
+        if (producto.getStock() == null || producto.getStock() < 0) {
             throw new RuntimeException("El stock del producto no puede ser menor a cero.");
         }
         if (producto.getPrecio() == null || producto.getPrecio() <= 0) {
@@ -118,6 +118,7 @@ public class ProductoService {
         if (producto == null) {
             throw new IllegalArgumentException("Producto no encontrado.");
         }
+        productoRepository.deleteById(id);
     }
 
     public Producto actualizacionParcialProducto(Producto producto) {
