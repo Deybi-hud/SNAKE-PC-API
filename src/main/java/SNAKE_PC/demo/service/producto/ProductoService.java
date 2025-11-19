@@ -90,11 +90,6 @@ public class ProductoService {
                     return categoriaRepository.save(nuevaCategoria);
                 });
 
-        ProductoCategoria productoCategoria = new ProductoCategoria();
-        productoCategoria.setCategoria(categoria);
-        productoCategoria.setProducto(producto);
-        ProductoCategoria nuevaProductoCategoria = productoCategoriaRepository.save(productoCategoria);
-
         Especificacion especificacion = especificacionRepository
                 .findByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(frecuencia, capacidad, consumo)
                 .orElseGet(() -> {
@@ -106,10 +101,20 @@ public class ProductoService {
                 });
 
         producto.setMarca(marca);
-        producto.setProductoCategoria(nuevaProductoCategoria);
         producto.setEspecificacion(especificacion);
 
-        return productoRepository.save(producto);
+        // GUARDAR PRODUCTO PRIMERO (necesita ID para ProductoCategoria)
+        Producto productoGuardado = productoRepository.save(producto);
+
+        // LUEGO guardar ProductoCategoria
+        ProductoCategoria productoCategoria = new ProductoCategoria();
+        productoCategoria.setCategoria(categoria);
+        productoCategoria.setProducto(productoGuardado);
+        ProductoCategoria nuevaProductoCategoria = productoCategoriaRepository.save(productoCategoria);
+
+        // Actualizar referencia en producto
+        productoGuardado.setProductoCategoria(nuevaProductoCategoria);
+        return productoRepository.save(productoGuardado);
 
     }
 
