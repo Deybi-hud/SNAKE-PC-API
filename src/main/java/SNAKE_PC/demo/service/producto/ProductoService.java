@@ -60,7 +60,7 @@ public class ProductoService {
         if (producto.getNombreProducto() == null) {
             throw new RuntimeException("El nombre del producto no puede estar vacio.");
         }
-        if (producto.getStock() == null || producto.getStock() >= 0) {
+        if (producto.getStock() == null || producto.getStock() < 0) {
             throw new RuntimeException("El stock del producto no puede ser menor a cero.");
         }
         if (producto.getPrecio() == null || producto.getPrecio() <= 0) {
@@ -90,11 +90,6 @@ public class ProductoService {
                     return categoriaRepository.save(nuevaCategoria);
                 });
 
-        ProductoCategoria productoCategoria = new ProductoCategoria();
-        productoCategoria.setCategoria(categoria);
-        productoCategoria.setProducto(producto);
-        ProductoCategoria nuevaProductoCategoria = productoCategoriaRepository.save(productoCategoria);
-
         Especificacion especificacion = especificacionRepository
                 .findByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(frecuencia, capacidad, consumo)
                 .orElseGet(() -> {
@@ -106,10 +101,20 @@ public class ProductoService {
                 });
 
         producto.setMarca(marca);
-        producto.setProductoCategoria(nuevaProductoCategoria);
         producto.setEspecificacion(especificacion);
 
-        return productoRepository.save(producto);
+        // GUARDAR PRODUCTO PRIMERO (necesita ID para ProductoCategoria)
+        Producto productoGuardado = productoRepository.save(producto);
+
+        // LUEGO guardar ProductoCategoria
+        ProductoCategoria productoCategoria = new ProductoCategoria();
+        productoCategoria.setCategoria(categoria);
+        productoCategoria.setProducto(productoGuardado);
+        ProductoCategoria nuevaProductoCategoria = productoCategoriaRepository.save(productoCategoria);
+
+        // Actualizar referencia en producto
+        productoGuardado.setProductoCategoria(nuevaProductoCategoria);
+        return productoRepository.save(productoGuardado);
 
     }
 
@@ -118,6 +123,7 @@ public class ProductoService {
         if (producto == null) {
             throw new IllegalArgumentException("Producto no encontrado.");
         }
+        productoRepository.deleteById(id);
     }
 
     public Producto actualizacionParcialProducto(Producto producto) {
@@ -158,7 +164,10 @@ public class ProductoService {
         return productoRepository.save(existingProducto);
     }
 
-    public Producto actualizarProducto(Producto producto) {
-        return guardarProducto(producto);
+    public Producto actualizarProducto(Producto producto, String marcaNombre, String categoriaNombre,
+            String frecuencia, String capacidad, String consumo, Long idMarca, Long idCategoria,
+            Long idEspecificacion) {
+        return guardarProducto(producto, marcaNombre, categoriaNombre, frecuencia, capacidad, consumo,
+                idMarca, idCategoria, idEspecificacion);
     }
 }
