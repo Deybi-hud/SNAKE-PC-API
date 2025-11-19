@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import SNAKE_PC.demo.model.producto.Producto;
 import SNAKE_PC.demo.service.producto.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -56,16 +57,16 @@ public class ProductoController {
     }
 
     @PostMapping("/agregar")
-    @Operation(summary = "Esta api agrega un producto", description = "esta api se encarga de agregar a un producto existente")
+    @Operation(summary = "Esta api agrega un producto", description = "esta api se encarga de agregar un producto")
     public ResponseEntity<?> agregar(@RequestBody Producto producto,
-            @RequestParam String marcaNombre,
-            @RequestParam String categoriaNombre,
-            @RequestParam String frecuencia,
-            @RequestParam String capacidad,
-            @RequestParam String consumo,
-            @RequestParam Long idMarca,
-            @RequestParam Long idCategoria,
-            @RequestParam Long idEspecificacion) {
+            @Parameter(description = "Nombre de la marca") @RequestParam String marcaNombre,
+            @Parameter(description = "Nombre de la categoría") @RequestParam String categoriaNombre,
+            @Parameter(description = "Frecuencia") @RequestParam String frecuencia,
+            @Parameter(description = "Capacidad") @RequestParam String capacidad,
+            @Parameter(description = "Consumo") @RequestParam String consumo,
+            @Parameter(description = "ID de marca") @RequestParam Long idMarca,
+            @Parameter(description = "ID de categoría") @RequestParam Long idCategoria,
+            @Parameter(description = "ID de especificación") @RequestParam Long idEspecificacion) {
         try {
             if (producto == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El producto no puede ser nulo");
@@ -85,14 +86,14 @@ public class ProductoController {
     @PutMapping("/{id}")
     @Operation(summary = "Esta api actualiza un producto", description = "esta api se encarga de actualizar a un producto existente")
     public ResponseEntity<?> updateProducto(@PathVariable Long id, @RequestBody Producto producto,
-            @RequestParam String marcaNombre,
-            @RequestParam String categoriaNombre,
-            @RequestParam String frecuencia,
-            @RequestParam String capacidad,
-            @RequestParam String consumo,
-            @RequestParam Long idMarca,
-            @RequestParam Long idCategoria,
-            @RequestParam Long idEspecificacion) {
+            @Parameter(description = "Nombre de la marca") @RequestParam String marcaNombre,
+            @Parameter(description = "Nombre de la categoría") @RequestParam String categoriaNombre,
+            @Parameter(description = "Frecuencia") @RequestParam String frecuencia,
+            @Parameter(description = "Capacidad") @RequestParam String capacidad,
+            @Parameter(description = "Consumo") @RequestParam String consumo,
+            @Parameter(description = "ID de marca") @RequestParam Long idMarca,
+            @Parameter(description = "ID de categoría") @RequestParam Long idCategoria,
+            @Parameter(description = "ID de especificación") @RequestParam Long idEspecificacion) {
         try {
             if (id == null || id <= 0) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID del producto debe ser mayor a 0");
