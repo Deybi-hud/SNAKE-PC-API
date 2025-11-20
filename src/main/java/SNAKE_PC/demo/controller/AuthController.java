@@ -17,19 +17,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import SNAKE_PC.demo.model.usuario.Usuario;
-import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
+import SNAKE_PC.demo.service.usuario.LoginService;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private LoginService loginService; // ✅ AHORA SÍ USA EL SERVICE
 
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    // ✅ LOGIN CON MODELO USUARIO
+    // ✅ LOGIN USANDO LOGINSERVICE
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Usuario usuarioRequest) {
         try {
@@ -44,7 +44,7 @@ public class AuthController {
                     .body(Map.of("error", "La contraseña es obligatoria"));
             }
 
-            // Autenticación con Spring Security
+            // ✅ AUTENTICACIÓN CON SPRING SECURITY
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                     usuarioRequest.getCorreo(),
@@ -54,11 +54,10 @@ public class AuthController {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Obtener usuario completo desde la base de datos
-            Usuario usuario = usuarioRepository.findByCorreo(usuarioRequest.getCorreo())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            // ✅ AHORA USA TU LOGINSERVICE
+            Usuario usuario = loginService.obtenerPorCorreo(usuarioRequest.getCorreo());
 
-            // Crear respuesta con el modelo Usuario
+            // Crear respuesta
             Map<String, Object> response = new HashMap<>();
             response.put("mensaje", "Login exitoso");
             response.put("usuario", mapearUsuarioResponse(usuario));
@@ -74,7 +73,7 @@ public class AuthController {
         }
     }
 
-    // ✅ MÉTODO PARA MAPEAR USUARIO (excluir datos sensibles)
+    // ✅ MÉTODO PARA MAPEAR USUARIO
     private Map<String, Object> mapearUsuarioResponse(Usuario usuario) {
         Map<String, Object> usuarioResponse = new HashMap<>();
         usuarioResponse.put("id", usuario.getId());
