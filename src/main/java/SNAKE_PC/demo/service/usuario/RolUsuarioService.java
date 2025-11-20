@@ -1,5 +1,7 @@
 package SNAKE_PC.demo.service.usuario;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,5 +36,37 @@ public class RolUsuarioService {
         
         contacto.setRolUsuario(nuevoRol);
         return contactoRepository.save(contacto);
+    }
+
+    public RolUsuario save(RolUsuario rolUsuario) {
+        // Validaciones antes de guardar
+        if (rolUsuario.getNombreRol() == null || rolUsuario.getNombreRol().trim().isEmpty()) {
+            throw new RuntimeException("El nombre del rol es obligatorio");
+        }
+        
+        // Verificar si ya existe el rol
+        if (rolRepository.existsByNombreRol(rolUsuario.getNombreRol())) {
+            throw new RuntimeException("El rol '" + rolUsuario.getNombreRol() + "' ya existe");
+        }
+        
+        return rolRepository.save(rolUsuario); // ✅ FALTABA EL RETURN
+    }
+
+        public List<RolUsuario> findAll() {
+        return rolRepository.findAll();
+    }
+    
+    public RolUsuario findById(Long id) {
+        return rolRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+    }
+    
+    public RolUsuario findByNombre(String nombreRol) {
+        return rolRepository.findByNombreRol(nombreRol)
+            .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + nombreRol));
+    }
+    
+    public boolean existeRol(String nombreRol) {
+        return rolRepository.existsByNombreRol(nombreRol);
     }
 }

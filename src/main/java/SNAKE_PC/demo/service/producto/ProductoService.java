@@ -80,16 +80,6 @@ public class ProductoService {
                     return marcaRepository.save(nuevaMarca);
                 });
 
-        if (categoriaNombre == null || categoriaNombre.isBlank()) {
-            throw new RuntimeException("El nombre de la categoria no puede estar vacio.");
-        }
-        Categoria categoria = categoriaRepository.findByNombreCategoria(categoriaNombre)
-                .orElseGet(() -> {
-                    Categoria nuevaCategoria = new Categoria();
-                    nuevaCategoria.setNombreCategoria(categoriaNombre);
-                    return categoriaRepository.save(nuevaCategoria);
-                });
-
         Especificacion especificacion = especificacionRepository
                 .findByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(frecuencia, capacidad, consumo)
                 .orElseGet(() -> {
@@ -100,21 +90,13 @@ public class ProductoService {
                     return especificacionRepository.save(nuevaEspecificacion);
                 });
 
+        // Asignar marca y especificación al producto
         producto.setMarca(marca);
         producto.setEspecificacion(especificacion);
 
-        // GUARDAR PRODUCTO PRIMERO (necesita ID para ProductoCategoria)
-        Producto productoGuardado = productoRepository.save(producto);
-
-        // LUEGO guardar ProductoCategoria
-        ProductoCategoria productoCategoria = new ProductoCategoria();
-        productoCategoria.setCategoria(categoria);
-        productoCategoria.setProducto(productoGuardado);
-        ProductoCategoria nuevaProductoCategoria = productoCategoriaRepository.save(productoCategoria);
-
-        // Actualizar referencia en producto
-        productoGuardado.setProductoCategoria(nuevaProductoCategoria);
-        return productoRepository.save(productoGuardado);
+        // Guardar y retornar producto
+        // NOTA: ProductoCategoria debe ser creada manualmente desde el endpoint /producto-categorias
+        return productoRepository.save(producto);
 
     }
 
