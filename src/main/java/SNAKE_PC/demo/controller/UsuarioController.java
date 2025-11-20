@@ -29,18 +29,26 @@ public class UsuarioController {
     // ✅ REGISTRAR CLIENTE (público - sin autenticación)
     @PostMapping(value = "/registrar", consumes = "multipart/form-data")
     public ResponseEntity<?> registrarCliente(
-            @RequestParam("imagen") MultipartFile imagen,
+            @RequestParam(value = "imagen", required = false) MultipartFile imagen,
             @RequestParam String nombreUsuario,
             @RequestParam String correo,
             @RequestParam String contrasena,
             @RequestParam String confirmarContrasena,
+            @RequestParam String nombre,
+            @RequestParam String apellido,
+            @RequestParam String telefono,
             @RequestParam String calle,
             @RequestParam String numero,
             @RequestParam Long comunaId,
-            @RequestParam Long idRol,
-            @ModelAttribute Contacto contacto) {
+            @RequestParam Long idRol) {
         
         try {
+            // Crear el objeto Contacto con los datos recibidos
+            Contacto contacto = new Contacto();
+            contacto.setNombre(nombre);
+            contacto.setApellido(apellido);
+            contacto.setTelefono(telefono);
+            
             Contacto nuevoContacto = usuarioContactoService.RegistrarCliente(
                 contacto, imagen, nombreUsuario, correo, contrasena, 
                 confirmarContrasena, calle, numero, comunaId, idRol
@@ -125,7 +133,7 @@ public class UsuarioController {
             String correoUsuario = authentication.getName();
             Usuario usuario = usuarioService.obtenerPorCorreo(correoUsuario);
             
-            Usuario usuarioActualizado = usuarioService.actualizarContrasena(
+            usuarioService.actualizarContrasena(
                 usuario.getId(), nuevaContrasena, confirmarContrasena
             );
             

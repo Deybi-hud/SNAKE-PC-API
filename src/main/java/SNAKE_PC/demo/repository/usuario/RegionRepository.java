@@ -17,14 +17,8 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     // ✅ BUSCAR REGIÓN POR NOMBRE
     Optional<Region> findByNombreRegion(String nombreRegion);
     
-    // ✅ BUSCAR REGIÓN POR CÓDIGO (si tienes ese campo)
-    Optional<Region> findByCodigoRegion(String codigoRegion);
-    
     // ✅ OBTENER REGIONES ORDENADAS POR NOMBRE
     List<Region> findAllByOrderByNombreRegionAsc();
-    
-    // ✅ VERIFICAR SI EXISTE REGIÓN POR CÓDIGO
-    boolean existsByCodigoRegion(String codigoRegion);
     
     // ✅ BUSCAR REGIONES QUE CONTENGAN TEXTO EN EL NOMBRE
     List<Region> findByNombreRegionContainingIgnoreCase(String nombre);

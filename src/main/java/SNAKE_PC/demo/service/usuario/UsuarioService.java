@@ -17,12 +17,22 @@ public class UsuarioService {
     private UsuarioRepository usuarioRepository;
 
     public Usuario save(Usuario usuario,String confirmarContrasena){
+        // Validar nombre de usuario
+        if(usuario.getNombreUsuario() == null || usuario.getNombreUsuario().trim().isEmpty()){
+            throw new RuntimeException("El nombre de usuario es obligatorio");
+        }
+        if(usuarioRepository.existsByNombreUsuario(usuario.getNombreUsuario())){
+            throw new RuntimeException("El nombre de usuario ya existe");
+        }
+        
+        // Validar correo
         if(usuario.getCorreo() != null){
             validarCorreo(usuario.getCorreo());
         } else {
             throw new RuntimeException("El correo es obligatorio");
         }
         
+        // Validar contraseña
         if(usuario.getContrasena() != null){
             validarContrasena(usuario, confirmarContrasena);
             usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));

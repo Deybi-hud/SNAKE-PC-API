@@ -48,22 +48,61 @@ public class UsuarioContactoService {
     public Contacto RegistrarCliente(Contacto contacto, MultipartFile imagen, String nombreUsuario, String correo, String contrasena, 
                                     String confrimarContrasena, String calle, String numero, Long comunaId, Long idRol) throws IOException{
 
-        if(!contrasena.equals(confrimarContrasena)){
-            throw new RuntimeException("Las contraseñas no coinciden");
+        // ✅ VALIDACIONES PREVIAS (antes de crear usuario)
+        
+        // Validar Contacto
+        if (contacto.getNombre() == null || contacto.getNombre().trim().isEmpty()){ 
+            throw new RuntimeException("El nombre es obligatorio");
+        }
+        if (contacto.getApellido() == null || contacto.getApellido().trim().isEmpty()){
+            throw new RuntimeException("El apellido es obligatorio");
+        }
+        if(contacto.getTelefono() == null || contacto.getTelefono().trim().isEmpty()){
+            throw new RuntimeException("El teléfono es obligatorio");
+        }
+        if(!contacto.getTelefono().matches("\\d+")){
+            throw new RuntimeException("El teléfono solo puede contener números");
+        }
+        if(contacto.getTelefono().length() != 9){
+            throw new RuntimeException("El teléfono debe tener exactamente 9 dígitos");
+        }
+        if(contactoRepository.existsByTelefono(contacto.getTelefono())){
+            throw new RuntimeException("El teléfono ya está registrado");
         }
 
-        byte[] imagenBytes = imagen.getBytes();
-        String base64 = Base64.getEncoder().encodeToString(imagenBytes);
+        // Validar Usuario
+        if (nombreUsuario == null || nombreUsuario.trim().isEmpty()){
+            throw new RuntimeException("El nombre de usuario es obligatorio");
+        }
+        
+        // Validar Dirección
+        if (calle == null || calle.trim().isEmpty()){
+            throw new RuntimeException("La calle es obligatoria");
+        }
+        if (numero == null || numero.trim().isEmpty()){
+            throw new RuntimeException("El número es obligatorio");
+        }
+        
+        // Validar Comuna y Rol antes de crear entidades
+        Comuna comuna = comunaRepository.findById(comunaId)
+            .orElseThrow(()-> new RuntimeException("Comuna no válida"));
+        
+        RolUsuario rolExistente = rolRepository.findById(idRol)
+            .orElseThrow(()-> new RuntimeException("Rol no encontrado"));
+
+        // ✅ CREAR USUARIO
         Usuario usuario = new Usuario();
-        usuario.setImagenUsuario(base64);
+        if (imagen != null && !imagen.isEmpty()) {
+            byte[] imagenBytes = imagen.getBytes();
+            String base64 = Base64.getEncoder().encodeToString(imagenBytes);
+            usuario.setImagenUsuario(base64);
+        }
         usuario.setNombreUsuario(nombreUsuario);
         usuario.setCorreo(correo);
         usuario.setContrasena(contrasena);
         Usuario nuevoUsuario = usuarioService.save(usuario, confrimarContrasena);
 
-        Comuna comuna = comunaRepository.findById(comunaId)
-            .orElseThrow(()-> new RuntimeException("Comuna no valida"));
-
+        // ✅ CREAR DIRECCIÓN
         Direccion direccion = new Direccion();
         direccion.setCalle(calle);
         direccion.setNumero(numero);
@@ -71,32 +110,11 @@ public class UsuarioContactoService {
         direccionService.validarDireccion(direccion);
         Direccion direccionGuardada = direccionRepository.save(direccion);
 
+        // ✅ CREAR CONTACTO
         contacto.setUsuario(nuevoUsuario);
         contacto.setDireccion(direccionGuardada);
-        
-        RolUsuario rolExistente = rolRepository.findById(idRol)
-            .orElseThrow(()-> new RuntimeException("Rol no encontrado"));
         contacto.setRolUsuario(rolExistente);
-
-        if (contacto.getNombre() == null || contacto.getNombre().trim().isEmpty()|| 
-            contacto.getApellido() == null || contacto.getApellido().trim().isEmpty()){
-            throw new RuntimeException("Debe indicar su nombre y apellido");
-        }
-        if(contacto.getTelefono() == null){
-            throw new RuntimeException("Debe ingresar un telefono");
-        }
-        if(!contacto.getTelefono().matches("\\d+")){
-            throw new RuntimeException("El teléfono solo puede contener números");
-        }
-        if(contacto.getTelefono().length() != 9){
-            throw new RuntimeException("Debe ingresar solo 9 digitos");
-        }
-        if(contactoRepository.existsByTelefono(contacto.getTelefono())){
-            throw new RuntimeException("El telefono ya está registrado");
-        }
-        if(contacto.getDireccion().getComuna() == null){
-            throw new RuntimeException("Debe seleccionar una comuna"); 
-        }
+        
         return contactoRepository.save(contacto);
     }
 

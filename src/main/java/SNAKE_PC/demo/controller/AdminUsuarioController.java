@@ -2,6 +2,7 @@ package SNAKE_PC.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import SNAKE_PC.demo.model.usuario.Contacto;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/usuarios")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminUsuarioController {
 
     @Autowired
