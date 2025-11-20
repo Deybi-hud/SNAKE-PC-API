@@ -16,9 +16,6 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-
-
-
     public Usuario save(Usuario usuario,String confirmarContrasena){
         if(usuario.getCorreo() != null){
             validarCorreo(usuario.getCorreo());
@@ -105,7 +102,7 @@ public class UsuarioService {
 
     public Usuario actualizarContrasena(Long usuarioId,String nuevaContrasena, String confirmarContrasena){
         Usuario usuario = usuarioRepository.findById(usuarioId)
-        .orElseThrow(()-> new RuntimeException("Usuario no encontrad")); 
+        .orElseThrow(()-> new RuntimeException("Usuario no encontrado")); 
         if(nuevaContrasena == null){
             throw new RuntimeException("Debe ingresar una contraseña");
         }
@@ -117,6 +114,8 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
+
+//------ administrador --------
     public Usuario obtenerPorCorreo(String correo){
         Usuario usuario = usuarioRepository.findByCorreo(correo)
             .orElseThrow(()-> new RuntimeException("No se encontraron usuarios con ese correo"));
