@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 
 import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
+import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class UsuarioService {
 
     @Autowired
@@ -17,29 +19,24 @@ public class UsuarioService {
     private UsuarioRepository usuarioRepository;
 
     public Usuario save(Usuario usuario,String confirmarContrasena){
-        // Validar nombre de usuario
         if(usuario.getNombreUsuario() == null || usuario.getNombreUsuario().trim().isEmpty()){
             throw new RuntimeException("El nombre de usuario es obligatorio");
         }
         if(usuarioRepository.existsByNombreUsuario(usuario.getNombreUsuario())){
             throw new RuntimeException("El nombre de usuario ya existe");
         }
-        
-        // Validar correo
         if(usuario.getCorreo() != null){
             validarCorreo(usuario.getCorreo());
         } else {
             throw new RuntimeException("El correo es obligatorio");
         }
         
-        // Validar contraseña
         if(usuario.getContrasena() != null){
             validarContrasena(usuario, confirmarContrasena);
             usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
         } else {
             throw new RuntimeException("La contraseña es obligatoria");
         }
-        
         return usuarioRepository.save(usuario);
     }
 

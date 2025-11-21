@@ -2,6 +2,7 @@ package SNAKE_PC.demo.service.usuario;
 
 import SNAKE_PC.demo.model.usuario.Region;
 import SNAKE_PC.demo.repository.usuario.RegionRepository;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class RegionService {
 
     @Autowired
@@ -31,13 +33,18 @@ public class RegionService {
     }
     
     public Region save(Region region) {
-        if (region.getNombreRegion() == null || region.getNombreRegion().trim().isEmpty()) {
-            throw new RuntimeException("El nombre de la región es obligatorio");
+        try{
+            if (region.getNombreRegion() == null || region.getNombreRegion().trim().isEmpty()) {
+                throw new RuntimeException("El nombre de la región es obligatorio");
+            }
+            if (regionRepository.existsByNombreRegion(region.getNombreRegion())) {
+                throw new RuntimeException("La región '" + region.getNombreRegion() + "' ya existe");
+            }
+            return regionRepository.save(region);
+
+        }catch(Exception e){
+            throw new RuntimeException(e);
         }
-        if (regionRepository.existsByNombreRegion(region.getNombreRegion())) {
-            throw new RuntimeException("La región '" + region.getNombreRegion() + "' ya existe");
-        }
-        return regionRepository.save(region);
     }
     
     public boolean existeRegion(String nombreRegion) {

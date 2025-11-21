@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 
 import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
+import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class LoginService {
     
     @Autowired
@@ -16,19 +18,24 @@ public class LoginService {
     @Autowired 
     private PasswordEncoder passwordEncoder;
 
+
     public Usuario iniciarSesion(String correo, String contrasena){
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
-        if(!passwordEncoder.matches(contrasena, usuario.getContrasena())){
-            throw new RuntimeException("Contraseña incorrecta");
+        try{
+            Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            
+            if(!passwordEncoder.matches(contrasena, usuario.getContrasena())){
+                throw new RuntimeException("Contraseña incorrecta");
+            }
+            
+            if (!usuario.isActivo()) {
+                throw new RuntimeException("Cuenta desactivada");
+            }
+            
+            return usuario;
+        }catch(Exception e){
+            throw new RuntimeException(e);
         }
-        
-        if (!usuario.isActivo()) {
-            throw new RuntimeException("Cuenta desactivada");
-        }
-        
-        return usuario;
     }
 
     public Usuario obtenerPorCorreo(String correo) {
