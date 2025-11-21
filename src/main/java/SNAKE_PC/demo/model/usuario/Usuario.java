@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,6 +42,6 @@ public class Usuario {
     @Column(name = "activo")
     private boolean activo = true;
 
-    @OneToMany(mappedBy = "usuario")
-    private List<Contacto> contactos;
+    @OneToOne(mappedBy = "usuario")
+    private Contacto contacto;
 }

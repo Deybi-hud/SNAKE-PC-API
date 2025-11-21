@@ -20,27 +20,26 @@ public class DireccionService {
     private ComunaRepository comunaRepository;
 
 
-    public void validarDireccion(String calle, String numero){
-        if(numero == null || numero.trim().isEmpty()){
-            throw new RuntimeException("Debe ingresar al menos 1 dígitos para la direccion");
-        }
-        if(calle == null || calle.trim().isEmpty()){
+    public void validarDireccion(Direccion direccion){
+        if(direccion.getCalle() == null || direccion.getCalle().trim().isBlank()){
             throw new RuntimeException("Debe ingresar el nombre de la calle para el envio");
+        }
+        if(direccion.getNumero() == null ||direccion.getNumero().trim().isBlank()){
+            throw new RuntimeException("Debe ingresar al menos 1 dígitos para la direccion");
         }
     }
 
-    public Direccion crearDireccion(String calle, String numero, Long comunaId){
-        validarDireccion(calle,numero);
-        
+    public Direccion crearDireccion(Direccion direccion, Long comunaId){
+        validarDireccion(direccion);
+
         Comuna comuna = comunaRepository.findById(comunaId)
             .orElseThrow(()-> new RuntimeException("Comuna no encontrada"));
-            
-        Direccion nuevaDireccion = new Direccion();
-        nuevaDireccion.setCalle(calle);
-        nuevaDireccion.setNumero(numero);
-        nuevaDireccion.setComuna(comuna);
+        
+        direccion.setCalle(direccion.getCalle().trim());
+        direccion.setNumero(direccion.getNumero().trim());
+        direccion.setComuna(comuna);
 
-        return direccionRepository.save(nuevaDireccion);
+        return direccionRepository.save(direccion);
     }
 
 

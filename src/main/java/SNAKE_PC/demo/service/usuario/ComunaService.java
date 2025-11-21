@@ -38,25 +38,21 @@ public class ComunaService {
             .orElseThrow(() -> new RuntimeException("Comuna no encontrada: " + nombreComuna));
     }
     
-    public Comuna save(String nombreComuna, Long regionId) {
-        if (nombreComuna == null || nombreComuna.trim().isEmpty()) {
+    public Comuna save(Comuna comuna, Long regionId) {
+        if (comuna.getNombreComuna() == null || comuna.getNombreComuna().isBlank()) {
             throw new RuntimeException("Debe ingresar el nombre de la comuna");
         }
-        
+        comuna.setNombreComuna(comuna.getNombreComuna().trim());
         Region region = regionService.findById(regionId);
-        
         boolean existeComuna = comunaRepository.existsByNombreComunaAndRegionId(
-            nombreComuna.trim(), regionId);
-        
+            comuna.getNombreComuna(), regionId);
         if (existeComuna) {
-            throw new RuntimeException("La comuna '" + nombreComuna + "' ya existe en esta región");
+            throw new RuntimeException("La comuna '" + comuna.getNombreComuna() + "' ya existe en esta región");
         }
+        
+       comuna.setRegion(region);
 
-        Comuna nuevaComuna = new Comuna();
-        nuevaComuna.setNombreComuna(nombreComuna.trim());
-        nuevaComuna.setRegion(region);
-
-        return comunaRepository.save(nuevaComuna);
+        return comunaRepository.save(comuna);
     }
     
     public boolean existeComuna(String nombreComuna, Long regionId) {

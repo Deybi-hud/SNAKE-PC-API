@@ -18,31 +18,31 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public Usuario crearUsuario(String nombreUsuario,String imagenUsuario, String correo, String contrasena,String confirmarContrasena){
-        if(nombreUsuario == null || nombreUsuario.trim().isEmpty()){
+    public Usuario crearUsuario(Usuario usuario, String confirmarContrasena){
+        if(usuario.getNombreUsuario() == null || usuario.getNombreUsuario().trim().isBlank()){
             throw new RuntimeException("El nombre de usuario es obligatorio");
         }
-        if(usuarioRepository.existsByNombreUsuario(nombreUsuario)){
+        if(usuarioRepository.existsByNombreUsuario(usuario.getNombreUsuario())){
             throw new RuntimeException("El nombre de usuario ya existe");
         }
-        validarCorreo(correo);
-
-        String encriptarContrasena = null;
-        validarContrasena(contrasena, confirmarContrasena);
-        encriptarContrasena = passwordEncoder.encode(contrasena);
-
-        Usuario nuevoUsuario = new Usuario();
-        nuevoUsuario.setNombreUsuario(nombreUsuario);
-        nuevoUsuario.setImagenUsuario(imagenUsuario);
-        nuevoUsuario.setCorreo(correo);
-        nuevoUsuario.setContrasena(encriptarContrasena);
-        nuevoUsuario.setActivo(true);
-
-        return usuarioRepository.save(nuevoUsuario);
-
+        validarCorreo(usuario.getCorreo());
+        validarContrasena(usuario.getContrasena(), confirmarContrasena);
+        usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
+        usuario.setActivo(true);
+        return usuarioRepository.save(usuario);
     }
 
-     public Usuario actualizarContrasena(Long usuarioId,String nuevaContrasena, String confirmarContrasena){
+
+    public Usuario actualizarCorreo(Long usuarioId, String correo){
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+            .orElseThrow(()-> new RuntimeException("Usuario no encontrad"));
+        validarCorreo(correo);
+        usuario.setCorreo(correo);
+        return usuarioRepository.save(usuario);
+    }
+
+
+    public Usuario actualizarContrasena(Long usuarioId,String nuevaContrasena, String confirmarContrasena){
         Usuario usuario = usuarioRepository.findById(usuarioId)
         .orElseThrow(()-> new RuntimeException("Usuario no encontrado")); 
         if(nuevaContrasena == null){
@@ -60,11 +60,12 @@ public class UsuarioService {
         if(correo == null || correo.trim().isEmpty()){
             throw new RuntimeException("El correo no puede estar vacío");
         }
+        String normalizado = correo.trim().toLowerCase();
         String formato = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-        if(!correo.matches(formato)){
+        if(!normalizado.matches(formato)){
             throw new RuntimeException("Formato de correo inválido");
         }
-         if(usuarioRepository.existsByCorreo(correo)){
+        if(usuarioRepository.existsByCorreo(normalizado)){
             throw new RuntimeException("El correo ya existe");
         }
 
@@ -120,7 +121,16 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
-
+    public Usuario validarActividad(String correo){
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+            .orElseThrow(()-> new RuntimeException("usuario no encontrado"));
+        if(!usuario.isActivo()){
+            throw new RuntimeException("El usuario está desactivado");
+        }
+        return usuario;
+    }
+        
+       
 //------ administrador --------
     public Usuario obtenerPorCorreo(String correo){
         Usuario usuario = usuarioRepository.findByCorreo(correo)

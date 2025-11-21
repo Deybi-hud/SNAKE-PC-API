@@ -30,71 +30,62 @@ public class UsuarioContactoService {
     @Autowired 
     private RolRepository rolRepository;
 
-    public Contacto RegistrarCliente(String nombre, String apellido, String telefono, String imagenUsuario, String nombreUsuario, String correo, String contrasena, 
-                                    String confirmarContrasena, String calle, String numero, Long comunaId, Long idRol) throws IOException{
+    public Contacto RegistrarCliente(Contacto contacto, Usuario usuario,String confirmarContrasena, Long idRol,Direccion direccion, Long idComuna) throws IOException{
     
-        validarDatosContacto(nombre, apellido, telefono);
+        validarDatosContacto(contacto);
         RolUsuario rolExistente = rolRepository.findById(idRol)
             .orElseThrow(()-> new RuntimeException("Rol no encontrado"));
 
-        Usuario nuevoUsuario = usuarioService.crearUsuario(nombreUsuario,imagenUsuario,correo, contrasena,confirmarContrasena);
-        Direccion nuevadireccion = direccionService.crearDireccion(calle,numero,comunaId);
-
-        Contacto nuevoContacto = new Contacto();
-        nuevoContacto.setNombre(nombre);
-        nuevoContacto.setApellido(apellido);
-        nuevoContacto.setTelefono(telefono);
-        nuevoContacto.setUsuario(nuevoUsuario);
-        nuevoContacto.setDireccion(nuevadireccion);
-        nuevoContacto.setRolUsuario(rolExistente);
+        Usuario usuarioNuevo = usuarioService.crearUsuario(usuario, confirmarContrasena);
+        Direccion direccionNuevo = direccionService.crearDireccion(direccion,idComuna);
+        contacto.setUsuario(usuarioNuevo);
+        contacto.setDireccion(direccionNuevo);
+        contacto.setRolUsuario(rolExistente);
+        usuarioNuevo.setContacto(contacto);
         
-        return contactoRepository.save(nuevoContacto);
+        return contactoRepository.save(contacto);
 
     }
 
-    public Contacto ActualizarContacto(Long contactoId, String nombre, String apellido, String telefono, String calle, String numero, Long comunaId){
-        Contacto contactoexistente = contactoRepository.findById(contactoId)
+    public Contacto ActualizarContacto(Contacto contactoActualizado, Usuario usuario, Direccion direccionActualizada, Long idComuna){
+        Contacto contactoexistente = contactoRepository.findById(contactoActualizado.getId())
             .orElseThrow(()-> new RuntimeException("Contacto no encontrado"));
 
-        validarDatosContacto(nombre, apellido, telefono);
-        
-        direccionService.validarDireccion(calle, numero);
-        Direccion nuevaDireccion = direccionService.crearDireccion(calle, numero, comunaId);
-
+        validarDatosContacto(contactoActualizado);
+        usuarioService.actualizarCorreo(usuario.getId(),usuario.getCorreo());
+        direccionService.validarDireccion(direccionActualizada);
+        Direccion nuevaDireccion = direccionService.crearDireccion(direccionActualizada, idComuna);
         contactoexistente.setDireccion(nuevaDireccion);
-        contactoexistente.setNombre(nombre);
-        contactoexistente.setApellido(apellido);
-        contactoexistente.setTelefono(telefono);
-        
+
         return contactoRepository.save(contactoexistente);
     }
 
     public Contacto obtenerDatosContacto(Long contactoId){
         return contactoRepository.findById(contactoId)
-            .orElseThrow(()-> new RuntimeException("Usuario no encontrado"));
+            .orElseThrow(()-> new RuntimeException("Contacto no encontrado"));
     }
 
 
 
 //--------------------------------- Validaciones ---------------------------------------------------------------
-public void validarDatosContacto(String nombre, String apellido, String telefono){
-        if (nombre == null || nombre.trim().isEmpty()){ 
+public void validarDatosContacto(Contacto contacto){
+        if (contacto.getNombre() == null || contacto.getNombre().trim().isBlank()){ 
                 throw new RuntimeException("El nombre es obligatorio");
         }
-        if (apellido == null || apellido.trim().isEmpty()){
+        if (contacto.getApellido() == null || contacto.getApellido().trim().isBlank()){
             throw new RuntimeException("El apellido es obligatorio");
         }
-        if(telefono == null || telefono.trim().isEmpty()){
+        if(contactoRepository.existsByTelefono(contacto.getTelefono())){
+            throw new RuntimeException("El teléfono ya existe");
+        }
+        if(contacto.getTelefono() == null || contacto.getTelefono().trim().isEmpty()){
             throw new RuntimeException("El teléfono es obligatorio");
         }
-        if(!telefono.matches("\\d+")){
+        if(!contacto.getTelefono().matches("\\d+")){
             throw new RuntimeException("El teléfono solo puede contener números");
         }
-        if(telefono.length() != 9){
+        if(contacto.getTelefono().length() != 9){
             throw new RuntimeException("El teléfono debe tener exactamente 9 dígitos");
-        }
-        if(contactoRepository.existsByTelefono(telefono)){
-            throw new RuntimeException("El teléfono ya está registrado");
         }
     }
 //--------------------------------- Para listar siendo admin ---------------------------------------------------

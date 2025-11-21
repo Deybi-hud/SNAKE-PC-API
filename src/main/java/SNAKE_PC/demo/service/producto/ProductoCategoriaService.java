@@ -33,28 +33,30 @@ public class ProductoCategoriaService {
         return productoCategoria;
     }
 
-    public ProductoCategoria guardarProductoCategoria(String nombreSubCategoria, String nombreCategoria) {
-        if (nombreSubCategoria == null|| nombreSubCategoria.trim().isEmpty()) {
+    public ProductoCategoria guardarProductoCategoria(ProductoCategoria productoCategoria, Categoria categoria) {
+        if (productoCategoria.getNombreSubCategoria() == null|| productoCategoria.getNombreSubCategoria().trim().isBlank()) {
             throw new RuntimeException("El nombre de la subcategoría no puede estar vacío.");
         }
-
-        Categoria productoCategoria = categoriaService.guardarCategoria(nombreCategoria);
+        if(productoCategoriaRepository.existsByNombreSubCategoriaAndCategoria(productoCategoria.getNombreSubCategoria(), categoria)){
+            throw new RuntimeException("Ya existe la subcategoria");
+        }
+        Categoria nuevaCategoria = categoriaService.guardarCategoria(categoria);
  
         ProductoCategoria nuevoProductoCategoria = new ProductoCategoria();
-        nuevoProductoCategoria.setCategoria(productoCategoria);
-        nuevoProductoCategoria.setNombreSubCategoria(nombreSubCategoria);
+        nuevoProductoCategoria.setCategoria(nuevaCategoria);
+        nuevoProductoCategoria.setNombreSubCategoria(productoCategoria.getNombreSubCategoria().trim());
         return productoCategoriaRepository.save(nuevoProductoCategoria);
        
     }
 
-    public ProductoCategoria actualizarProductoCategoria(String nombreSubCategoria, String nombreCategoria ) {
+    public ProductoCategoria actualizarProductoCategoria(String nombreSubCategoria, Categoria categoria) {
         ProductoCategoria existente = productoCategoriaRepository.findByNombreSubCategoria(nombreSubCategoria)
                 .orElseThrow(() -> new RuntimeException("ProductoCategoria no encontrada."));  
         if (nombreSubCategoria != null && !nombreSubCategoria.trim().isEmpty()) {
             existente.setNombreSubCategoria(nombreSubCategoria.trim());
         }
-        if (nombreCategoria != null) {
-            Categoria categoria = categoriaService.guardarCategoria(nombreCategoria);
+        if (categoria.getNombreCategoria() != null) {
+            categoriaService.guardarCategoria(categoria);
             existente.setCategoria(categoria);
         }
         return productoCategoriaRepository.save(existente);

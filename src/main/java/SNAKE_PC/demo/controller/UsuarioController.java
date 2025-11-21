@@ -29,7 +29,7 @@ public class UsuarioController {
     // ✅ REGISTRAR CLIENTE (público - sin autenticación)
     @PostMapping(value = "/registrar", consumes = "multipart/form-data")
     public ResponseEntity<?> registrarCliente(
-            @RequestParam(value = "imagen", required = false) MultipartFile imagen,
+            @RequestParam MultipartFile imagenUsuario,
             @RequestParam String nombreUsuario,
             @RequestParam String correo,
             @RequestParam String contrasena,
@@ -50,7 +50,7 @@ public class UsuarioController {
             contacto.setTelefono(telefono);
             
             Contacto nuevoContacto = usuarioContactoService.RegistrarCliente(
-                contacto, imagen, nombreUsuario, correo, contrasena, 
+                nombre, apellido, telefono,imagenUsuario, nombreUsuario, correo, contrasena, 
                 confirmarContrasena, calle, numero, comunaId, idRol
             );
             

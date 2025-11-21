@@ -29,33 +29,28 @@ public class EspecificacionService {
         return especificacion;
     }
 
-    public Especificacion guardarEspecificacion(String frecuencia, String capacidadAlmacenamiento, String consumo) {
-       validarEspecificacion(frecuencia, capacidadAlmacenamiento, consumo);
-           
-        Especificacion nuevaEspecificacion = new Especificacion();
-        nuevaEspecificacion.setFrecuencia(frecuencia);
-        nuevaEspecificacion.setCapacidadAlmacenamiento(capacidadAlmacenamiento);
-        nuevaEspecificacion.setConsumo(consumo);
-
-        return especificacionRepository.save(nuevaEspecificacion);
+    public Especificacion guardarEspecificacion(Especificacion especificacion) {
+        validarEspecificacion(especificacion);
+        return especificacionRepository.save(especificacion);
         
     }
 
-    public void validarEspecificacion(String frecuencia, String capacidadAlmacenamiento, String consumo){
+    public void validarEspecificacion(Especificacion especificacion){
 
-        String frec = frecuencia.trim().toUpperCase();
-        String cap  = capacidadAlmacenamiento.trim().toUpperCase();
-        String con  = consumo.trim().toUpperCase();
-        
-        if (frecuencia != null && frecuencia.trim().isEmpty()) {
+        if (especificacion.getFrecuencia() == null || especificacion.getFrecuencia().trim().isBlank()) {
             throw new RuntimeException("La frecuencia no puede estar vacía.");
         }
-        if (capacidadAlmacenamiento != null && capacidadAlmacenamiento.trim().isEmpty()) {
+        if (especificacion.getCapacidadAlmacenamiento() == null || especificacion.getCapacidadAlmacenamiento().trim().isBlank()) {
             throw new RuntimeException("La capacidad de almacenamiento es obligatoria.");
         }
-        if (consumo != null && consumo.trim().isEmpty()) {
+        if (especificacion.getConsumo() ==  null || especificacion.getConsumo().trim().isBlank()) {
             throw new RuntimeException("El consumo es obligatorio.");
         }
+
+        String frec = especificacion.getFrecuencia().trim().toUpperCase();
+        String cap  = especificacion.getCapacidadAlmacenamiento().trim().toUpperCase();
+        String con  = especificacion.getConsumo().trim().toUpperCase();
+
         boolean existente = especificacionRepository
             .existsByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(frec, cap, con);
         if(existente){

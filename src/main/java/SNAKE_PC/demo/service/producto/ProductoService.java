@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import SNAKE_PC.demo.model.producto.Categoria;
 import SNAKE_PC.demo.model.producto.Especificacion;
 import SNAKE_PC.demo.model.producto.Marca;
 import SNAKE_PC.demo.model.producto.Producto;
@@ -42,45 +43,37 @@ public class ProductoService {
         return producto;
     }
 
-    public Producto guardarProducto(String nombreProducto, Double precio, String sku, Integer stock,String peso, String marcaNombre, String categoriaNombre,
-            String nombreSubCategoria, String frecuencia, String capacidadAlmacenamiento, String consumo, Long idMarca, Long idCategoria,Long idEspecificacion) {
+    public Producto guardarProducto(Producto producto, ProductoCategoria productoCategoria, Categoria categoria,  Marca marca, Especificacion especificacion,
+        Long idMarca, Long idCategoria,Long idEspecificacion) {
 
         
-        validarProducto(nombreProducto, precio, sku, stock, peso);
-        Marca marca = marcaService.guardarMarca(marcaNombre);
+        validarProducto(producto);
+        Marca marcaNueva = marcaService.guardarMarca(marca);
+        Especificacion especificacionNuevaOexistente = especificacionService.guardarEspecificacion(especificacion);
+        ProductoCategoria nuevoProductoCategoria = productoCategoriaService.guardarProductoCategoria(productoCategoria, categoria);
 
-        Especificacion especificacionNuevaOexistente = especificacionService.guardarEspecificacion(frecuencia, capacidadAlmacenamiento, consumo);
-        ProductoCategoria nuevoProductoCategoria = productoCategoriaService.guardarProductoCategoria(nombreSubCategoria, categoriaNombre);
+        producto.setMarca(marcaNueva);
+        producto.setEspecificacion(especificacionNuevaOexistente);
+        producto.setProductoCategoria(nuevoProductoCategoria);
 
-        
-        Producto nuevoProducto = new Producto();
-        nuevoProducto.setNombreProducto(nombreProducto);
-        nuevoProducto.setStock(stock);
-        nuevoProducto.setPrecio(precio);
-        nuevoProducto.setSku(sku);
-        nuevoProducto.setPeso(peso);
-        nuevoProducto.setMarca(marca);
-        nuevoProducto.setEspecificacion(especificacionNuevaOexistente);
-        nuevoProducto.setProductoCategoria(nuevoProductoCategoria);
-
-        return productoRepository.save(nuevoProducto);
+        return productoRepository.save(producto);
 
     }
 
-    public void validarProducto(String nombreProducto, Double precio, String sku, Integer stock, String peso){
-        if(nombreProducto == null || nombreProducto.trim().isEmpty()){
+    public void validarProducto(Producto producto){
+        if(producto.getNombreProducto() == null || producto.getNombreProducto().trim().isBlank()){
             throw new RuntimeException("Debe asignar un nombre al producto");
         }
-        if(stock == null || stock < 0){
+        if(producto.getStock() == null || producto.getStock() < 0){
             throw new RuntimeException("El stock debe ser mayor o igual a 0");
         }
-        if(precio == null || precio <= 0){
+        if(producto.getPrecio() == null || producto.getPrecio() <= 0){
             throw new RuntimeException("El valor del producto no puede ser 0");
         }
-        if(sku == null || sku.trim().isEmpty()){
+        if(producto.getSku() == null || producto.getSku().trim().isBlank()){
             throw new RuntimeException("Debe asignar un sku");
         }
-        if(peso == null || peso.trim().isEmpty()){
+        if(producto.getPeso() == null || producto.getPeso().trim().isBlank()){
             throw new RuntimeException("Debe asignar un peso en (kg / gr)");
         }
 
@@ -94,7 +87,7 @@ public class ProductoService {
         productoRepository.deleteById(id);
     }
 
-    public Producto actualizacionParcialProducto(Producto producto, String marcaNombre, String frecuencia, String consumo, String capacidadAlmacenamiento) {
+    public Producto actualizacionParcialProducto(Producto producto, Marca marca, Especificacion especificacion) {
         Producto existingProducto = productoRepository.findById(producto.getId())
             .orElseThrow(()-> new RuntimeException("El producto no fue encontrado"));
 
@@ -113,17 +106,13 @@ public class ProductoService {
         if (producto.getProductoCategoria() != null) {
             existingProducto.setProductoCategoria(producto.getProductoCategoria());
         }
-        if (marcaNombre != null && !marcaNombre.trim().isEmpty()) {
-            Marca marcaNueva = marcaService.guardarMarca(marcaNombre);
+        if (marca.getMarcaNombre() != null && !marca.getMarcaNombre().trim().isBlank()) {
+            Marca marcaNueva = marcaService.guardarMarca(marca);
             existingProducto.setMarca(marcaNueva);
         }
-        boolean cambiarEspecificaciones = frecuencia != null || consumo != null || capacidadAlmacenamiento != null; 
+        boolean cambiarEspecificaciones = especificacion.getFrecuencia() != null || especificacion.getCapacidadAlmacenamiento() != null || especificacion.getConsumo() != null; 
         if (cambiarEspecificaciones) {
-            Especificacion nuevaEspecificacion = especificacionService.guardarEspecificacion(
-                frecuencia != null ? frecuencia.trim() : null, 
-                capacidadAlmacenamiento != null? capacidadAlmacenamiento.trim() : null, 
-                consumo != null ? consumo.trim() : null
-            );
+            Especificacion nuevaEspecificacion = especificacionService.guardarEspecificacion(especificacion);
             existingProducto.setEspecificacion(nuevaEspecificacion);
         }
         return productoRepository.save(existingProducto);

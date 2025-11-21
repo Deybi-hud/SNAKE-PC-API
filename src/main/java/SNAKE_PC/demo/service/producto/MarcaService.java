@@ -38,17 +38,20 @@ public class MarcaService {
             .orElseThrow(()->new RuntimeException("No se encontro la marca."));
     }
 
-    public Marca guardarMarca(String marcaNombre) {
-        if (marcaNombre == null || marcaNombre.trim().isEmpty()) {
+    public Marca guardarMarca(Marca marca) {
+        if (marca.getMarcaNombre() == null || marca.getMarcaNombre().trim().isBlank()) {
             throw new RuntimeException("El nombre de la marca no puede estar vacío.");
         }
-        return marcaRepository.findByNombre(marcaNombre)
+
+        String normalizado = marca.getMarcaNombre().trim();
+        return marcaRepository.findByNombre(normalizado)
             .orElseGet(()->{
                 Marca nuevaMarca = new Marca();
-                nuevaMarca.setMarcaNombre(marcaNombre);
+                nuevaMarca.setMarcaNombre(marca.getMarcaNombre());
                 return marcaRepository.save(nuevaMarca);
             });
     }
+
 
     public Marca actualizarMarca(Long id, Marca marca) {
         Marca marcaExistente = marcaRepository.findById(id)

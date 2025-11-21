@@ -12,6 +12,8 @@ import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.pedido.*;
 import SNAKE_PC.demo.repository.usuario.ContactoRepository;
 import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
+import SNAKE_PC.demo.service.usuario.UsuarioContactoService;
+import SNAKE_PC.demo.service.usuario.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import SNAKE_PC.demo.repository.producto.ProductoRepository;
 
@@ -26,24 +28,21 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PedidoService {
 
-    private final Authentication authentication;
+    @Autowired
+    private UsuarioService usuarioService;
 
-    public Pedido crearPedido(Map<Long, Integer> productosYCantidades, String correoUsuarioLogueado) {
-        Usuario usuario = usuarioRepository.findByCorreo(correoUsuarioLogueado)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    @Autowired
+    private UsuarioContactoService  usuarioContactoService;
 
-        if (!usuario.isActivo()) {
-            throw new RuntimeException("Usuario desactivado, no puede crear pedidos");
-        }
+    @Autowired
+    private EstadoPedidoRepository estadoPedidoRepository;
 
-        List<Contacto> contactos = contactoRepository.findByUsuario(usuario);
-        if (contactos.isEmpty()) {
-            throw new RuntimeException("No se encontró un contacto para el usuario");
-        }
-
-        Contacto contacto = contactos.get(0);
-        EstadoPedido estadoPendiente = estadoPedidoRepository.findByNombre("PENDIENTE")
-                .orElseThrow(() -> new RuntimeException("Estado PENDIENTE no configurado"));
+    public Pedido crearPedido(Map<Long, Integer> productosYCantidades, String correoUsuario) {
+        Usuario usuario = usuarioService.validarActividad(correoUsuario);
+        Contacto contacto = usuarioContactoService.obtenerDatosContacto(usuario.getId());
+        
+        EstadoPedido estadoPedido = estadoPedidoRepository.findByNombre(estadoPedido.getNombre());
+            
 
         if (productosYCantidades == null || productosYCantidades.isEmpty()) {
             throw new RuntimeException("Debe agregar productos al pedido");

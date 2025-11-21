@@ -13,4 +13,5 @@ public interface DireccionRepository extends JpaRepository<Direccion, Long> {
 
     long countByComuna(Comuna comuna);
 
+    boolean existsByCalleIgnoreCaseAndNumeroIgnoreCase(String calle, String numero);
 }
