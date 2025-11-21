@@ -44,9 +44,36 @@ public class EstadoPedidoService {
             nuevo.setNombre("PENDIENTE");
             nuevo.setDescripcion("El pedido se está preparando");
             return guardarEstado(nuevo);
-
         }); 
     }
 
+    public EstadoPedido obtenerEstadoCanelado(){
+        return estadoPedidoRepository.findByNombreIgnoreCase("CANCELADO")
+        .orElseGet(()-> {
+            EstadoPedido nuevo = new EstadoPedido();
+            nuevo.setNombre("CANCELADO");
+            nuevo.setDescripcion("Pedido cancelado");
+            return guardarEstado(nuevo);
+        }); 
+    }
 
+    public EstadoPedido obtenerEstadoEntregado(){
+        return estadoPedidoRepository.findByNombreIgnoreCase("ENTREGADO")
+        .orElseGet(()-> {
+            EstadoPedido nuevo = new EstadoPedido();
+            nuevo.setNombre("ENTREGADO");
+            nuevo.setDescripcion("El pedido se entrego correctamente.");
+            return guardarEstado(nuevo);
+        }); 
+    }
+
+    public EstadoPedido obtenerEstadoDespachado(){
+        return estadoPedidoRepository.findByNombreIgnoreCase("DESPACHADO")
+        .orElseGet(()-> {
+            EstadoPedido nuevo = new EstadoPedido();
+            nuevo.setNombre("DESPACHADO");
+            nuevo.setDescripcion("El pedido va en camino");
+            return guardarEstado(nuevo);
+        }); 
+    }
 }

@@ -55,7 +55,6 @@ public class PedidoService {
         Contacto contacto = usuarioContactoService.obtenerDatosContacto(usuario.getId());
         EstadoPedido pedidoEstado = estadoPedidoService.obtenerEstadoPendiente();
             
-
         if (productosYCantidades == null || productosYCantidades.isEmpty()) {
             throw new RuntimeException("Debe agregar productos al pedido");
         }
@@ -164,7 +163,6 @@ public class PedidoService {
     public Pedido actualizarEstadoPedido(Long pedidoId, String nuevoEstado) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
-
         EstadoPedido estado = estadoPedidoRepository.findByNombre(nuevoEstado.toUpperCase())
                 .orElseThrow(() -> new RuntimeException("Estado no válido: " + nuevoEstado));
 
@@ -183,7 +181,6 @@ public class PedidoService {
     public Pedido obtenerPedidoPorId(Long pedidoId, String correoUsuario) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
-
         if (!pedido.getContacto().getUsuario().getCorreo().equals(correoUsuario)) {
             throw new RuntimeException("No tiene permisos para ver este pedido");
         }
