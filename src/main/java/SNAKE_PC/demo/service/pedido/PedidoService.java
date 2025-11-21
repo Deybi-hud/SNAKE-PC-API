@@ -12,6 +12,7 @@ import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.pedido.*;
 import SNAKE_PC.demo.repository.usuario.ContactoRepository;
 import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
+import SNAKE_PC.demo.service.producto.ProductoService;
 import SNAKE_PC.demo.service.usuario.UsuarioContactoService;
 import SNAKE_PC.demo.service.usuario.UsuarioService;
 import lombok.RequiredArgsConstructor;
@@ -35,26 +36,36 @@ public class PedidoService {
     private UsuarioContactoService  usuarioContactoService;
 
     @Autowired
+    private DetallePedidoService detallePedidoService;
+
+    @Autowired 
+    private ProductoService productoService;
+
+    @Autowired
     private EstadoPedidoRepository estadoPedidoRepository;
+
+    @Autowired
+    private EstadoPedidoService estadoPedidoService;
+
+    @Autowired 
+    private PedidoRepository pedidoRepository;
 
     public Pedido crearPedido(Map<Long, Integer> productosYCantidades, String correoUsuario) {
         Usuario usuario = usuarioService.validarActividad(correoUsuario);
         Contacto contacto = usuarioContactoService.obtenerDatosContacto(usuario.getId());
-        
-        EstadoPedido estadoPedido = estadoPedidoRepository.findByNombre(estadoPedido.getNombre());
+        EstadoPedido pedidoEstado = estadoPedidoService.obtenerEstadoPendiente();
             
 
         if (productosYCantidades == null || productosYCantidades.isEmpty()) {
             throw new RuntimeException("Debe agregar productos al pedido");
         }
-
+        
         Pedido pedido = new Pedido();
         pedido.setFechaPedido(LocalDate.now());
         pedido.setNumeroPedido(generarNumeroPedido());
         pedido.setContacto(contacto);
-        pedido.setEstado(estadoPendiente);
-
-        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+        pedido.setEstado(pedidoEstado);
+        pedidoRepository.save(pedido);
 
         for (Map.Entry<Long, Integer> entry : productosYCantidades.entrySet()) {
             Long productoId = entry.getKey();
@@ -63,27 +74,25 @@ public class PedidoService {
             if (cantidad <= 0) {
                 throw new RuntimeException("La cantidad debe ser mayor a 0");
             }
-
-            Producto producto = productoRepository.findById(productoId)
-                    .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + productoId));
+            Producto producto = productoService.buscarPorId(productoId);
 
             if (producto.getStock() < cantidad) {
                 throw new RuntimeException("Stock insuficiente para: " + producto.getNombreProducto());
             }
+            productoService.actualizarStock(productoId, cantidad);
 
-            producto.setStock(producto.getStock() - cantidad);
-            productoRepository.save(producto);
 
-            DetallePedido detalle = new DetallePedido();
-            detalle.setCantidad(cantidad);
-            detalle.setPrecioUnitario(producto.getPrecio());
-            detalle.setPedido(pedidoGuardado);
-            detalle.setProducto(producto);
+            DetallePedido detallePedido = new DetallePedido();
+            detallePedido.setPedido(pedido);
+            detallePedido.setProducto(producto);
+            detallePedido.setCantidad(cantidad);
+            detallePedido.setPrecioUnitario(producto.getPrecio());
 
-            detallePedidoRepository.save(detalle);
+            DetallePedido detalleGuardado = detallePedidoService.crearDetalle(detallePedido);
+            pedido.getDetalles().add(detalleGuardado);  
         }
 
-        return pedidoGuardado;
+        return pedido;
     }
 
     public Pago crearPago(Long pedidoId, String correoUsuario, Long metodoPagoId) {

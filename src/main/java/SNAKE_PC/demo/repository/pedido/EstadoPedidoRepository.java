@@ -7,5 +7,7 @@ import java.util.Optional;
 
 @Repository
 public interface EstadoPedidoRepository extends JpaRepository<EstadoPedido, Long> {
-    Optional<EstadoPedido> findByNombre(String nombre);
+    Optional<EstadoPedido> findByNombreIgnoreCase(String nombre);
+
+
 }

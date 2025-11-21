@@ -36,10 +36,8 @@ public class ProductoService {
     }
 
     public Producto buscarPorId(Long id) {
-        Producto producto = productoRepository.findById(id).orElse(null);
-        if (producto == null) {
-            throw new IllegalArgumentException("Producto no encontrado.");
-        }
+        Producto producto = productoRepository.findById(id)
+            .orElseThrow(()-> new RuntimeException("Producto no encontrado."));
         return producto;
     }
 
@@ -128,5 +126,18 @@ public class ProductoService {
         return existente;
     }
 
+    public Producto actualizarStock(Long idProducto, int cantidad){
+        if(cantidad <0 ){
+            throw new RuntimeException("La cantidad no puede ser negativa");
+        }
+        Producto existente = productoRepository.findById(idProducto)
+            .orElseThrow(()-> new RuntimeException("Producto no encontrado"));
+        int nuevoStock = existente.getStock() -  cantidad;
+        if(nuevoStock < 0 ){
+              throw new RuntimeException("Stock insuficiente");
+        }
+        existente.setStock(nuevoStock);
+        return productoRepository.save(existente);
+    }
 
 }

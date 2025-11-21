@@ -30,6 +30,9 @@ public class DetallePedido {
     @Column(name = "precio_unitario", nullable = false)
     private Double precioUnitario;
 
+    @Column(name ="subtotal", nullable = false)
+    private Double subtotal;
+
     @ManyToOne
     @JoinColumn(name = "id_pedido", nullable = false)
     private Pedido pedido;

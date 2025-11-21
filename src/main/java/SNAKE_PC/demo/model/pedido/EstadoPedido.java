@@ -22,7 +22,7 @@ public class EstadoPedido {
     private Long id;
 
     @Column(name = "nombre", nullable = false, unique = true)
-    private String nombre; // "PENDIENTE", "CONFIRMADO", "ENVIADO", "ENTREGADO", "CANCELADO"
+    private String nombre;  
 
     @Column(name = "descripcion")
     private String descripcion;
