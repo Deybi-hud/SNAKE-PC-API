@@ -10,11 +10,9 @@ import java.util.List;
 
 @Repository
 public interface DetalleRepository extends JpaRepository<DetallePedido, Long> {
-    
-    // ✅ Detalles de un pedido específico
+
     List<DetallePedido> findByPedidoId(Long pedidoId);
-    
-    // ✅ Detalles con información completa del producto
+
     @Query("SELECT dp FROM DetallePedido dp JOIN FETCH dp.producto WHERE dp.pedido.id = :pedidoId")
     List<DetallePedido> findByPedidoIdWithProducto(@Param("pedidoId") Long pedidoId);
 }

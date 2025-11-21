@@ -13,7 +13,6 @@ import SNAKE_PC.demo.service.pedido.PedidoService;
 import java.util.List;
 import java.util.Map;
 
-
 @RestController
 @RequestMapping("/api/cliente/pedidos")
 public class PedidoClienteController {
@@ -21,7 +20,6 @@ public class PedidoClienteController {
     @Autowired
     private PedidoService pedidoService;
 
-    // ✅ CREAR PEDIDO
     @PostMapping
     public ResponseEntity<?> crearPedido(
             @RequestBody Map<Long, Integer> productosYCantidades,
@@ -35,7 +33,6 @@ public class PedidoClienteController {
         }
     }
 
-    // ✅ PAGAR PEDIDO
     @PostMapping("/{pedidoId}/pagar")
     public ResponseEntity<?> pagarPedido(
             @PathVariable Long pedidoId,
@@ -50,7 +47,6 @@ public class PedidoClienteController {
         }
     }
 
-    // ✅ CANCELAR PEDIDO
     @PutMapping("/{pedidoId}/cancelar")
     public ResponseEntity<?> cancelarPedido(
             @PathVariable Long pedidoId,
@@ -64,7 +60,6 @@ public class PedidoClienteController {
         }
     }
 
-    // ✅ MIS PEDIDOS
     @GetMapping
     public ResponseEntity<?> obtenerMisPedidos(Authentication authentication) {
         try {
@@ -76,7 +71,6 @@ public class PedidoClienteController {
         }
     }
 
-    // ✅ DETALLE DE MI PEDIDO
     @GetMapping("/{pedidoId}")
     public ResponseEntity<?> obtenerMiPedido(
             @PathVariable Long pedidoId,
@@ -90,7 +84,6 @@ public class PedidoClienteController {
         }
     }
 
-    // ✅ CALCULAR TOTAL
     @GetMapping("/{pedidoId}/total")
     public ResponseEntity<?> calcularTotal(@PathVariable Long pedidoId) {
         try {

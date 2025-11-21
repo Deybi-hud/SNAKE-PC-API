@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Pago {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,7 +31,7 @@ public class Pago {
     private Double monto;
 
     @Column(name = "fecha_pago", nullable = false)
-    @JsonFormat(pattern = "yyyy-MM-dd") 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate fechaPago;
 
     @Column(name = "estado_pago")

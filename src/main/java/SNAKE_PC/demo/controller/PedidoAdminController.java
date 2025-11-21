@@ -19,7 +19,6 @@ public class PedidoAdminController {
     @Autowired
     private PedidoService pedidoService;
 
-    // ✅ TODOS LOS PEDIDOS
     @GetMapping
     public ResponseEntity<?> obtenerTodosLosPedidos() {
         try {
@@ -31,7 +30,6 @@ public class PedidoAdminController {
         }
     }
 
-    // ✅ ACTUALIZAR ESTADO
     @PutMapping("/{pedidoId}/estado")
     public ResponseEntity<?> actualizarEstado(
             @PathVariable Long pedidoId,
@@ -44,7 +42,6 @@ public class PedidoAdminController {
         }
     }
 
-    // ✅ PEDIDOS DEL DÍA
     @GetMapping("/reportes/dia")
     public ResponseEntity<?> obtenerPedidosDelDia() {
         try {
@@ -56,7 +53,6 @@ public class PedidoAdminController {
         }
     }
 
-    // ✅ PEDIDOS DEL MES
     @GetMapping("/reportes/mes")
     public ResponseEntity<?> obtenerPedidosDelMes() {
         try {
@@ -68,7 +64,6 @@ public class PedidoAdminController {
         }
     }
 
-    // ✅ ESTADÍSTICAS DEL DÍA
     @GetMapping("/reportes/estadisticas-dia")
     public ResponseEntity<?> obtenerEstadisticasDelDia() {
         try {
@@ -80,7 +75,6 @@ public class PedidoAdminController {
         }
     }
 
-    // ✅ ESTADÍSTICAS DEL MES
     @GetMapping("/reportes/estadisticas-mes")
     public ResponseEntity<?> obtenerEstadisticasDelMes() {
         try {
@@ -92,7 +86,6 @@ public class PedidoAdminController {
         }
     }
 
-    // ✅ PEDIDOS POR RANGO DE FECHAS
     @GetMapping("/reportes/rango")
     public ResponseEntity<?> obtenerPedidosPorRango(
             @RequestParam String inicio,

@@ -24,40 +24,33 @@ import SNAKE_PC.demo.service.usuario.LoginService;
 public class AuthController {
 
     @Autowired
-    private LoginService loginService; // ✅ AHORA SÍ USA EL SERVICE
+    private LoginService loginService;
 
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    // ✅ LOGIN USANDO LOGINSERVICE
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Usuario usuarioRequest) {
         try {
-            // Validaciones básicas
             if (usuarioRequest.getCorreo() == null || usuarioRequest.getCorreo().isBlank()) {
                 return ResponseEntity.badRequest()
-                    .body(Map.of("error", "El correo es obligatorio"));
+                        .body(Map.of("error", "El correo es obligatorio"));
             }
 
             if (usuarioRequest.getContrasena() == null || usuarioRequest.getContrasena().isBlank()) {
                 return ResponseEntity.badRequest()
-                    .body(Map.of("error", "La contraseña es obligatoria"));
+                        .body(Map.of("error", "La contraseña es obligatoria"));
             }
 
-            // ✅ AUTENTICACIÓN CON SPRING SECURITY
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    usuarioRequest.getCorreo(),
-                    usuarioRequest.getContrasena()
-                )
-            );
+                    new UsernamePasswordAuthenticationToken(
+                            usuarioRequest.getCorreo(),
+                            usuarioRequest.getContrasena()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // ✅ AHORA USA TU LOGINSERVICE
             Usuario usuario = loginService.obtenerPorCorreo(usuarioRequest.getCorreo());
 
-            // Crear respuesta
             Map<String, Object> response = new HashMap<>();
             response.put("mensaje", "Login exitoso");
             response.put("usuario", mapearUsuarioResponse(usuario));
@@ -66,14 +59,13 @@ public class AuthController {
 
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "Credenciales inválidas"));
+                    .body(Map.of("error", "Credenciales inválidas"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "Error en autenticación: " + e.getMessage()));
+                    .body(Map.of("error", "Error en autenticación: " + e.getMessage()));
         }
     }
 
-    // ✅ MÉTODO PARA MAPEAR USUARIO
     private Map<String, Object> mapearUsuarioResponse(Usuario usuario) {
         Map<String, Object> usuarioResponse = new HashMap<>();
         usuarioResponse.put("id", usuario.getId());
@@ -81,12 +73,11 @@ public class AuthController {
         usuarioResponse.put("correo", usuario.getCorreo());
         usuarioResponse.put("imagenUsuario", usuario.getImagenUsuario());
         usuarioResponse.put("activo", usuario.isActivo());
-        
-        // Obtener rol desde el contacto asociado
+
         if (usuario.getContactos() != null && !usuario.getContactos().isEmpty()) {
             usuarioResponse.put("rol", usuario.getContactos().get(0).getRolUsuario().getNombreRol());
         }
-        
+
         return usuarioResponse;
     }
 }

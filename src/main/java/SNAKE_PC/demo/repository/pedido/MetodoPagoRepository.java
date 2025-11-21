@@ -6,5 +6,5 @@ import SNAKE_PC.demo.model.pedido.MetodoPago;
 
 @Repository
 public interface MetodoPagoRepository extends JpaRepository<MetodoPago, Long> {
-    
+
 }

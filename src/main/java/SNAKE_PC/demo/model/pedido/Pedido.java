@@ -1,6 +1,5 @@
 package SNAKE_PC.demo.model.pedido;
 
-
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -24,7 +23,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Pedido {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,8 +39,8 @@ public class Pedido {
     @JoinColumn(name = "id_contacto", nullable = false)
     private Contacto contacto;
 
-     @ManyToOne
+    @ManyToOne
     @JoinColumn(name = "id_estado_pedido", nullable = false)
     private EstadoPedido estado;
-    
+
 }

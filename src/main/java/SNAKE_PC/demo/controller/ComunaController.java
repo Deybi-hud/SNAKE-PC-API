@@ -19,7 +19,6 @@ public class ComunaController {
     @Autowired
     private ComunaService comunaService;
 
-    // ✅ OBTENER TODAS LAS COMUNAS (público)
     @GetMapping("/comunas")
     public ResponseEntity<?> obtenerTodasLasComunas() {
         try {
@@ -32,7 +31,6 @@ public class ComunaController {
         }
     }
 
-    // ✅ OBTENER COMUNAS POR REGIÓN (público)
     @GetMapping("/regiones/{regionId}/comunas")
     public ResponseEntity<?> obtenerComunasPorRegion(@PathVariable Long regionId) {
         try {
@@ -45,7 +43,6 @@ public class ComunaController {
         }
     }
 
-    // ✅ OBTENER COMUNA POR ID (público)
     @GetMapping("/comunas/{comunaId}")
     public ResponseEntity<?> obtenerComunaPorId(@PathVariable Long comunaId) {
         try {
@@ -58,22 +55,21 @@ public class ComunaController {
         }
     }
 
-    // ✅ CREAR COMUNA (Admin)
     @PostMapping("/comunas")
     public ResponseEntity<?> crearComuna(
             @RequestParam String nombreComuna,
             @RequestParam Long regionId) {
         try {
             Comuna comunaCreada = comunaService.save(nombreComuna, regionId);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("mensaje", "Comuna creada exitosamente");
             response.put("comunaId", comunaCreada.getId());
             response.put("nombreComuna", comunaCreada.getNombreComuna());
             response.put("region", comunaCreada.getRegion().getNombreRegion());
-            
+
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-            
+
         } catch (RuntimeException e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
@@ -81,11 +77,9 @@ public class ComunaController {
         }
     }
 
-    // ✅ BUSCAR COMUNAS POR NOMBRE (público)
     @GetMapping("/comunas/buscar")
     public ResponseEntity<?> buscarComunasPorNombre(@RequestParam String nombre) {
         try {
-            // Necesitarías agregar este método al ComunaService
             Comuna comuna = comunaService.findByNombre(nombre);
             return ResponseEntity.ok(comuna);
         } catch (RuntimeException e) {
@@ -95,21 +89,19 @@ public class ComunaController {
         }
     }
 
-    // ✅ VERIFICAR SI COMUNA EXISTE (público)
     @GetMapping("/comunas/verificar")
     public ResponseEntity<?> verificarComunaExiste(
             @RequestParam String nombreComuna,
             @RequestParam Long regionId) {
         try {
             boolean existe = comunaService.existeComuna(nombreComuna, regionId);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("existe", existe);
-            response.put("mensaje", existe ? 
-                "La comuna ya existe en esta región" : "Comuna disponible");
-            
+            response.put("mensaje", existe ? "La comuna ya existe en esta región" : "Comuna disponible");
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Error al verificar comuna: " + e.getMessage());

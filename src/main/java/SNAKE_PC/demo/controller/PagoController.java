@@ -18,7 +18,6 @@ public class PagoController {
     @Autowired
     private PedidoService pedidoService;
 
-    // ✅ MIS PAGOS
     @GetMapping
     public ResponseEntity<?> obtenerMisPagos(Authentication authentication) {
         try {

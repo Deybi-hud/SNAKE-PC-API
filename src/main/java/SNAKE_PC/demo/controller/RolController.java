@@ -21,19 +21,18 @@ public class RolController {
     @Autowired
     private RolUsuarioService rolService;
 
-    // ✅ CREAR ROL (Admin)
     @PostMapping
     public ResponseEntity<?> crearRol(@RequestBody RolUsuario rolUsuario) {
         try {
             RolUsuario rolCreado = rolService.save(rolUsuario);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("mensaje", "Rol creado exitosamente");
             response.put("rolId", rolCreado.getId());
             response.put("nombreRol", rolCreado.getNombreRol());
-            
+
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-            
+
         } catch (RuntimeException e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
@@ -41,7 +40,6 @@ public class RolController {
         }
     }
 
-    // ✅ LISTAR TODOS LOS ROLES (Admin)
     @GetMapping
     public ResponseEntity<?> listarRoles() {
         try {
@@ -54,7 +52,6 @@ public class RolController {
         }
     }
 
-    // ✅ OBTENER ROL POR ID (Admin)
     @GetMapping("/{rolId}")
     public ResponseEntity<?> obtenerRol(@PathVariable Long rolId) {
         try {
@@ -67,19 +64,17 @@ public class RolController {
         }
     }
 
-    // ✅ VERIFICAR SI ROL EXISTE (Admin)
     @GetMapping("/verificar")
     public ResponseEntity<?> verificarRolExiste(@RequestParam String nombreRol) {
         try {
             boolean existe = rolService.existeRol(nombreRol);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("existe", existe);
-            response.put("mensaje", existe ? 
-                "El rol ya existe" : "Rol disponible");
-            
+            response.put("mensaje", existe ? "El rol ya existe" : "Rol disponible");
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Error al verificar rol: " + e.getMessage());

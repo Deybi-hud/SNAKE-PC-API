@@ -19,19 +19,18 @@ public class RegionController {
     @Autowired
     private RegionService regionService;
 
-    // ✅ CREAR REGIÓN (Admin)
     @PostMapping
     public ResponseEntity<?> crearRegion(@RequestBody Region region) {
         try {
             Region regionCreada = regionService.save(region);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("mensaje", "Región creada exitosamente");
             response.put("regionId", regionCreada.getId());
             response.put("nombreRegion", regionCreada.getNombreRegion());
-            
+
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-            
+
         } catch (RuntimeException e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
@@ -39,7 +38,6 @@ public class RegionController {
         }
     }
 
-    // ✅ LISTAR TODAS LAS REGIONES
     @GetMapping
     public ResponseEntity<?> listarRegiones() {
         try {
@@ -52,7 +50,6 @@ public class RegionController {
         }
     }
 
-    // ✅ OBTENER REGIÓN POR ID
     @GetMapping("/{regionId}")
     public ResponseEntity<?> obtenerRegion(@PathVariable Long regionId) {
         try {
@@ -65,7 +62,6 @@ public class RegionController {
         }
     }
 
-    // ✅ OBTENER REGIÓN POR NOMBRE
     @GetMapping("/nombre/{nombreRegion}")
     public ResponseEntity<?> obtenerRegionPorNombre(@PathVariable String nombreRegion) {
         try {
@@ -78,19 +74,17 @@ public class RegionController {
         }
     }
 
-    // ✅ VERIFICAR SI REGIÓN EXISTE
     @GetMapping("/verificar")
     public ResponseEntity<?> verificarRegionExiste(@RequestParam String nombreRegion) {
         try {
             boolean existe = regionService.existeRegion(nombreRegion);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("existe", existe);
-            response.put("mensaje", existe ? 
-                "La región ya existe" : "Región disponible");
-            
+            response.put("mensaje", existe ? "La región ya existe" : "Región disponible");
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Error al verificar región: " + e.getMessage());

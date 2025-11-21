@@ -25,7 +25,6 @@ public class AdminUsuarioController {
     @Autowired
     private UsuarioContactoService usuarioContactoService;
 
-    // ✅ LISTAR TODOS LOS CONTACTOS (Admin)
     @GetMapping("/contactos")
     public ResponseEntity<?> listarTodosLosContactos() {
         try {
@@ -33,11 +32,10 @@ public class AdminUsuarioController {
             return ResponseEntity.ok(contactos);
         } catch (Exception e) {
             return ResponseEntity.badRequest()
-                .body(Map.of("error", "Error al obtener contactos: " + e.getMessage()));
+                    .body(Map.of("error", "Error al obtener contactos: " + e.getMessage()));
         }
     }
 
-    // ✅ BUSCAR USUARIO POR CORREO (Admin)
     @GetMapping("/buscar")
     public ResponseEntity<?> buscarUsuarioPorCorreo(@RequestParam String correo) {
         try {
@@ -45,45 +43,42 @@ public class AdminUsuarioController {
             return ResponseEntity.ok(usuario);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
-                .body(Map.of("error", e.getMessage()));
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
-    // ✅ DESACTIVAR CUENTA DE USUARIO (Admin)
     @PutMapping("/{usuarioId}/desactivar")
     public ResponseEntity<?> desactivarCuentaUsuario(@PathVariable Long usuarioId) {
         try {
             usuarioService.desactivarCuenta(usuarioId);
-            
+
             Map<String, String> response = new HashMap<>();
             response.put("mensaje", "Cuenta desactivada exitosamente");
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
-                .body(Map.of("error", e.getMessage()));
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
-    // ✅ REACTIVAR CUENTA DE USUARIO (Admin)
     @PutMapping("/{usuarioId}/reactivar")
     public ResponseEntity<?> reactivarCuentaUsuario(@PathVariable Long usuarioId) {
         try {
             usuarioService.reactivarCuenta(usuarioId);
-            
+
             Map<String, String> response = new HashMap<>();
             response.put("mensaje", "Cuenta reactivada exitosamente");
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
-                .body(Map.of("error", e.getMessage()));
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
-    // ✅ OBTENER CONTACTO POR ID (Admin)
     @GetMapping("/contactos/{contactoId}")
     public ResponseEntity<?> obtenerContacto(@PathVariable Long contactoId) {
         try {
@@ -91,7 +86,7 @@ public class AdminUsuarioController {
             return ResponseEntity.ok(contacto);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
-                .body(Map.of("error", e.getMessage()));
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 }
