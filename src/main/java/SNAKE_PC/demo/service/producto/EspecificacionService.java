@@ -29,11 +29,21 @@ public class EspecificacionService {
         return especificacion;
     }
 
-    public Especificacion guardarEspecificacion(Especificacion especificacion) {
-        if (especificacion.getFrecuencia() == null || especificacion.getFrecuencia().isBlank()) {
+    public Especificacion guardarEspecificacion(String frecuencia, String Capacidad, String consumo) {
+        if (frecuencia == null || frecuencia.trim().isEmpty()) {
             throw new RuntimeException("La frecuencia no puede estar vacía.");
         }
-        return especificacionRepository.save(especificacion);
+        if (Capacidad == null || Capacidad.trim().isEmpty()) {
+            throw new RuntimeException("La capacidad de almacenamiento es obligatoria.");
+        }
+        if (consumo == null || consumo.trim().isEmpty()) {
+            throw new RuntimeException("El consumo es obligatorio.");
+        }
+        Especificacion nuevaEspecificacion = new Especificacion();
+        nuevaEspecificacion.setFrecuencia(frecuencia);
+        nuevaEspecificacion.setCapacidadAlmacenamiento(Capacidad);
+        nuevaEspecificacion.setConsumo(consumo);
+        return especificacionRepository.save(nuevaEspecificacion);
     }
 
     public Especificacion actualizarEspecificacion(Long id, Especificacion especificacion) {

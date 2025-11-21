@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 
 import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
+import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class UsuarioService {
 
     @Autowired
@@ -16,35 +18,45 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public Usuario save(Usuario usuario,String confirmarContrasena){
-        // Validar nombre de usuario
-        if(usuario.getNombreUsuario() == null || usuario.getNombreUsuario().trim().isEmpty()){
+    public Usuario crearUsuario(String nombreUsuario,String imagenUsuario, String correo, String contrasena,String confirmarContrasena){
+        if(nombreUsuario == null || nombreUsuario.trim().isEmpty()){
             throw new RuntimeException("El nombre de usuario es obligatorio");
         }
-        if(usuarioRepository.existsByNombreUsuario(usuario.getNombreUsuario())){
+        if(usuarioRepository.existsByNombreUsuario(nombreUsuario)){
             throw new RuntimeException("El nombre de usuario ya existe");
         }
-        
-        // Validar correo
-        if(usuario.getCorreo() != null){
-            validarCorreo(usuario.getCorreo());
-        } else {
-            throw new RuntimeException("El correo es obligatorio");
+        validarCorreo(correo);
+
+        String encriptarContrasena = null;
+        validarContrasena(contrasena, confirmarContrasena);
+        encriptarContrasena = passwordEncoder.encode(contrasena);
+
+        Usuario nuevoUsuario = new Usuario();
+        nuevoUsuario.setNombreUsuario(nombreUsuario);
+        nuevoUsuario.setImagenUsuario(imagenUsuario);
+        nuevoUsuario.setCorreo(correo);
+        nuevoUsuario.setContrasena(encriptarContrasena);
+        nuevoUsuario.setActivo(true);
+
+        return usuarioRepository.save(nuevoUsuario);
+
+    }
+
+     public Usuario actualizarContrasena(Long usuarioId,String nuevaContrasena, String confirmarContrasena){
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+        .orElseThrow(()-> new RuntimeException("Usuario no encontrado")); 
+        if(nuevaContrasena == null){
+            throw new RuntimeException("Debe ingresar una contraseña");
         }
-        
-        // Validar contraseña
-        if(usuario.getContrasena() != null){
-            validarContrasena(usuario, confirmarContrasena);
-            usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
-        } else {
-            throw new RuntimeException("La contraseña es obligatoria");
+        if(!nuevaContrasena.equals(confirmarContrasena)){
+            throw new RuntimeException("Las contraseñas no coinciden");
         }
-        
+        validarContrasena(nuevaContrasena, confirmarContrasena);
+        usuario.setContrasena(passwordEncoder.encode(confirmarContrasena));
         return usuarioRepository.save(usuario);
     }
 
     public void validarCorreo(String correo){
-
         if(correo == null || correo.trim().isEmpty()){
             throw new RuntimeException("El correo no puede estar vacío");
         }
@@ -58,38 +70,36 @@ public class UsuarioService {
 
     }
 
-    public void validarContrasena(Usuario usuario, String confirmarContrasena) {
-        String password = usuario.getContrasena();
-        
-        if(password == null || password.trim().isEmpty()) {
+    public void validarContrasena(String contrasena, String confirmarContrasena) {
+        if(contrasena == null || contrasena.trim().isEmpty()) {
             throw new RuntimeException("La contraseña no puede estar vacía");
         }
 
-        if (!password.equals(confirmarContrasena)) {
+        if (!contrasena.equals(confirmarContrasena)) {
             throw new RuntimeException("Las contraseñas no coinciden");
         }
 
-        if(password.length() < 8) {
+        if(contrasena.length() < 8) {
             throw new RuntimeException("La contraseña debe tener mínimo 8 caracteres");
         }
         
-        if (!password.matches(".*[A-Z].*")) {
+        if (!contrasena.matches(".*[A-Z].*")) {
             throw new RuntimeException("Debe contener al menos una mayúscula");
         }
         
-        if (!password.matches(".*[a-z].*")) {
+        if (!contrasena.matches(".*[a-z].*")) {
             throw new RuntimeException("Debe contener al menos una minúscula");
         }
         
-        if (!password.matches(".*\\d.*")) {
+        if (!contrasena.matches(".*\\d.*")) {
             throw new RuntimeException("Debe contener al menos un número");
         }
         
-        if (!password.matches(".*[@#$%^&+=!].*")) {
+        if (!contrasena.matches(".*[@#$%^&+=!].*")) {
             throw new RuntimeException("Debe contener al menos un carácter especial (@#$%^&+=!)");
         }
         
-        if (password.contains(" ")) {
+        if (contrasena.contains(" ")) {
             throw new RuntimeException("No puede contener espacios");
         }
     }
@@ -108,20 +118,6 @@ public class UsuarioService {
         
         usuario.setActivo(true);
         usuarioRepository.save(usuario);
-    }
-
-    public Usuario actualizarContrasena(Long usuarioId,String nuevaContrasena, String confirmarContrasena){
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-        .orElseThrow(()-> new RuntimeException("Usuario no encontrado")); 
-        if(nuevaContrasena == null){
-            throw new RuntimeException("Debe ingresar una contraseña");
-        }
-        if(!nuevaContrasena.equals(confirmarContrasena)){
-            throw new RuntimeException("Las contraseñas no coinciden");
-        }
-
-        usuario.setContrasena(passwordEncoder.encode(confirmarContrasena));
-        return usuarioRepository.save(usuario);
     }
 
 

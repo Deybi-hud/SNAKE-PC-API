@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 
 import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
+import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class LoginService {
     
     @Autowired
@@ -15,6 +17,7 @@ public class LoginService {
 
     @Autowired 
     private PasswordEncoder passwordEncoder;
+
 
     public Usuario iniciarSesion(String correo, String contrasena){
         Usuario usuario = usuarioRepository.findByCorreo(correo)
@@ -41,11 +44,7 @@ public class LoginService {
     }
     
     public boolean validarCredenciales(String correo, String contrasena) {
-        try {
             Usuario usuario = iniciarSesion(correo, contrasena);
             return usuario != null;
-        } catch (RuntimeException e) {
-            return false;
-        }
     }
 }

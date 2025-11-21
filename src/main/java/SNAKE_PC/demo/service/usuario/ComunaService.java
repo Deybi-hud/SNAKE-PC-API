@@ -3,6 +3,7 @@ package SNAKE_PC.demo.service.usuario;
 import SNAKE_PC.demo.model.usuario.Comuna;
 import SNAKE_PC.demo.model.usuario.Region;
 import SNAKE_PC.demo.repository.usuario.ComunaRepository;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class ComunaService {
 
     @Autowired

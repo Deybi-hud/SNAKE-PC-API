@@ -1,23 +1,16 @@
 package SNAKE_PC.demo.service.producto;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import SNAKE_PC.demo.model.producto.Categoria;
 import SNAKE_PC.demo.model.producto.Especificacion;
 import SNAKE_PC.demo.model.producto.Marca;
 import SNAKE_PC.demo.model.producto.Producto;
-import SNAKE_PC.demo.model.producto.ProductoCategoria;
-import SNAKE_PC.demo.model.usuario.Usuario;
-import SNAKE_PC.demo.repository.producto.CategoriaRepository;
 import SNAKE_PC.demo.repository.producto.EspecificacionRepository;
 import SNAKE_PC.demo.repository.producto.MarcaRepository;
-import SNAKE_PC.demo.repository.producto.ProductoCategoriaRepository;
 import SNAKE_PC.demo.repository.producto.ProductoRepository;
-
 import jakarta.transaction.Transactional;
 
 @SuppressWarnings("null")
@@ -32,13 +25,10 @@ public class ProductoService {
     private MarcaRepository marcaRepository;
 
     @Autowired
-    private CategoriaRepository categoriaRepository;
-
-    @Autowired
-    private ProductoCategoriaRepository productoCategoriaRepository;
-
-    @Autowired
     private EspecificacionRepository especificacionRepository;
+
+    @Autowired 
+    private MarcaService marcaService;
 
     public List<Producto> buscarTodo() {
         List<Producto> productos = productoRepository.findAll();
@@ -53,30 +43,15 @@ public class ProductoService {
         return producto;
     }
 
-    public Producto guardarProducto(Producto producto, String marcaNombre, String categoriaNombre,
-            String frecuencia, String capacidad, String consumo, Long idMarca, Long idCategoria,
-            Long idEspecificacion) {
+    public Producto guardarProducto(String nombreProducto, Double precio, String sku, Integer stock, String marcaNombre, String categoriaNombre,
+            String frecuencia, String capacidad, String consumo, Long idMarca, Long idCategoria,Long idEspecificacion) {
 
-        if (producto.getNombreProducto() == null) {
-            throw new RuntimeException("El nombre del producto no puede estar vacio.");
-        }
-        if (producto.getStock() == null || producto.getStock() < 0) {
-            throw new RuntimeException("El stock del producto no puede ser menor a cero.");
-        }
-        if (producto.getPrecio() == null || producto.getPrecio() <= 0) {
-            throw new RuntimeException("El precio del producto no puede ser menor o igual a cero.");
-        }
-        if (producto.getSku() == null) {
-            throw new RuntimeException("El SKU del producto no puede estar vacio.");
-        }
+        
+        validarProducto(nombreProducto,precio,sku,stock);
 
-        if (marcaNombre == null || marcaNombre.isBlank()) {
-            throw new RuntimeException("El nombre de la marca no puede estar vacio.");
-        }
         Marca marca = marcaRepository.findByNombre(marcaNombre)
                 .orElseGet(() -> {
-                    Marca nuevaMarca = new Marca();
-                    nuevaMarca.setNombre(marcaNombre);
+                    Marca nuevaMarca = marcaService.guardarMarca(marcaNombre);
                     return marcaRepository.save(nuevaMarca);
                 });
 
@@ -90,15 +65,39 @@ public class ProductoService {
                     return especificacionRepository.save(nuevaEspecificacion);
                 });
 
-        // Asignar marca y especificación al producto
-        producto.setMarca(marca);
-        producto.setEspecificacion(especificacion);
+        Producto nuevProducto = new Producto();
+        nuevProducto.setNombreProducto(nombreProducto);
+        nuevProducto.setStock(stock);
+        nuevProducto.setPrecio(precio);
+        nuevProducto.setSku(sku);
+        nuevProducto.setMarca(marca);
+        nuevProducto.setEspecificacion(especificacion);
 
-        // Guardar y retornar producto
-        // NOTA: ProductoCategoria debe ser creada manualmente desde el endpoint /producto-categorias
-        return productoRepository.save(producto);
+        return productoRepository.save(nuevProducto);
 
     }
+
+    public void validarProducto(String nombreProducto, Double precio, String sku, Integer stock){
+        if(nombreProducto == null || nombreProducto.trim().isEmpty()){
+            throw new RuntimeException("Debe asignar un nombre al producto");
+        }
+        if(stock == null || stock < 0){
+            throw new RuntimeException("El stock debe ser mayor o igual a 0");
+        }
+        if(precio == null || precio <= 0){
+            throw new RuntimeException("El valor del producto no puede ser 0");
+        }
+        if(sku == null || sku.trim().isEmpty()){
+            throw new RuntimeException("Debe asignar un sku");
+        }
+
+
+    }
+
+
+
+
+
 
     public void borrarProducto(Long id) {
         Producto producto = productoRepository.findById(id).orElse(null);
@@ -146,10 +145,10 @@ public class ProductoService {
         return productoRepository.save(existingProducto);
     }
 
-    public Producto actualizarProducto(Producto producto, String marcaNombre, String categoriaNombre,
+    public Producto actualizarProducto(String nombreProducto, Double precio, String sku, Integer stock, String marcaNombre, String categoriaNombre,
             String frecuencia, String capacidad, String consumo, Long idMarca, Long idCategoria,
             Long idEspecificacion) {
-        return guardarProducto(producto, marcaNombre, categoriaNombre, frecuencia, capacidad, consumo,
+        return guardarProducto(nombreProducto, precio, sku, stock, marcaNombre, categoriaNombre, frecuencia, capacidad, consumo,
                 idMarca, idCategoria, idEspecificacion);
     }
 }

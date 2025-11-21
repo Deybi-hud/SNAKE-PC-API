@@ -22,6 +22,6 @@ public class Marca {
     private Long id;
 
     @Column(name = "nombre", nullable = false, unique = true)
-    private String nombre;  
+    private String marcaNombre;  
 
 }

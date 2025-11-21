@@ -9,9 +9,11 @@ import SNAKE_PC.demo.model.usuario.Contacto;
 import SNAKE_PC.demo.model.usuario.RolUsuario;
 import SNAKE_PC.demo.repository.usuario.ContactoRepository;
 import SNAKE_PC.demo.repository.usuario.RolRepository;
-import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
+import jakarta.transaction.Transactional;
+
 
 @Service
+@Transactional
 public class RolUsuarioService {
     
 
@@ -21,13 +23,8 @@ public class RolUsuarioService {
     @Autowired
     private ContactoRepository contactoRepository;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private UsuarioService usuarioService;
-
     public Contacto actualizarRol(Long contactoId, Long nuevoRolId){
+        
         Contacto contacto = contactoRepository.findById(contactoId)
             .orElseThrow(()-> new RuntimeException("Usuario no encontrado"));
 
@@ -39,20 +36,17 @@ public class RolUsuarioService {
     }
 
     public RolUsuario save(RolUsuario rolUsuario) {
-        // Validaciones antes de guardar
         if (rolUsuario.getNombreRol() == null || rolUsuario.getNombreRol().trim().isEmpty()) {
             throw new RuntimeException("El nombre del rol es obligatorio");
         }
-        
-        // Verificar si ya existe el rol
         if (rolRepository.existsByNombreRol(rolUsuario.getNombreRol())) {
             throw new RuntimeException("El rol '" + rolUsuario.getNombreRol() + "' ya existe");
         }
         
-        return rolRepository.save(rolUsuario); // ✅ FALTABA EL RETURN
+        return rolRepository.save(rolUsuario);
     }
 
-        public List<RolUsuario> findAll() {
+    public List<RolUsuario> findAll() {
         return rolRepository.findAll();
     }
     
