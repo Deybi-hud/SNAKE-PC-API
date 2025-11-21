@@ -37,11 +37,16 @@ public class CategoriaService {
         return categoria;
     }
 
-    public Categoria guardarCategoria(Categoria categoria) {
-        if (categoria.getNombreCategoria() == null || categoria.getNombreCategoria().isBlank()) {
+    public Categoria guardarCategoria(String nombreCategoria) {
+        if (nombreCategoria == null || nombreCategoria.trim().isEmpty()) {
             throw new RuntimeException("El nombre de la categoría no puede estar vacío.");
         }
-        return categoriaRepository.save(categoria);
+        return categoriaRepository.findByNombreCategoria(nombreCategoria)
+                .orElseGet(()->{
+                    Categoria nuevaCategoria = new Categoria();
+                    nuevaCategoria.setNombreCategoria(nombreCategoria);
+                    return categoriaRepository.save(nuevaCategoria);
+        });  
     }
 
     public Categoria actualizarCategoria(Long id, Categoria categoria) {

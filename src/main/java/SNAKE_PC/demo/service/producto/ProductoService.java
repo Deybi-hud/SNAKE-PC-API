@@ -8,8 +8,7 @@ import org.springframework.stereotype.Service;
 import SNAKE_PC.demo.model.producto.Especificacion;
 import SNAKE_PC.demo.model.producto.Marca;
 import SNAKE_PC.demo.model.producto.Producto;
-import SNAKE_PC.demo.repository.producto.EspecificacionRepository;
-import SNAKE_PC.demo.repository.producto.MarcaRepository;
+import SNAKE_PC.demo.model.producto.ProductoCategoria;
 import SNAKE_PC.demo.repository.producto.ProductoRepository;
 import jakarta.transaction.Transactional;
 
@@ -22,13 +21,13 @@ public class ProductoService {
     private ProductoRepository productoRepository;
 
     @Autowired
-    private MarcaRepository marcaRepository;
-
-    @Autowired
-    private EspecificacionRepository especificacionRepository;
+    private EspecificacionService especificacionService;
 
     @Autowired 
     private MarcaService marcaService;
+
+    @Autowired 
+    private ProductoCategoriaService productoCategoriaService;
 
     public List<Producto> buscarTodo() {
         List<Producto> productos = productoRepository.findAll();
@@ -43,41 +42,32 @@ public class ProductoService {
         return producto;
     }
 
-    public Producto guardarProducto(String nombreProducto, Double precio, String sku, Integer stock, String marcaNombre, String categoriaNombre,
-            String frecuencia, String capacidad, String consumo, Long idMarca, Long idCategoria,Long idEspecificacion) {
+    public Producto guardarProducto(String nombreProducto, Double precio, String sku, Integer stock,String peso, String marcaNombre, String categoriaNombre,
+            String nombreSubCategoria, String frecuencia, String capacidadAlmacenamiento, String consumo, Long idMarca, Long idCategoria,Long idEspecificacion) {
 
         
-        validarProducto(nombreProducto,precio,sku,stock);
+        validarProducto(nombreProducto, precio, sku, stock, peso);
+        Marca marca = marcaService.guardarMarca(marcaNombre);
 
-        Marca marca = marcaRepository.findByNombre(marcaNombre)
-                .orElseGet(() -> {
-                    Marca nuevaMarca = marcaService.guardarMarca(marcaNombre);
-                    return marcaRepository.save(nuevaMarca);
-                });
+        Especificacion especificacionNuevaOexistente = especificacionService.guardarEspecificacion(frecuencia, capacidadAlmacenamiento, consumo);
+        ProductoCategoria nuevoProductoCategoria = productoCategoriaService.guardarProductoCategoria(nombreSubCategoria, categoriaNombre);
 
-        Especificacion especificacion = especificacionRepository
-                .findByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(frecuencia, capacidad, consumo)
-                .orElseGet(() -> {
-                    Especificacion nuevaEspecificacion = new Especificacion();
-                    nuevaEspecificacion.setFrecuencia(frecuencia);
-                    nuevaEspecificacion.setCapacidadAlmacenamiento(capacidad);
-                    nuevaEspecificacion.setConsumo(consumo);
-                    return especificacionRepository.save(nuevaEspecificacion);
-                });
+        
+        Producto nuevoProducto = new Producto();
+        nuevoProducto.setNombreProducto(nombreProducto);
+        nuevoProducto.setStock(stock);
+        nuevoProducto.setPrecio(precio);
+        nuevoProducto.setSku(sku);
+        nuevoProducto.setPeso(peso);
+        nuevoProducto.setMarca(marca);
+        nuevoProducto.setEspecificacion(especificacionNuevaOexistente);
+        nuevoProducto.setProductoCategoria(nuevoProductoCategoria);
 
-        Producto nuevProducto = new Producto();
-        nuevProducto.setNombreProducto(nombreProducto);
-        nuevProducto.setStock(stock);
-        nuevProducto.setPrecio(precio);
-        nuevProducto.setSku(sku);
-        nuevProducto.setMarca(marca);
-        nuevProducto.setEspecificacion(especificacion);
-
-        return productoRepository.save(nuevProducto);
+        return productoRepository.save(nuevoProducto);
 
     }
 
-    public void validarProducto(String nombreProducto, Double precio, String sku, Integer stock){
+    public void validarProducto(String nombreProducto, Double precio, String sku, Integer stock, String peso){
         if(nombreProducto == null || nombreProducto.trim().isEmpty()){
             throw new RuntimeException("Debe asignar un nombre al producto");
         }
@@ -90,14 +80,11 @@ public class ProductoService {
         if(sku == null || sku.trim().isEmpty()){
             throw new RuntimeException("Debe asignar un sku");
         }
-
+        if(peso == null || peso.trim().isEmpty()){
+            throw new RuntimeException("Debe asignar un peso en (kg / gr)");
+        }
 
     }
-
-
-
-
-
 
     public void borrarProducto(Long id) {
         Producto producto = productoRepository.findById(id).orElse(null);
@@ -107,48 +94,50 @@ public class ProductoService {
         productoRepository.deleteById(id);
     }
 
-    public Producto actualizacionParcialProducto(Producto producto) {
-        Producto existingProducto = productoRepository.findById(producto.getId()).orElse(null);
-        if (existingProducto == null) {
-            throw new IllegalArgumentException("Producto no encontrado.");
-        }
+    public Producto actualizacionParcialProducto(Producto producto, String marcaNombre, String frecuencia, String consumo, String capacidadAlmacenamiento) {
+        Producto existingProducto = productoRepository.findById(producto.getId())
+            .orElseThrow(()-> new RuntimeException("El producto no fue encontrado"));
+
         if (producto.getNombreProducto() != null) {
             existingProducto.setNombreProducto(producto.getNombreProducto());
         }
         if (producto.getStock() != null) {
             existingProducto.setStock(producto.getStock());
         }
-
         if (producto.getPrecio() != null) {
             existingProducto.setPrecio(producto.getPrecio());
         }
-
         if (producto.getSku() != null) {
             existingProducto.setSku(producto.getSku());
         }
-
         if (producto.getProductoCategoria() != null) {
             existingProducto.setProductoCategoria(producto.getProductoCategoria());
         }
-
-        if (producto.getMarca() != null) {
-            existingProducto.setMarca(producto.getMarca());
+        if (marcaNombre != null && !marcaNombre.trim().isEmpty()) {
+            Marca marcaNueva = marcaService.guardarMarca(marcaNombre);
+            existingProducto.setMarca(marcaNueva);
         }
-
-        if (producto.getDimension() != null) {
-            existingProducto.setDimension(producto.getDimension());
-        }
-
-        if (producto.getEspecificacion() != null) {
-            existingProducto.setEspecificacion(producto.getEspecificacion());
+        boolean cambiarEspecificaciones = frecuencia != null || consumo != null || capacidadAlmacenamiento != null; 
+        if (cambiarEspecificaciones) {
+            Especificacion nuevaEspecificacion = especificacionService.guardarEspecificacion(
+                frecuencia != null ? frecuencia.trim() : null, 
+                capacidadAlmacenamiento != null? capacidadAlmacenamiento.trim() : null, 
+                consumo != null ? consumo.trim() : null
+            );
+            existingProducto.setEspecificacion(nuevaEspecificacion);
         }
         return productoRepository.save(existingProducto);
     }
 
-    public Producto actualizarProducto(String nombreProducto, Double precio, String sku, Integer stock, String marcaNombre, String categoriaNombre,
-            String frecuencia, String capacidad, String consumo, Long idMarca, Long idCategoria,
-            Long idEspecificacion) {
-        return guardarProducto(nombreProducto, precio, sku, stock, marcaNombre, categoriaNombre, frecuencia, capacidad, consumo,
-                idMarca, idCategoria, idEspecificacion);
+    public Producto buscarPorNombre(String nombreProducto){
+        if(nombreProducto == null || nombreProducto.trim().isEmpty()){
+            throw new RuntimeException("Debe ingresar un nombre para buscar.");
+        }
+        Producto existente = productoRepository.findByNombreProducto(nombreProducto)
+            .orElseThrow(()-> new RuntimeException("No se encontraron productos con ese nombre"));
+        
+        return existente;
     }
+
+
 }

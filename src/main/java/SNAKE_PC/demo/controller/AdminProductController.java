@@ -194,10 +194,11 @@ public class AdminProductController {
 
     @PostMapping("/especificaciones")
     @Operation(summary = "Crear especificación", description = "Crea una nueva especificación")
-    public ResponseEntity<?> crearEspecificacion(@RequestBody Especificacion especificacion) {
+    public ResponseEntity<?> crearEspecificacion(@RequestParam String frecuencia,
+                                                 @RequestParam String capacidadAlamcenamientop, 
+                                                 @RequestParam String consumo) {
         try {
-            validarEspecificacion(especificacion);
-            Especificacion nuevaEspecificacion = especificacionService.guardarEspecificacion(especificacion);
+            Especificacion nuevaEspecificacion = especificacionService.guardarEspecificacion(frecuencia, capacidadAlamcenamientop,consumo );
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevaEspecificacion);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());

@@ -1,6 +1,7 @@
 package SNAKE_PC.demo.service.pedido;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +12,7 @@ import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.pedido.*;
 import SNAKE_PC.demo.repository.usuario.ContactoRepository;
 import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
+import lombok.RequiredArgsConstructor;
 import SNAKE_PC.demo.repository.producto.ProductoRepository;
 
 import java.time.LocalDate;
@@ -20,33 +22,12 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class PedidoService {
 
-    @Autowired
-    private PedidoRepository pedidoRepository;
+    private final Authentication authentication;
 
-    @Autowired
-    private DetalleRepository detallePedidoRepository;
-
-    @Autowired
-    private EstadoPedidoRepository estadoPedidoRepository;
-
-    @Autowired
-    private ContactoRepository contactoRepository;
-
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private ProductoRepository productoRepository;
-
-    @Autowired
-    private MetodoPagoRepository metodoPagoRepository;
-
-    @Autowired
-    private PagoRepository pagoRepository;
-
-    @Transactional
     public Pedido crearPedido(Map<Long, Integer> productosYCantidades, String correoUsuarioLogueado) {
         Usuario usuario = usuarioRepository.findByCorreo(correoUsuarioLogueado)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -106,7 +87,6 @@ public class PedidoService {
         return pedidoGuardado;
     }
 
-    @Transactional
     public Pago crearPago(Long pedidoId, String correoUsuario, Long metodoPagoId) {
 
         Pedido pedido = pedidoRepository.findById(pedidoId)
@@ -151,7 +131,7 @@ public class PedidoService {
         return pagoRepository.findByPedidoContactoUsuarioCorreo(correoUsuario);
     }
 
-    @Transactional
+
     public Pedido cancelarPedido(Long pedidoId, String correoUsuario) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
@@ -173,7 +153,6 @@ public class PedidoService {
         return pedidoRepository.save(pedido);
     }
 
-    @Transactional
     public Pedido actualizarEstadoPedido(Long pedidoId, String nuevoEstado) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));

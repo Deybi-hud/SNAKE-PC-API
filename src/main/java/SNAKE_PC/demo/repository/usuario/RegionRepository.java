@@ -11,15 +11,11 @@ import SNAKE_PC.demo.model.usuario.Region;
 @Repository
 public interface RegionRepository extends JpaRepository<Region, Long> {
 
-        // ✅ VERIFICAR SI EXISTE REGIÓN POR NOMBRE
     boolean existsByNombreRegion(String nombreRegion);
     
-    // ✅ BUSCAR REGIÓN POR NOMBRE
     Optional<Region> findByNombreRegion(String nombreRegion);
-    
-    // ✅ OBTENER REGIONES ORDENADAS POR NOMBRE
+
     List<Region> findAllByOrderByNombreRegionAsc();
-    
-    // ✅ BUSCAR REGIONES QUE CONTENGAN TEXTO EN EL NOMBRE
+
     List<Region> findByNombreRegionContainingIgnoreCase(String nombre);
 }

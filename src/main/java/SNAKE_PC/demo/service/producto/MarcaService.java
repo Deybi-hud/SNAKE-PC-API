@@ -29,21 +29,25 @@ public class MarcaService {
         return marca;
     }
 
-    public Marca buscarPorNombre(String nombre) {
-        Marca marca = marcaRepository.findByNombre(nombre).orElse(null);
-        if (marca == null) {
-            throw new IllegalArgumentException("Marca no encontrada.");
+    public Marca buscarPorNombre(String marcaNombre) {
+        if(marcaNombre == null || marcaNombre.trim().isEmpty()) {
+            throw new RuntimeException("Debe ingresar el nombre de la marca");
         }
-        return marca;
+        String nombre = marcaNombre.trim().toUpperCase();
+        return marcaRepository.findByNombre(nombre)
+            .orElseThrow(()->new RuntimeException("No se encontro la marca."));
     }
 
     public Marca guardarMarca(String marcaNombre) {
         if (marcaNombre == null || marcaNombre.trim().isEmpty()) {
             throw new RuntimeException("El nombre de la marca no puede estar vacío.");
         }
-        Marca nuevaMarca = new Marca();
-        nuevaMarca.setMarcaNombre(marcaNombre);
-        return marcaRepository.save(nuevaMarca);
+        return marcaRepository.findByNombre(marcaNombre)
+            .orElseGet(()->{
+                Marca nuevaMarca = new Marca();
+                nuevaMarca.setMarcaNombre(marcaNombre);
+                return marcaRepository.save(nuevaMarca);
+            });
     }
 
     public Marca actualizarMarca(Long id, Marca marca) {

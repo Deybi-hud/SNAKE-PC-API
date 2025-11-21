@@ -13,4 +13,6 @@ public interface EspecificacionRepository extends JpaRepository<Especificacion, 
     Optional<Especificacion> findByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(String frecuencia, String capacidad,
             String consumo);
 
+    boolean existsByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(String frecuencia, String capacidad,
+            String consumo);
 }

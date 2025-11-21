@@ -10,6 +10,6 @@ import SNAKE_PC.demo.model.producto.Marca;
 @Repository
 public interface MarcaRepository extends JpaRepository<Marca, Long> {
 
-    Optional<Marca> findByNombre(String nombre);
+    Optional<Marca> findByNombre(String marcaNombre);
 
 }

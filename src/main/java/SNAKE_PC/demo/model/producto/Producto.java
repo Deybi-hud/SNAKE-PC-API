@@ -35,6 +35,9 @@ public class Producto {
     @Column(name = "sku", nullable = false, unique = true)
     private String sku;
 
+    @Column(name = "peso", nullable = true)
+    private String peso; 
+
     @ManyToOne
     @JoinColumn(name = "id_productoCategoria", nullable = true)
     private ProductoCategoria productoCategoria;
@@ -42,10 +45,6 @@ public class Producto {
     @ManyToOne
     @JoinColumn(name = "id_marca", nullable = true)
     private Marca marca;
-
-    @ManyToOne
-    @JoinColumn(name = "id_dimension", nullable = true)
-    private Dimension dimension;
 
     @ManyToOne
     @JoinColumn(name = "id_especificacion", nullable = true)

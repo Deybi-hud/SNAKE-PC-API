@@ -29,22 +29,41 @@ public class EspecificacionService {
         return especificacion;
     }
 
-    public Especificacion guardarEspecificacion(String frecuencia, String Capacidad, String consumo) {
-        if (frecuencia == null || frecuencia.trim().isEmpty()) {
-            throw new RuntimeException("La frecuencia no puede estar vacía.");
-        }
-        if (Capacidad == null || Capacidad.trim().isEmpty()) {
-            throw new RuntimeException("La capacidad de almacenamiento es obligatoria.");
-        }
-        if (consumo == null || consumo.trim().isEmpty()) {
-            throw new RuntimeException("El consumo es obligatorio.");
-        }
+    public Especificacion guardarEspecificacion(String frecuencia, String capacidadAlmacenamiento, String consumo) {
+       validarEspecificacion(frecuencia, capacidadAlmacenamiento, consumo);
+           
         Especificacion nuevaEspecificacion = new Especificacion();
         nuevaEspecificacion.setFrecuencia(frecuencia);
-        nuevaEspecificacion.setCapacidadAlmacenamiento(Capacidad);
+        nuevaEspecificacion.setCapacidadAlmacenamiento(capacidadAlmacenamiento);
         nuevaEspecificacion.setConsumo(consumo);
+
         return especificacionRepository.save(nuevaEspecificacion);
+        
     }
+
+    public void validarEspecificacion(String frecuencia, String capacidadAlmacenamiento, String consumo){
+
+        String frec = frecuencia.trim().toUpperCase();
+        String cap  = capacidadAlmacenamiento.trim().toUpperCase();
+        String con  = consumo.trim().toUpperCase();
+        
+        if (frecuencia != null && frecuencia.trim().isEmpty()) {
+            throw new RuntimeException("La frecuencia no puede estar vacía.");
+        }
+        if (capacidadAlmacenamiento != null && capacidadAlmacenamiento.trim().isEmpty()) {
+            throw new RuntimeException("La capacidad de almacenamiento es obligatoria.");
+        }
+        if (consumo != null && consumo.trim().isEmpty()) {
+            throw new RuntimeException("El consumo es obligatorio.");
+        }
+        boolean existente = especificacionRepository
+            .existsByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(frec, cap, con);
+        if(existente){
+            throw new RuntimeException("Ya existe especificación");
+        }
+    }
+
+
 
     public Especificacion actualizarEspecificacion(Long id, Especificacion especificacion) {
         Especificacion especificacionExistente = especificacionRepository.findById(id).orElse(null);
