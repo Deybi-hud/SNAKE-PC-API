@@ -47,7 +47,6 @@ public class Usuario {
     @OneToOne(mappedBy = "usuario")
     private Contacto contacto;
 
-    
     @ManyToOne
     @JoinColumn(name = "id_rol_usuario", nullable = true)
     private RolUsuario rolUsuario;

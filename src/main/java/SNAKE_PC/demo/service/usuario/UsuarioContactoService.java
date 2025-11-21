@@ -40,7 +40,6 @@ public class UsuarioContactoService {
         Direccion direccionNuevo = direccionService.crearDireccion(direccion,idComuna);
         contacto.setUsuario(usuarioNuevo);
         contacto.setDireccion(direccionNuevo);
-        contacto.setRolUsuario(rolExistente);
         usuarioNuevo.setContacto(contacto);
         
         return contactoRepository.save(contacto);
