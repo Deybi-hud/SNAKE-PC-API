@@ -24,33 +24,26 @@ public class RolUsuarioService {
     private ContactoRepository contactoRepository;
 
     public Contacto actualizarRol(Long contactoId, Long nuevoRolId){
-        try{
-            Contacto contacto = contactoRepository.findById(contactoId)
-                .orElseThrow(()-> new RuntimeException("Usuario no encontrado"));
+        
+        Contacto contacto = contactoRepository.findById(contactoId)
+            .orElseThrow(()-> new RuntimeException("Usuario no encontrado"));
 
-            RolUsuario nuevoRol = rolRepository.findById(nuevoRolId)
-                .orElseThrow(()-> new RuntimeException("Rol no encontrado"));
-            
-            contacto.setRolUsuario(nuevoRol);
-            return contactoRepository.save(contacto);
-        }catch(Exception e){
-            throw new RuntimeException(e);
-        }
+        RolUsuario nuevoRol = rolRepository.findById(nuevoRolId)
+            .orElseThrow(()-> new RuntimeException("Rol no encontrado"));
+        
+        contacto.setRolUsuario(nuevoRol);
+        return contactoRepository.save(contacto);
     }
 
     public RolUsuario save(RolUsuario rolUsuario) {
-        try{
-            if (rolUsuario.getNombreRol() == null || rolUsuario.getNombreRol().trim().isEmpty()) {
-                throw new RuntimeException("El nombre del rol es obligatorio");
-            }
-            if (rolRepository.existsByNombreRol(rolUsuario.getNombreRol())) {
-                throw new RuntimeException("El rol '" + rolUsuario.getNombreRol() + "' ya existe");
-            }
-            
-            return rolRepository.save(rolUsuario);
-        }catch(Exception e){
-            throw new RuntimeException(e);
+        if (rolUsuario.getNombreRol() == null || rolUsuario.getNombreRol().trim().isEmpty()) {
+            throw new RuntimeException("El nombre del rol es obligatorio");
         }
+        if (rolRepository.existsByNombreRol(rolUsuario.getNombreRol())) {
+            throw new RuntimeException("El rol '" + rolUsuario.getNombreRol() + "' ya existe");
+        }
+        
+        return rolRepository.save(rolUsuario);
     }
 
     public List<RolUsuario> findAll() {

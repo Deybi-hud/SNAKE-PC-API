@@ -20,22 +20,18 @@ public class LoginService {
 
 
     public Usuario iniciarSesion(String correo, String contrasena){
-        try{
-            Usuario usuario = usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-            
-            if(!passwordEncoder.matches(contrasena, usuario.getContrasena())){
-                throw new RuntimeException("Contraseña incorrecta");
-            }
-            
-            if (!usuario.isActivo()) {
-                throw new RuntimeException("Cuenta desactivada");
-            }
-            
-            return usuario;
-        }catch(Exception e){
-            throw new RuntimeException(e);
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        if(!passwordEncoder.matches(contrasena, usuario.getContrasena())){
+            throw new RuntimeException("Contraseña incorrecta");
         }
+        
+        if (!usuario.isActivo()) {
+            throw new RuntimeException("Cuenta desactivada");
+        }
+        
+        return usuario;
     }
 
     public Usuario obtenerPorCorreo(String correo) {
@@ -48,11 +44,7 @@ public class LoginService {
     }
     
     public boolean validarCredenciales(String correo, String contrasena) {
-        try {
             Usuario usuario = iniciarSesion(correo, contrasena);
             return usuario != null;
-        } catch (RuntimeException e) {
-            return false;
-        }
     }
 }

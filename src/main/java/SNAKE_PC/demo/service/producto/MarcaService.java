@@ -37,20 +37,20 @@ public class MarcaService {
         return marca;
     }
 
-    public Marca guardarMarca(Marca marca) {
-        if (marca.getNombre() == null || marca.getNombre().isBlank()) {
+    public Marca guardarMarca(String marcaNombre) {
+        if (marcaNombre == null || marcaNombre.trim().isEmpty()) {
             throw new RuntimeException("El nombre de la marca no puede estar vacío.");
         }
-        return marcaRepository.save(marca);
+        Marca nuevaMarca = new Marca();
+        nuevaMarca.setMarcaNombre(marcaNombre);
+        return marcaRepository.save(nuevaMarca);
     }
 
     public Marca actualizarMarca(Long id, Marca marca) {
-        Marca marcaExistente = marcaRepository.findById(id).orElse(null);
-        if (marcaExistente == null) {
-            throw new IllegalArgumentException("Marca no encontrada.");
-        }
-        if (marca.getNombre() != null && !marca.getNombre().isBlank()) {
-            marcaExistente.setNombre(marca.getNombre());
+        Marca marcaExistente = marcaRepository.findById(id)
+            .orElseThrow(()-> new RuntimeException("Marca no encontrada"));
+        if (marca.getMarcaNombre() != null && !marca.getMarcaNombre().isBlank()) {
+            marcaExistente.setMarcaNombre(marca.getMarcaNombre());
         }
         return marcaRepository.save(marcaExistente);
     }

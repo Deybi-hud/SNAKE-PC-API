@@ -33,18 +33,14 @@ public class RegionService {
     }
     
     public Region save(Region region) {
-        try{
-            if (region.getNombreRegion() == null || region.getNombreRegion().trim().isEmpty()) {
-                throw new RuntimeException("El nombre de la región es obligatorio");
-            }
-            if (regionRepository.existsByNombreRegion(region.getNombreRegion())) {
-                throw new RuntimeException("La región '" + region.getNombreRegion() + "' ya existe");
-            }
-            return regionRepository.save(region);
-
-        }catch(Exception e){
-            throw new RuntimeException(e);
+        if (region.getNombreRegion() == null || region.getNombreRegion().trim().isEmpty()) {
+            throw new RuntimeException("El nombre de la región es obligatorio");
         }
+        if (regionRepository.existsByNombreRegion(region.getNombreRegion())) {
+            throw new RuntimeException("La región '" + region.getNombreRegion() + "' ya existe");
+        }
+        return regionRepository.save(region);
+
     }
     
     public boolean existeRegion(String nombreRegion) {
