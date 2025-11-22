@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import SNAKE_PC.demo.model.usuario.Contacto;
 import SNAKE_PC.demo.model.usuario.RolUsuario;
-import SNAKE_PC.demo.repository.usuario.ContactoRepository;
+import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.usuario.RolRepository;
+import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
 import jakarta.transaction.Transactional;
 
 
@@ -21,19 +21,19 @@ public class RolUsuarioService {
     private RolRepository rolRepository;
 
     @Autowired
-    private ContactoRepository contactoRepository;
+    private UsuarioRepository usuarioRepository;
 
-    public Contacto actualizarRol(Long contactoId, Long nuevoRolId){
-        
-        Contacto contacto = contactoRepository.findById(contactoId)
-            .orElseThrow(()-> new RuntimeException("Usuario no encontrado"));
+   public Usuario actualizarRol(Long usuarioId, String nombreRol) {
 
-        RolUsuario nuevoRol = rolRepository.findById(nuevoRolId)
-            .orElseThrow(()-> new RuntimeException("Rol no encontrado"));
-        
-        contacto.setRolUsuario(nuevoRol);
-        return contactoRepository.save(contacto);
-    }
+    Usuario usuario = usuarioRepository.findById(usuarioId)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+    RolUsuario nuevoRol = rolRepository.findByNombreRol(nombreRol.toUpperCase())
+        .orElseThrow(() -> new RuntimeException("Rol no encontrado: '" + nombreRol + "'"));
+
+    usuario.setRolUsuario(nuevoRol);
+    
+    return usuarioRepository.save(usuario);
+}
 
     public RolUsuario save(RolUsuario rolUsuario) {
         if (rolUsuario.getNombreRol() == null || rolUsuario.getNombreRol().trim().isEmpty()) {

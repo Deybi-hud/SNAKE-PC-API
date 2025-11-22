@@ -30,20 +30,20 @@ public class UsuarioContactoService {
     @Autowired 
     private RolRepository rolRepository;
 
-    public Contacto RegistrarCliente(Contacto contacto, Usuario usuario,String confirmarContrasena, Long idRol,Direccion direccion, Long idComuna) throws IOException{
+    public Contacto RegistrarCliente(Contacto contacto, Usuario usuario,String confirmarContrasena, Direccion direccion, Long idComuna) throws IOException{
     
         validarDatosContacto(contacto);
-        RolUsuario rolExistente = rolRepository.findById(idRol)
+        RolUsuario rolCliente= rolRepository.findByNombreRol("CLIENTE")
             .orElseThrow(()-> new RuntimeException("Rol no encontrado"));
-
         Usuario usuarioNuevo = usuarioService.crearUsuario(usuario, confirmarContrasena);
+        usuarioNuevo.setRolUsuario(rolCliente);
+
         Direccion direccionNuevo = direccionService.crearDireccion(direccion,idComuna);
         contacto.setUsuario(usuarioNuevo);
         contacto.setDireccion(direccionNuevo);
         usuarioNuevo.setContacto(contacto);
         
         return contactoRepository.save(contacto);
-
     }
 
     public Contacto ActualizarContacto(Contacto contactoActualizado, Usuario usuario, Direccion direccionActualizada, Long idComuna){

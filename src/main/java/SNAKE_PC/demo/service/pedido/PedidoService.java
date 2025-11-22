@@ -38,6 +38,9 @@ public class PedidoService {
     @Autowired
     private DetallePedidoService detallePedidoService;
 
+    @Autowired
+    private MetodoPagoService metodoPagoService;
+
     @Autowired 
     private ProductoService productoService;
 
@@ -49,6 +52,10 @@ public class PedidoService {
 
     @Autowired 
     private PedidoRepository pedidoRepository;
+
+    @Autowired 
+    private PagoRepository pagoRepository;
+
 
     public Pedido crearPedido(Map<Long, Integer> productosYCantidades, String correoUsuario) {
         Usuario usuario = usuarioService.validarActividad(correoUsuario);
@@ -94,7 +101,7 @@ public class PedidoService {
         return pedido;
     }
 
-    public Pago crearPago(Long pedidoId, String correoUsuario, Long metodoPagoId) {
+    public Pago crearPago(Long pedidoId, String correoUsuario, MetodoPago metodoPago) {
 
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
@@ -107,8 +114,8 @@ public class PedidoService {
             throw new RuntimeException("Solo se pueden pagar pedidos en estado PENDIENTE");
         }
 
-        MetodoPago metodoPago = metodoPagoRepository.findById(metodoPagoId)
-                .orElseThrow(() -> new RuntimeException("Método de pago no válido"));
+        MetodoPago metodoPagoSeleccionado = metodoPagoService.buscarTipoPago(metodoPago);
+               
 
         Double totalPedido = calcularTotalPedido(pedidoId);
 
@@ -116,7 +123,7 @@ public class PedidoService {
         pago.setMonto(totalPedido);
         pago.setFechaPago(LocalDate.now());
         pago.setEstadoPago("PAGADO");
-        pago.setMetodoPago(metodoPago);
+        pago.setMetodoPago(metodoPagoSeleccionado);
         pago.setPedido(pedido);
 
         Pago pagoCreado = pagoRepository.save(pago);

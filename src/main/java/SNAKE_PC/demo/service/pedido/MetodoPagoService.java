@@ -34,10 +34,11 @@ public class MetodoPagoService {
            
 
 
-    public void buscarMetdoPago(MetodoPago metodoPago){
+    public MetodoPago buscarTipoPago(MetodoPago metodoPago){
         if(metodoPagoRepository.existsByTipoPago(metodoPago.getTipoPago())){
             throw new RuntimeException("El metodo no existe");
         }
+        return metodoPago;
     }
 
 
