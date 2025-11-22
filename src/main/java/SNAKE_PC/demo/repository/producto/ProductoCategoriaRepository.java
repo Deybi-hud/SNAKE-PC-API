@@ -16,4 +16,5 @@ public interface ProductoCategoriaRepository extends JpaRepository<ProductoCateg
     boolean existsByNombreSubCategoria(String nombreSubCategoria);
 
     boolean existsByNombreSubCategoriaAndCategoria(String nombreSubCategoria, Categoria categoria);
+
 }
