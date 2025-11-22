@@ -1,7 +1,6 @@
 package SNAKE_PC.demo.model.pedido;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import SNAKE_PC.demo.model.producto.Producto;
 import jakarta.persistence.Column;

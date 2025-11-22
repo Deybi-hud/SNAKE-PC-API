@@ -1,5 +1,6 @@
 package SNAKE_PC.demo.model.pedido;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -28,7 +29,7 @@ public class Pago {
     private Long id;
 
     @Column(name = "monto", nullable = false)
-    private Double monto;
+    private BigDecimal monto;
 
     @Column(name = "fecha_pago", nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
