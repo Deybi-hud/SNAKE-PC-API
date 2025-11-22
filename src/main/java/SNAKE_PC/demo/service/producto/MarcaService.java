@@ -34,7 +34,7 @@ public class MarcaService {
             throw new RuntimeException("Debe ingresar el nombre de la marca");
         }
         String nombre = marcaNombre.trim().toUpperCase();
-        return marcaRepository.findByNombre(nombre)
+        return marcaRepository.findByMarcaNombre(nombre)
             .orElseThrow(()->new RuntimeException("No se encontro la marca."));
     }
 
@@ -44,7 +44,7 @@ public class MarcaService {
         }
 
         String normalizado = marca.getMarcaNombre().trim();
-        return marcaRepository.findByNombre(normalizado)
+        return marcaRepository.findByMarcaNombre(normalizado)
             .orElseGet(()->{
                 Marca nuevaMarca = new Marca();
                 nuevaMarca.setMarcaNombre(marca.getMarcaNombre());

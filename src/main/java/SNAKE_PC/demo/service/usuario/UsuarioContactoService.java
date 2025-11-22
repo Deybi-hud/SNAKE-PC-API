@@ -32,7 +32,7 @@ public class UsuarioContactoService {
     private RolRepository rolRepository;
 
     public Contacto RegistrarCliente(Contacto contacto, Usuario usuario, String confirmarContrasena,
-            Direccion direccion, Long idComuna) throws IOException {
+        Direccion direccion, Long idComuna) throws IOException {
 
         validarDatosContacto(contacto);
         RolUsuario rolCliente = rolRepository.findByNombreRol("CLIENTE")
@@ -49,7 +49,8 @@ public class UsuarioContactoService {
     }
 
     public Contacto ActualizarContacto(Contacto contactoActualizado, Usuario usuarioConCorreoNuevo,
-            Direccion direccionActualizada, Long idComuna, String correoUsuarioLogueado) {
+        Direccion direccionActualizada, Long idComuna, String correoUsuarioLogueado) {
+            
         Contacto contactoexistente = contactoRepository
                 .findByIdAndUsuarioCorreo(contactoActualizado.getId(), correoUsuarioLogueado)
                 .orElseThrow(() -> new RuntimeException("Contacto no encontrado o no tienes permisos"));
@@ -78,8 +79,7 @@ public class UsuarioContactoService {
                 .orElseThrow(() -> new RuntimeException("Contacto no encontrado"));
     }
 
-    // --------------------------------- Validaciones
-    // ---------------------------------------------------------------
+    // --------------------------------- Validaciones  ---------------------------------------------------------------
     public void validarDatosContacto(Contacto contacto) {
         if (contacto.getNombre() == null || contacto.getNombre().trim().isBlank()) {
             throw new RuntimeException("El nombre es obligatorio");
@@ -122,8 +122,7 @@ public class UsuarioContactoService {
         }
     }
 
-    // --------------------------------- Para listar siendo admin
-    // ---------------------------------------------------
+    // --------------------------------- Para listar siendo admin ----------------------------------------------
     public List<Contacto> findAll() {
         return contactoRepository.findAll();
     }

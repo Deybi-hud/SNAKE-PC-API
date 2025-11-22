@@ -24,16 +24,15 @@ public class RolUsuarioService {
     private UsuarioRepository usuarioRepository;
 
    public Usuario actualizarRol(Long usuarioId, String nombreRol) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+        RolUsuario nuevoRol = rolRepository.findByNombreRol(nombreRol.toUpperCase())
+            .orElseThrow(() -> new RuntimeException("Rol no encontrado: '" + nombreRol + "'"));
 
-    Usuario usuario = usuarioRepository.findById(usuarioId)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
-    RolUsuario nuevoRol = rolRepository.findByNombreRol(nombreRol.toUpperCase())
-        .orElseThrow(() -> new RuntimeException("Rol no encontrado: '" + nombreRol + "'"));
-
-    usuario.setRolUsuario(nuevoRol);
-    
-    return usuarioRepository.save(usuario);
-}
+        usuario.setRolUsuario(nuevoRol);
+        
+        return usuarioRepository.save(usuario);
+    }
 
     public RolUsuario save(RolUsuario rolUsuario) {
         if (rolUsuario.getNombreRol() == null || rolUsuario.getNombreRol().trim().isEmpty()) {

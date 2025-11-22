@@ -72,18 +72,18 @@ public class UsuarioService {
     }
 
     public void validarCorreoParaActualizacion(String correoNuevo, Long usuarioIdActual) {
-    if (correoNuevo == null || correoNuevo.trim().isEmpty()) {
-        throw new RuntimeException("El correo no puede estar vacío");
+        if (correoNuevo == null || correoNuevo.trim().isEmpty()) {
+            throw new RuntimeException("El correo no puede estar vacío");
+        }
+        String normalizado = correoNuevo.trim().toLowerCase();
+        String formato = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+        if (!normalizado.matches(formato)) {
+            throw new RuntimeException("Formato de correo inválido");
+        }
+        if (usuarioRepository.existsByCorreoAndIdNot(normalizado, usuarioIdActual)) {
+            throw new RuntimeException("El correo ya está registrado por otro usuario");
     }
-    String normalizado = correoNuevo.trim().toLowerCase();
-    String formato = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-    if (!normalizado.matches(formato)) {
-        throw new RuntimeException("Formato de correo inválido");
     }
-    if (usuarioRepository.existsByCorreoAndIdNot(normalizado, usuarioIdActual)) {
-        throw new RuntimeException("El correo ya está registrado por otro usuario");
-    }
-}
 
 
 

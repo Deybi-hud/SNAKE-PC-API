@@ -1,4 +1,4 @@
-package SNAKE_PC.demo.controller;
+package SNAKE_PC.demo.controller.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +16,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/admin/roles")
 @PreAuthorize("hasRole('ADMIN')")
-public class RolController {
+public class AdminRolController {
 
     @Autowired
     private RolUsuarioService rolService;

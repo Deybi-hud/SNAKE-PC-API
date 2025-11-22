@@ -1,4 +1,4 @@
-package SNAKE_PC.demo.controller;
+package SNAKE_PC.demo.controller.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
