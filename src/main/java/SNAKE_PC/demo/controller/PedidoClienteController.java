@@ -69,13 +69,11 @@ public class PedidoClienteController {
 
             Pedido pedido = pedidoOpt.get();
 
-            // Validar que el pedido pertenece al usuario autenticado
             if (!pedido.getContacto().getUsuario().getCorreo().equals(correoUsuario)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(Map.of("error", "No tienes permiso para pagar este pedido"));
             }
 
-            // Buscar pagos existentes del pedido
             List<Pago> pagosExistentes = pagoRepository.findByPedidoId(pedidoId);
 
             if (!pagosExistentes.isEmpty()) {

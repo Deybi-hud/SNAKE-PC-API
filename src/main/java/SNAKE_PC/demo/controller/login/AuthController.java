@@ -1,5 +1,6 @@
-package SNAKE_PC.demo.controller.publico;
+package SNAKE_PC.demo.controller.login;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,10 +15,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
+import SNAKE_PC.demo.model.usuario.Contacto;
+import SNAKE_PC.demo.model.usuario.Direccion;
 import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.service.usuario.LoginService;
+import SNAKE_PC.demo.service.usuario.UsuarioContactoService;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -28,6 +33,37 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UsuarioContactoService usuarioContactoService;
+
+    @PostMapping(value = "/registrar", consumes = "multipart/form-data")
+    public ResponseEntity<?> registrarCliente(
+            @RequestPart(value = "imagenUsuario", required = false) String imagenUsuario,
+            @RequestPart Contacto contacto,
+            @RequestPart Usuario usuario,
+            @RequestPart Direccion direccion,
+            @RequestPart Long comunaId) {
+
+        try {
+            Contacto nuevoContacto = usuarioContactoService.RegistrarCliente(
+                    contacto, usuario, "", direccion, comunaId);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(
+                    Map.of(
+                            "mensaje", "Cliente registrado exitosamente",
+                            "contactoId", nuevoContacto.getId(),
+                            "usuarioId", nuevoContacto.getUsuario().getId(),
+                            "imagenUsuario", imagenUsuario));
+
+        } catch (IOException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Error al procesar: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Usuario usuarioRequest) {

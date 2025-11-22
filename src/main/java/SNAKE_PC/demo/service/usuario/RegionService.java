@@ -6,8 +6,6 @@ import jakarta.transaction.Transactional;
 
 import java.util.List;
 
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,17 +19,17 @@ public class RegionService {
     public List<Region> findAllRegiones() {
         return regionRepository.findAllByOrderByNombreRegionAsc();
     }
-    
+
     public Region findById(Long regionId) {
         return regionRepository.findById(regionId)
-            .orElseThrow(() -> new RuntimeException("Región no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Región no encontrada"));
     }
-    
+
     public Region findByNombre(String nombreRegion) {
         return regionRepository.findByNombreRegion(nombreRegion)
-            .orElseThrow(() -> new RuntimeException("Región no encontrada: " + nombreRegion));
+                .orElseThrow(() -> new RuntimeException("Región no encontrada: " + nombreRegion));
     }
-    
+
     public Region save(Region region) {
         if (region.getNombreRegion() == null || region.getNombreRegion().trim().isEmpty()) {
             throw new RuntimeException("El nombre de la región es obligatorio");
@@ -41,9 +39,5 @@ public class RegionService {
         }
         return regionRepository.save(region);
 
-    }
-    
-    public boolean existeRegion(String nombreRegion) {
-        return regionRepository.existsByNombreRegion(nombreRegion);
     }
 }

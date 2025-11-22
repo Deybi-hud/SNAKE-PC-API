@@ -1,11 +1,11 @@
-package SNAKE_PC.demo.controller;
+package SNAKE_PC.demo.controller.cliente;
+
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -17,46 +17,15 @@ import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.service.usuario.UsuarioContactoService;
 import SNAKE_PC.demo.service.usuario.UsuarioService;
 
-import java.io.IOException;
-import java.util.Map;
-
 @RestController
-@RequestMapping("/api/v1/cliente")
-public class UsuarioController {
+@RequestMapping("/api/v1/perfil")
+public class PerfilController {
 
     @Autowired
     private UsuarioService usuarioService;
 
     @Autowired
     private UsuarioContactoService usuarioContactoService;
-
-    @PostMapping(value = "/registrar", consumes = "multipart/form-data")
-    public ResponseEntity<?> registrarCliente(
-            @RequestPart(value = "imagenUsuario", required = false) String imagenUsuario,
-            @RequestPart Contacto contacto,
-            @RequestPart Usuario usuario,
-            @RequestPart Direccion direccion,
-            @RequestPart Long comunaId) {
-
-        try {
-            Contacto nuevoContacto = usuarioContactoService.RegistrarCliente(
-                    contacto, usuario, "", direccion, comunaId);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(
-                    Map.of(
-                            "mensaje", "Cliente registrado exitosamente",
-                            "contactoId", nuevoContacto.getId(),
-                            "usuarioId", nuevoContacto.getUsuario().getId(),
-                            "imagenUsuario", imagenUsuario));
-
-        } catch (IOException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Error al procesar: " + e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", e.getMessage()));
-        }
-    }
 
     @GetMapping("/perfil")
     public ResponseEntity<?> obtenerMiPerfil(Authentication authentication) {
