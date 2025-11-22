@@ -10,9 +10,13 @@ import SNAKE_PC.demo.model.producto.Especificacion;
 @Repository
 public interface EspecificacionRepository extends JpaRepository<Especificacion, Long> {
 
-    Optional<Especificacion> findByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(String frecuencia, String capacidad,
-            String consumo);
+        Optional<Especificacion> findByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(String frecuencia,
+                        String capacidad,
+                        String consumo);
 
-    boolean existsByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(String frecuencia, String capacidad,
-            String consumo);
+        boolean existsByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(String frecuencia, String capacidad,
+                        String consumo);
+
+        void deleteByProductoId(Long productoId);
+
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,7 +37,7 @@ public class Producto {
     private String sku;
 
     @Column(name = "peso", nullable = true)
-    private String peso; 
+    private String peso;
 
     @ManyToOne
     @JoinColumn(name = "id_productoCategoria", nullable = true)
@@ -46,7 +47,7 @@ public class Producto {
     @JoinColumn(name = "id_marca", nullable = true)
     private Marca marca;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "id_especificacion", nullable = true)
     private Especificacion especificacion;
 
