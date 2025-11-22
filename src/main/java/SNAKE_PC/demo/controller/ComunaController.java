@@ -52,7 +52,7 @@ public class ComunaController {
         try {
             Comuna comuna = comunaService.findById(comunaId);
             return ResponseEntity.ok(comuna);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
@@ -76,7 +76,7 @@ public class ComunaController {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
@@ -88,7 +88,7 @@ public class ComunaController {
         try {
             Comuna comuna = comunaService.findByNombre(nombre);
             return ResponseEntity.ok(comuna);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
@@ -108,7 +108,7 @@ public class ComunaController {
 
             return ResponseEntity.ok(response);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Error al verificar comuna: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
@@ -124,7 +124,7 @@ public class ComunaController {
             }
             comunaRepository.deleteById(comunaId);
             return ResponseEntity.ok(Map.of("mensaje", "Comuna eliminada exitosamente"));
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
         }

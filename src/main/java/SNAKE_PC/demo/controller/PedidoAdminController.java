@@ -24,7 +24,7 @@ public class PedidoAdminController {
         try {
             List<Pedido> pedidos = pedidoService.obtenerTodosLosPedidos();
             return ResponseEntity.ok(pedidos);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error al obtener pedidos: " + e.getMessage()));
         }
@@ -37,7 +37,7 @@ public class PedidoAdminController {
         try {
             Pedido pedido = pedidoService.actualizarEstadoPedido(pedidoId, estado);
             return ResponseEntity.ok(pedido);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -47,7 +47,7 @@ public class PedidoAdminController {
         try {
             List<Pedido> pedidos = pedidoService.obtenerPedidosDelDia();
             return ResponseEntity.ok(pedidos);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error al obtener reporte: " + e.getMessage()));
         }
@@ -58,7 +58,7 @@ public class PedidoAdminController {
         try {
             List<Pedido> pedidos = pedidoService.obtenerPedidosDelMes();
             return ResponseEntity.ok(pedidos);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error al obtener reporte: " + e.getMessage()));
         }
@@ -69,7 +69,7 @@ public class PedidoAdminController {
         try {
             Map<String, Object> estadisticas = pedidoService.obtenerEstadisticasDelDia();
             return ResponseEntity.ok(estadisticas);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error al obtener estadísticas: " + e.getMessage()));
         }
@@ -80,7 +80,7 @@ public class PedidoAdminController {
         try {
             Map<String, Object> estadisticas = pedidoService.obtenerEstadisticasDelMes();
             return ResponseEntity.ok(estadisticas);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error al obtener estadísticas: " + e.getMessage()));
         }
@@ -95,7 +95,7 @@ public class PedidoAdminController {
             LocalDate fechaFin = LocalDate.parse(fin);
             List<Pedido> pedidos = pedidoService.obtenerPedidosPorRangoFechas(fechaInicio, fechaFin);
             return ResponseEntity.ok(pedidos);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Formato de fecha inválido. Use YYYY-MM-DD"));
         }

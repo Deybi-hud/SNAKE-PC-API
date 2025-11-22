@@ -42,7 +42,7 @@ public class ProductController {
                 return ResponseEntity.noContent().build();
             }
             return ResponseEntity.ok(productos);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -53,7 +53,7 @@ public class ProductController {
         try {
             Producto producto = productoService.buscarPorId(id);
             return ResponseEntity.ok(producto);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }
     }
@@ -69,7 +69,7 @@ public class ProductController {
             Producto nuevoProducto = productoService.guardarProducto(
                     producto, productoCategoria, categoria, marca, especificacion, null, null, null);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -86,7 +86,7 @@ public class ProductController {
             Producto updateProducto = productoService.guardarProducto(
                     producto, productoCategoria, categoria, marca, especificacion, null, null, null);
             return ResponseEntity.ok(updateProducto);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -100,7 +100,7 @@ public class ProductController {
             producto.setId(id);
             Producto updatedProducto = productoService.actualizacionParcialProducto(producto, marca, especificacion);
             return ResponseEntity.ok(updatedProducto);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -111,7 +111,7 @@ public class ProductController {
         try {
             productoService.borrarProducto(id);
             return ResponseEntity.ok(Map.of("mensaje", "Producto eliminado correctamente"));
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }
     }

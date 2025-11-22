@@ -41,7 +41,7 @@ public class AdminUsuarioController {
         try {
             Usuario usuario = usuarioService.obtenerPorCorreo(correo);
             return ResponseEntity.ok(usuario);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }
@@ -57,7 +57,7 @@ public class AdminUsuarioController {
 
             return ResponseEntity.ok(response);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }
@@ -73,7 +73,7 @@ public class AdminUsuarioController {
 
             return ResponseEntity.ok(response);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }
@@ -84,7 +84,7 @@ public class AdminUsuarioController {
         try {
             Contacto contacto = usuarioContactoService.obtenerDatosContacto(contactoId);
             return ResponseEntity.ok(contacto);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }

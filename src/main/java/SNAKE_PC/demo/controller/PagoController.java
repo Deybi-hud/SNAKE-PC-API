@@ -24,7 +24,7 @@ public class PagoController {
             String correoUsuario = authentication.getName();
             List<Pago> pagos = pedidoService.obtenerPagosPorUsuario(correoUsuario);
             return ResponseEntity.ok(pagos);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }

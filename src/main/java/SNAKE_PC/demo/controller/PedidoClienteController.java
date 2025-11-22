@@ -28,7 +28,7 @@ public class PedidoClienteController {
             String correoUsuario = authentication.getName();
             Pedido pedido = pedidoService.crearPedido(productosYCantidades, correoUsuario);
             return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -42,7 +42,7 @@ public class PedidoClienteController {
             String correoUsuario = authentication.getName();
             Pago pago = pedidoService.crearPago(pedidoId, correoUsuario, metodoPagoId);
             return ResponseEntity.ok(pago);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -55,7 +55,7 @@ public class PedidoClienteController {
             String correoUsuario = authentication.getName();
             Pedido pedido = pedidoService.cancelarPedido(pedidoId, correoUsuario);
             return ResponseEntity.ok(pedido);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -66,7 +66,7 @@ public class PedidoClienteController {
             String correoUsuario = authentication.getName();
             List<Pedido> pedidos = pedidoService.obtenerPedidosPorUsuario(correoUsuario);
             return ResponseEntity.ok(pedidos);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -79,7 +79,7 @@ public class PedidoClienteController {
             String correoUsuario = authentication.getName();
             Pedido pedido = pedidoService.obtenerPedidoPorId(pedidoId, correoUsuario);
             return ResponseEntity.ok(pedido);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -89,7 +89,7 @@ public class PedidoClienteController {
         try {
             Double total = pedidoService.calcularTotalPedido(pedidoId);
             return ResponseEntity.ok(Map.of("total", total));
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
