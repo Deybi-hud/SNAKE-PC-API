@@ -1,4 +1,4 @@
-package SNAKE_PC.demo.controller;
+package SNAKE_PC.demo.controller.publico;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

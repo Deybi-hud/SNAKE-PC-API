@@ -6,7 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import SNAKE_PC.demo.model.pedido.Pago;
-import SNAKE_PC.demo.service.pedido.PedidoService;
+import SNAKE_PC.demo.repository.pedido.PagoRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -16,13 +16,13 @@ import java.util.Map;
 public class PagoController {
 
     @Autowired
-    private PedidoService pedidoService;
+    private PagoRepository pagoRepository;
 
     @GetMapping
     public ResponseEntity<?> obtenerMisPagos(Authentication authentication) {
         try {
             String correoUsuario = authentication.getName();
-            List<Pago> pagos = pedidoService.obtenerPagosPorUsuario(correoUsuario);
+            List<Pago> pagos = pagoRepository.findByPedidoContactoUsuarioCorreo(correoUsuario);
             return ResponseEntity.ok(pagos);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

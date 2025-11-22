@@ -1,4 +1,4 @@
-package SNAKE_PC.demo.controller;
+package SNAKE_PC.demo.controller.publico;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,8 +74,8 @@ public class AuthController {
         usuarioResponse.put("imagenUsuario", usuario.getImagenUsuario());
         usuarioResponse.put("activo", usuario.isActivo());
 
-        if (usuario.getContactos() != null && !usuario.getContactos().isEmpty()) {
-            usuarioResponse.put("rol", usuario.getContactos().get(0).getRolUsuario().getNombreRol());
+        if (usuario.getRolUsuario() != null) {
+            usuarioResponse.put("rol", usuario.getRolUsuario().getNombreRol());
         }
 
         return usuarioResponse;

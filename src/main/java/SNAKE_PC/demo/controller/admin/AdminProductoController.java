@@ -1,4 +1,4 @@
-package SNAKE_PC.demo.controller;
+package SNAKE_PC.demo.controller.admin;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("api/v1/admin/catalogo")
 @Tag(name = "Admin - Catalogo de Productos", description = "Gestion de marcas, categorias, especificaciones y subCategorias")
 @PreAuthorize("hasRole('ADMIN')")
-public class AdminProductController {
+public class AdminProductoController {
 
     @Autowired
     private MarcaService marcaService;
