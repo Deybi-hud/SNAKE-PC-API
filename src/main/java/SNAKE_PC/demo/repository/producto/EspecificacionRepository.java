@@ -20,8 +20,8 @@ public interface EspecificacionRepository extends JpaRepository<Especificacion, 
         boolean existsByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(String frecuencia, String capacidad,
                         String consumo);
 
-        @Modifying           
-        @Query("DELETE FROM Especificacion e WHERE e.producto.id = :productoId")
+        @Modifying
+        @Query("DELETE FROM Especificacion e WHERE :productoId MEMBER OF e.productos")
         void deleteByProductoId(@Param("productoId") Long productoId);
 
 }
