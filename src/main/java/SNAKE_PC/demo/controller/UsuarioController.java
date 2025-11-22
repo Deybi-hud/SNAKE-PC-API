@@ -52,7 +52,7 @@ public class UsuarioController {
         } catch (IOException e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Error al procesar: " + e.getMessage()));
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }
@@ -67,7 +67,7 @@ public class UsuarioController {
 
             return ResponseEntity.ok(Map.of("usuario", usuario, "contacto", contacto));
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }
@@ -93,7 +93,7 @@ public class UsuarioController {
 
             return ResponseEntity.ok(contactoActualizadoResult);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }
@@ -112,7 +112,7 @@ public class UsuarioController {
 
             return ResponseEntity.ok(Map.of("mensaje", "Contraseña actualizada exitosamente"));
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }
@@ -124,7 +124,7 @@ public class UsuarioController {
             Usuario usuario = usuarioService.obtenerPorCorreo(authentication.getName());
             usuarioService.desactivarCuenta(usuario.getId());
             return ResponseEntity.ok(Map.of("mensaje", "Cuenta desactivada exitosamente"));
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }
@@ -136,7 +136,7 @@ public class UsuarioController {
             Usuario usuario = usuarioService.obtenerPorCorreo(authentication.getName());
             usuarioService.reactivarCuenta(usuario.getId());
             return ResponseEntity.ok(Map.of("mensaje", "Cuenta reactivada exitosamente"));
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }

@@ -31,7 +31,7 @@ public class RegionController {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
@@ -55,7 +55,7 @@ public class RegionController {
         try {
             Region region = regionService.findById(regionId);
             return ResponseEntity.ok(region);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
@@ -67,7 +67,7 @@ public class RegionController {
         try {
             Region region = regionService.findByNombre(nombreRegion);
             return ResponseEntity.ok(region);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);

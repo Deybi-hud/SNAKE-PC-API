@@ -33,7 +33,7 @@ public class RolController {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
@@ -57,7 +57,7 @@ public class RolController {
         try {
             RolUsuario rol = rolService.findById(rolId);
             return ResponseEntity.ok(rol);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);

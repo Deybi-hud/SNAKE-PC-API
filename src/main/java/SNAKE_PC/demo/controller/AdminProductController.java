@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import SNAKE_PC.demo.model.producto.Categoria;
@@ -62,7 +62,6 @@ public class AdminProductController {
     @Operation(summary = "Obtener marca por ID", description = "Obtiene una marca específica")
     public ResponseEntity<?> obtenerMarca(@PathVariable Long id) {
         try {
-            validarId(id);
             Marca marca = marcaService.buscarPorId(id);
             return ResponseEntity.ok(marca);
         } catch (Exception e) {
@@ -74,7 +73,6 @@ public class AdminProductController {
     @Operation(summary = "Crear marca", description = "Crea una nueva marca")
     public ResponseEntity<?> crearMarca(@RequestBody Marca marca) {
         try {
-            validarMarca(marca);
             Marca nuevaMarca = marcaService.guardarMarca(marca);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevaMarca);
         } catch (Exception e) {
@@ -86,8 +84,6 @@ public class AdminProductController {
     @Operation(summary = "Actualizar marca", description = "Actualiza una marca existente")
     public ResponseEntity<?> actualizarMarca(@PathVariable Long id, @RequestBody Marca marca) {
         try {
-            validarId(id);
-            validarMarca(marca);
             Marca marcaActualizada = marcaService.actualizarMarca(id, marca);
             return ResponseEntity.ok(marcaActualizada);
         } catch (Exception e) {
@@ -99,7 +95,6 @@ public class AdminProductController {
     @Operation(summary = "Eliminar marca", description = "Elimina una marca del sistema")
     public ResponseEntity<?> eliminarMarca(@PathVariable Long id) {
         try {
-            validarId(id);
             marcaService.eliminarMarca(id);
             return ResponseEntity.ok("Marca eliminada correctamente");
         } catch (Exception e) {
@@ -123,7 +118,6 @@ public class AdminProductController {
     @Operation(summary = "Obtener categoría por ID", description = "Obtiene una categoría específica")
     public ResponseEntity<?> obtenerCategoria(@PathVariable Long id) {
         try {
-            validarId(id);
             Categoria categoria = categoriaService.buscarPorId(id);
             return ResponseEntity.ok(categoria);
         } catch (Exception e) {
@@ -135,7 +129,6 @@ public class AdminProductController {
     @Operation(summary = "Crear categoría", description = "Crea una nueva categoría")
     public ResponseEntity<?> crearCategoria(@RequestBody Categoria categoria) {
         try {
-            validarCategoria(categoria);
             Categoria nuevaCategoria = categoriaService.guardarCategoria(categoria);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCategoria);
         } catch (Exception e) {
@@ -147,8 +140,6 @@ public class AdminProductController {
     @Operation(summary = "Actualizar categoría", description = "Actualiza una categoría existente")
     public ResponseEntity<?> actualizarCategoria(@PathVariable Long id, @RequestBody Categoria categoria) {
         try {
-            validarId(id);
-            validarCategoria(categoria);
             Categoria categoriaActualizada = categoriaService.actualizarCategoria(id, categoria);
             return ResponseEntity.ok(categoriaActualizada);
         } catch (Exception e) {
@@ -160,7 +151,6 @@ public class AdminProductController {
     @Operation(summary = "Eliminar categoría", description = "Elimina una categoría del sistema")
     public ResponseEntity<?> eliminarCategoria(@PathVariable Long id) {
         try {
-            validarId(id);
             categoriaService.eliminarCategoria(id);
             return ResponseEntity.ok("Categoría eliminada correctamente");
         } catch (Exception e) {
@@ -184,7 +174,6 @@ public class AdminProductController {
     @Operation(summary = "Obtener especificación por ID", description = "Obtiene una especificación específica")
     public ResponseEntity<?> obtenerEspecificacion(@PathVariable Long id) {
         try {
-            validarId(id);
             Especificacion especificacion = especificacionService.buscarPorId(id);
             return ResponseEntity.ok(especificacion);
         } catch (Exception e) {
@@ -194,11 +183,9 @@ public class AdminProductController {
 
     @PostMapping("/especificaciones")
     @Operation(summary = "Crear especificación", description = "Crea una nueva especificación")
-    public ResponseEntity<?> crearEspecificacion(@RequestParam String frecuencia,
-                                                 @RequestParam String capacidadAlamcenamientop, 
-                                                 @RequestParam String consumo) {
+    public ResponseEntity<?> crearEspecificacion(@RequestBody Especificacion especificacion) {
         try {
-            Especificacion nuevaEspecificacion = especificacionService.guardarEspecificacion(frecuencia, capacidadAlamcenamientop,consumo );
+            Especificacion nuevaEspecificacion = especificacionService.guardarEspecificacion(especificacion);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevaEspecificacion);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
@@ -207,11 +194,11 @@ public class AdminProductController {
 
     @PutMapping("/especificaciones/{id}")
     @Operation(summary = "Actualizar especificación", description = "Actualiza una especificación existente")
-    public ResponseEntity<?> actualizarEspecificacion(@PathVariable Long id, @RequestBody Especificacion especificacion) {
+    public ResponseEntity<?> actualizarEspecificacion(@PathVariable Long id,
+            @RequestBody Especificacion especificacion) {
         try {
-            validarId(id);
-            validarEspecificacion(especificacion);
-            Especificacion especificacionActualizada = especificacionService.actualizarEspecificacion(id, especificacion);
+            Especificacion especificacionActualizada = especificacionService.actualizarEspecificacion(id,
+                    especificacion);
             return ResponseEntity.ok(especificacionActualizada);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
@@ -222,7 +209,6 @@ public class AdminProductController {
     @Operation(summary = "Eliminar especificación", description = "Elimina una especificación del sistema")
     public ResponseEntity<?> eliminarEspecificacion(@PathVariable Long id) {
         try {
-            validarId(id);
             especificacionService.eliminarEspecificacion(id);
             return ResponseEntity.ok("Especificación eliminada correctamente");
         } catch (Exception e) {
@@ -230,7 +216,8 @@ public class AdminProductController {
         }
     }
 
-    // ======================== PRODUCTO CATEGORÍA (SUBCATEGORÍAS) ========================
+    // ======================== PRODUCTO CATEGORÍA (SUBCATEGORÍAS)
+    // ========================
 
     @GetMapping("/producto-categorias")
     @Operation(summary = "Listar subcategorías de productos", description = "Obtiene todas las subcategorías")
@@ -246,7 +233,6 @@ public class AdminProductController {
     @Operation(summary = "Obtener subcategoría por ID", description = "Obtiene una subcategoría específica")
     public ResponseEntity<?> obtenerProductoCategoria(@PathVariable Long id) {
         try {
-            validarId(id);
             ProductoCategoria productoCategoria = productoCategoriaService.buscarPorId(id);
             return ResponseEntity.ok(productoCategoria);
         } catch (Exception e) {
@@ -254,29 +240,27 @@ public class AdminProductController {
         }
     }
 
-    @PostMapping("/producto-categorias")
+    @PostMapping(value = "/producto-categorias", consumes = "multipart/form-data")
     @Operation(summary = "Crear subcategoría", description = "Crea una nueva subcategoría para una categoría existente")
-    public ResponseEntity<?> crearProductoCategoria(@RequestBody ProductoCategoria productoCategoria,
-            @Parameter(description = "ID de la categoría padre") @RequestParam Long idCategoria) {
+    public ResponseEntity<?> crearProductoCategoria(@RequestPart ProductoCategoria productoCategoria,
+            @Parameter(description = "ID de la categoría padre") @RequestPart Categoria categoria) {
         try {
-            validarProductoCategoria(productoCategoria);
             ProductoCategoria nuevaProductoCategoria = productoCategoriaService.guardarProductoCategoria(
-                    productoCategoria, idCategoria);
+                    productoCategoria, categoria);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevaProductoCategoria);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
         }
     }
 
-    @PutMapping("/producto-categorias/{id}")
-    @Operation(summary = "Actualizar subcategoría", description = "Actualiza una subcategoría existente")
+    @PutMapping(value = "/producto-categorias/{id}", consumes = "multipart/form-data")
+    @Operation(summary = "Actualizar subCategoria", description = "Actualiza una subCategoria que ya existe")
     public ResponseEntity<?> actualizarProductoCategoria(@PathVariable Long id,
-            @RequestBody ProductoCategoria productoCategoria,
-            @Parameter(description = "ID de la categoría") @RequestParam(required = false) Long idCategoria) {
+            @RequestPart ProductoCategoria productoCategoria,
+            @Parameter(description = "Categoria") @RequestPart(required = false) Categoria categoria) {
         try {
-            validarId(id);
             ProductoCategoria productoCategoriaActualizada = productoCategoriaService
-                    .actualizarProductoCategoria(id, productoCategoria, idCategoria);
+                    .actualizarProductoCategoria(productoCategoria.getNombreSubCategoria(), categoria);
             return ResponseEntity.ok(productoCategoriaActualizada);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
@@ -284,59 +268,13 @@ public class AdminProductController {
     }
 
     @DeleteMapping("/producto-categorias/{id}")
-    @Operation(summary = "Eliminar subcategoría", description = "Elimina una subcategoría del sistema")
+    @Operation(summary = "Eliminar subcategoría", description = "Elimina una subCategoria del sistema")
     public ResponseEntity<?> eliminarProductoCategoria(@PathVariable Long id) {
         try {
-            validarId(id);
             productoCategoriaService.eliminarProductoCategoria(id);
             return ResponseEntity.ok("Subcategoría eliminada correctamente");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
-        }
-    }
-
-    // ======================== MÉTODOS VALIDACIÓN PRIVADOS ========================
-
-    private void validarId(Long id) {
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException("El ID debe ser mayor a 0");
-        }
-    }
-
-    private void validarMarca(Marca marca) {
-        if (marca == null) {
-            throw new IllegalArgumentException("La marca no puede ser nula");
-        }
-        if (marca.getNombre() == null || marca.getNombre().isBlank()) {
-            throw new IllegalArgumentException("El nombre de la marca es obligatorio");
-        }
-    }
-
-    private void validarCategoria(Categoria categoria) {
-        if (categoria == null) {
-            throw new IllegalArgumentException("La categoría no puede ser nula");
-        }
-        if (categoria.getNombreCategoria() == null || categoria.getNombreCategoria().isBlank()) {
-            throw new IllegalArgumentException("El nombre de la categoría es obligatorio");
-        }
-    }
-
-    private void validarEspecificacion(Especificacion especificacion) {
-        if (especificacion == null) {
-            throw new IllegalArgumentException("La especificación no puede ser nula");
-        }
-        if (especificacion.getFrecuencia() == null || especificacion.getFrecuencia().isBlank()) {
-            throw new IllegalArgumentException("La frecuencia es obligatoria");
-        }
-    }
-
-    private void validarProductoCategoria(ProductoCategoria productoCategoria) {
-        if (productoCategoria == null) {
-            throw new IllegalArgumentException("La subcategoría no puede ser nula");
-        }
-        if (productoCategoria.getNombreSubcategoria() == null
-                || productoCategoria.getNombreSubcategoria().isBlank()) {
-            throw new IllegalArgumentException("El nombre de la subcategoría es obligatorio");
         }
     }
 }
