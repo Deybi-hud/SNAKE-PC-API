@@ -15,7 +15,7 @@ import SNAKE_PC.demo.model.usuario.Usuario;
 @Repository
 public interface ContactoRepository extends JpaRepository<Contacto, Long> {
 
-    boolean existsByTelefono(String id);
+    boolean existsByTelefono(String telefono);
 
     boolean existsByDireccion(Direccion direccion);
 
@@ -25,9 +25,8 @@ public interface ContactoRepository extends JpaRepository<Contacto, Long> {
 
     @Query("SELECT c FROM Contacto c WHERE c.id = :id AND c.usuario.correo = :correo")
     Optional<Contacto> findByIdAndUsuarioCorreo(
-    @Param("id") Long id, 
-    @Param("correo") String correo
-);
+            @Param("id") Long id,
+            @Param("correo") String correo);
 
     boolean existsByTelefonoAndId(String telefono, Long contactoIdActual);
 

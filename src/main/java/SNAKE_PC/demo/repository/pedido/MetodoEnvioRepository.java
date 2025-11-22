@@ -5,21 +5,13 @@ import org.springframework.stereotype.Repository;
 
 import SNAKE_PC.demo.model.pedido.MetodoEnvio;
 
-
 @Repository
 public interface MetodoEnvioRepository extends JpaRepository<MetodoEnvio, Long> {
 
-    boolean existsByNombreIgnoreCase(String metodoEnvio);
-
-    boolean existsById(Integer id);
-
-    boolean existsByNombreMetodo(Integer id);
+    boolean existsById(Long id);
 
     boolean existsByNombreMetodo(String nombreMetodo);
 
-    boolean existsByNombreMetodoIgnoreCase(String nombre);
+    boolean existsByNombreMetodoIgnoreCase(String nombreMetodo);
 
-    
-
-    
 }
