@@ -11,6 +11,7 @@ import SNAKE_PC.demo.model.producto.Especificacion;
 import SNAKE_PC.demo.model.producto.Marca;
 import SNAKE_PC.demo.model.producto.Producto;
 import SNAKE_PC.demo.model.producto.ProductoCategoria;
+import SNAKE_PC.demo.repository.producto.EspecificacionRepository;
 import SNAKE_PC.demo.repository.producto.ProductoRepository;
 import jakarta.transaction.Transactional;
 
@@ -23,12 +24,15 @@ public class ProductoService {
     private ProductoRepository productoRepository;
 
     @Autowired
+    private EspecificacionRepository especificacionRepository;
+
+    @Autowired
     private EspecificacionService especificacionService;
 
-    @Autowired 
+    @Autowired
     private MarcaService marcaService;
 
-    @Autowired 
+    @Autowired
     private ProductoCategoriaService productoCategoriaService;
 
     public List<Producto> buscarTodo() {
@@ -38,18 +42,19 @@ public class ProductoService {
 
     public Producto buscarPorId(Long id) {
         Producto producto = productoRepository.findById(id)
-            .orElseThrow(()-> new RuntimeException("Producto no encontrado."));
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado."));
         return producto;
     }
 
-    public Producto guardarProducto(Producto producto, ProductoCategoria productoCategoria, Categoria categoria,  Marca marca, Especificacion especificacion,
-        Long idMarca, Long idCategoria,Long idEspecificacion) {
+    public Producto guardarProducto(Producto producto, ProductoCategoria productoCategoria, Categoria categoria,
+            Marca marca, Especificacion especificacion,
+            Long idMarca, Long idCategoria, Long idEspecificacion) {
 
-        
         validarProducto(producto);
         Marca marcaNueva = marcaService.guardarMarca(marca);
         Especificacion especificacionNuevaOexistente = especificacionService.guardarEspecificacion(especificacion);
-        ProductoCategoria nuevoProductoCategoria = productoCategoriaService.guardarProductoCategoria(productoCategoria, categoria);
+        ProductoCategoria nuevoProductoCategoria = productoCategoriaService.guardarProductoCategoria(productoCategoria,
+                categoria);
 
         producto.setMarca(marcaNueva);
         producto.setEspecificacion(especificacionNuevaOexistente);
@@ -59,37 +64,39 @@ public class ProductoService {
 
     }
 
-    public void validarProducto(Producto producto){
-        if(producto.getNombreProducto() == null || producto.getNombreProducto().trim().isBlank()){
+    public void validarProducto(Producto producto) {
+        if (producto.getNombreProducto() == null || producto.getNombreProducto().trim().isBlank()) {
             throw new RuntimeException("Debe asignar un nombre al producto");
         }
-        if(producto.getStock() == null || producto.getStock() < 0){
+        if (producto.getStock() == null || producto.getStock() < 0) {
             throw new RuntimeException("El stock debe ser mayor o igual a 0");
         }
-        if(producto.getPrecio() == null || producto.getPrecio().compareTo(BigDecimal.ZERO) <= 0){
+        if (producto.getPrecio() == null || producto.getPrecio().compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("El valor del producto no puede ser 0");
         }
-        if(producto.getSku() == null || producto.getSku().trim().isBlank()){
+        if (producto.getSku() == null || producto.getSku().trim().isBlank()) {
             throw new RuntimeException("Debe asignar un sku");
         }
-        if(producto.getPeso() == null || producto.getPeso().trim().isBlank()){
+        if (producto.getPeso() == null || producto.getPeso().trim().isBlank()) {
             throw new RuntimeException("Debe asignar un peso en (kg / gr)");
         }
 
     }
-    
 
     public void borrarProducto(Long id) {
         Producto producto = productoRepository.findById(id).orElse(null);
         if (producto == null) {
             throw new IllegalArgumentException("Producto no encontrado.");
         }
+
+        especificacionRepository.deleteById(producto.getEspecificacion().getId());
+
         productoRepository.deleteById(id);
     }
 
     public Producto actualizacionParcialProducto(Producto producto, Marca marca, Especificacion especificacion) {
         Producto existingProducto = productoRepository.findById(producto.getId())
-            .orElseThrow(()-> new RuntimeException("El producto no fue encontrado"));
+                .orElseThrow(() -> new RuntimeException("El producto no fue encontrado"));
 
         if (producto.getNombreProducto() != null) {
             existingProducto.setNombreProducto(producto.getNombreProducto());
@@ -110,7 +117,8 @@ public class ProductoService {
             Marca marcaNueva = marcaService.guardarMarca(marca);
             existingProducto.setMarca(marcaNueva);
         }
-        boolean cambiarEspecificaciones = especificacion.getFrecuencia() != null || especificacion.getCapacidadAlmacenamiento() != null || especificacion.getConsumo() != null; 
+        boolean cambiarEspecificaciones = especificacion.getFrecuencia() != null
+                || especificacion.getCapacidadAlmacenamiento() != null || especificacion.getConsumo() != null;
         if (cambiarEspecificaciones) {
             Especificacion nuevaEspecificacion = especificacionService.guardarEspecificacion(especificacion);
             existingProducto.setEspecificacion(nuevaEspecificacion);
@@ -118,25 +126,25 @@ public class ProductoService {
         return productoRepository.save(existingProducto);
     }
 
-    public Producto buscarPorNombre(String nombreProducto){
-        if(nombreProducto == null || nombreProducto.trim().isEmpty()){
+    public Producto buscarPorNombre(String nombreProducto) {
+        if (nombreProducto == null || nombreProducto.trim().isEmpty()) {
             throw new RuntimeException("Debe ingresar un nombre para buscar.");
         }
         Producto existente = productoRepository.findByNombreProducto(nombreProducto)
-            .orElseThrow(()-> new RuntimeException("No se encontraron productos con ese nombre"));
-        
+                .orElseThrow(() -> new RuntimeException("No se encontraron productos con ese nombre"));
+
         return existente;
     }
 
-    public Producto actualizarStock(Long idProducto, int cantidad){
-        if(cantidad <0 ){
+    public Producto actualizarStock(Long idProducto, int cantidad) {
+        if (cantidad < 0) {
             throw new RuntimeException("La cantidad no puede ser negativa");
         }
         Producto existente = productoRepository.findById(idProducto)
-            .orElseThrow(()-> new RuntimeException("Producto no encontrado"));
-        int nuevoStock = existente.getStock() -  cantidad;
-        if(nuevoStock < 0 ){
-              throw new RuntimeException("Stock insuficiente");
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        int nuevoStock = existente.getStock() - cantidad;
+        if (nuevoStock < 0) {
+            throw new RuntimeException("Stock insuficiente");
         }
         existente.setStock(nuevoStock);
         return productoRepository.save(existente);
