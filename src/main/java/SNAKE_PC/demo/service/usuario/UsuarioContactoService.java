@@ -46,13 +46,23 @@ public class UsuarioContactoService {
         return contactoRepository.save(contacto);
     }
 
-    public Contacto ActualizarContacto(Contacto contactoActualizado, Usuario usuario, Direccion direccionActualizada, Long idComuna){
-        Contacto contactoexistente = contactoRepository.findById(contactoActualizado.getId())
-            .orElseThrow(()-> new RuntimeException("Contacto no encontrado"));
+    public Contacto ActualizarContacto(Contacto contactoActualizado, Usuario usuarioConCorreoNuevo, Direccion direccionActualizada, Long idComuna, String correoUsuarioLogueado){
+        Contacto contactoexistente = contactoRepository.findByIdAndUsuarioCorreo(contactoActualizado.getId(), correoUsuarioLogueado)
+            .orElseThrow(()-> new RuntimeException("Contacto no encontrado o no tienes permisos"));
 
-        validarDatosContacto(contactoActualizado);
-        usuarioService.actualizarCorreo(usuario.getId(),usuario.getCorreo());
-        direccionService.validarDireccion(direccionActualizada);
+        validarDatosContactoParaActualizacion(contactoActualizado, contactoexistente.getId());
+
+        contactoexistente.setNombre(contactoActualizado.getNombre().trim());
+        contactoexistente.setApellido(contactoActualizado.getApellido().trim());
+        contactoexistente.setTelefono(contactoActualizado.getTelefono());
+
+        Usuario usuarioReal = contactoexistente.getUsuario();
+        String correoActual = usuarioReal.getCorreo().trim();
+        String correoNuevo = usuarioConCorreoNuevo.getCorreo().trim();
+        if(!correoActual.equalsIgnoreCase(correoNuevo)){
+            usuarioService.validarCorreoParaActualizacion(correoNuevo, usuarioReal.getId());
+            usuarioService.actualizarCorreo(usuarioReal.getId(), correoNuevo);
+        }
         Direccion nuevaDireccion = direccionService.crearDireccion(direccionActualizada, idComuna);
         contactoexistente.setDireccion(nuevaDireccion);
 
@@ -65,9 +75,8 @@ public class UsuarioContactoService {
     }
 
 
-
 //--------------------------------- Validaciones ---------------------------------------------------------------
-public void validarDatosContacto(Contacto contacto){
+    public void validarDatosContacto(Contacto contacto){
         if (contacto.getNombre() == null || contacto.getNombre().trim().isBlank()){ 
                 throw new RuntimeException("El nombre es obligatorio");
         }
@@ -87,6 +96,29 @@ public void validarDatosContacto(Contacto contacto){
             throw new RuntimeException("El teléfono debe tener exactamente 9 dígitos");
         }
     }
+
+    private void validarDatosContactoParaActualizacion(Contacto contactoActualizado, Long contactoIdActual) {
+        if (contactoActualizado.getNombre() == null || contactoActualizado.getNombre().trim().isBlank()) {
+            throw new RuntimeException("El nombre es obligatorio");
+        }
+        if (contactoActualizado.getApellido() == null || contactoActualizado.getApellido().trim().isBlank()) {
+            throw new RuntimeException("El apellido es obligatorio");
+        }
+        if (contactoActualizado.getTelefono() == null || contactoActualizado.getTelefono().trim().isEmpty()) {
+            throw new RuntimeException("El teléfono es obligatorio");
+        }
+        if (!contactoActualizado.getTelefono().matches("\\d+")) {
+            throw new RuntimeException("El teléfono solo puede contener números");
+        }
+        if (contactoActualizado.getTelefono().length() != 9) {
+            throw new RuntimeException("El teléfono debe tener exactamente 9 dígitos");
+        }
+        if (contactoRepository.existsByTelefonoAndIdNot(contactoActualizado.getTelefono(), contactoIdActual)) {
+            throw new RuntimeException("El teléfono ya está registrado por otro usuario");
+        }
+    }
+
+
 //--------------------------------- Para listar siendo admin ---------------------------------------------------
     public List<Contacto> findAll(){
         return contactoRepository.findAll();

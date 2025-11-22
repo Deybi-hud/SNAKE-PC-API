@@ -1,6 +1,7 @@
 package SNAKE_PC.demo.service.pedido;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import SNAKE_PC.demo.model.pedido.MetodoPago;
 import SNAKE_PC.demo.model.pedido.Pago;
 import SNAKE_PC.demo.model.pedido.Pedido;
+import SNAKE_PC.demo.repository.pedido.PagoRepository;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -16,6 +18,13 @@ public class PagoService {
     
     @Autowired
     private PedidoService pedidoService;
+
+    @Autowired
+    private MetodoPagoService metodoPagoService;
+
+    @Autowired
+    private PagoRepository pagoRepository;
+
 
     public Pago crearPago(Long pedidoId, String correoUsuario, Long metodoPagoId) {
 
@@ -45,4 +54,10 @@ public class PagoService {
 
         return pagoCreado;
     }
+
+     public List<Pago> obtenerPagosPorUsuario(String correoUsuario) {
+        return pagoRepository.findByPedidoContactoUsuarioCorreo(correoUsuario);
+    }
+
+
 }
