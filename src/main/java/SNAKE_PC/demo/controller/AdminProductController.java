@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("api/v1/admin/catalogo")
-@Tag(name = "Admin - Catálogo de Productos", description = "Gestión de marcas, categorías, especificaciones y subcategorías")
+@Tag(name = "Admin - Catalogo de Productos", description = "Gestion de marcas, categorias, especificaciones y subCategorias")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminProductController {
 
@@ -46,7 +46,7 @@ public class AdminProductController {
     @Autowired
     private ProductoCategoriaService productoCategoriaService;
 
-    // ======================== MARCAS ========================
+    // ======================== CRUD MARCAS ========================
 
     @GetMapping("/marcas")
     @Operation(summary = "Listar marcas", description = "Obtiene todas las marcas")
@@ -102,10 +102,10 @@ public class AdminProductController {
         }
     }
 
-    // ======================== CATEGORÍAS ========================
+    // ======================== CRUD CATEGORIAS ========================
 
     @GetMapping("/categorias")
-    @Operation(summary = "Listar categorías", description = "Obtiene todas las categorías")
+    @Operation(summary = "Listar categorias", description = "Obtiene todas las categorias")
     public ResponseEntity<?> listarCategorias() {
         List<Categoria> categorias = categoriaService.buscarTodos();
         if (categorias.isEmpty()) {
@@ -115,7 +115,7 @@ public class AdminProductController {
     }
 
     @GetMapping("/categorias/{id}")
-    @Operation(summary = "Obtener categoría por ID", description = "Obtiene una categoría específica")
+    @Operation(summary = "Obtener categoria por ID", description = "Obtiene una categoria específica")
     public ResponseEntity<?> obtenerCategoria(@PathVariable Long id) {
         try {
             Categoria categoria = categoriaService.buscarPorId(id);
@@ -126,7 +126,7 @@ public class AdminProductController {
     }
 
     @PostMapping("/categorias")
-    @Operation(summary = "Crear categoría", description = "Crea una nueva categoría")
+    @Operation(summary = "Crear categoria", description = "Crea una nueva categoria")
     public ResponseEntity<?> crearCategoria(@RequestBody Categoria categoria) {
         try {
             Categoria nuevaCategoria = categoriaService.guardarCategoria(categoria);
@@ -137,7 +137,7 @@ public class AdminProductController {
     }
 
     @PutMapping("/categorias/{id}")
-    @Operation(summary = "Actualizar categoría", description = "Actualiza una categoría existente")
+    @Operation(summary = "Actualizar categoria", description = "Actualiza una categoria existente")
     public ResponseEntity<?> actualizarCategoria(@PathVariable Long id, @RequestBody Categoria categoria) {
         try {
             Categoria categoriaActualizada = categoriaService.actualizarCategoria(id, categoria);
@@ -148,17 +148,17 @@ public class AdminProductController {
     }
 
     @DeleteMapping("/categorias/{id}")
-    @Operation(summary = "Eliminar categoría", description = "Elimina una categoría del sistema")
+    @Operation(summary = "Eliminar categoria", description = "Elimina una categoria del sistema")
     public ResponseEntity<?> eliminarCategoria(@PathVariable Long id) {
         try {
             categoriaService.eliminarCategoria(id);
-            return ResponseEntity.ok("Categoría eliminada correctamente");
+            return ResponseEntity.ok("Categoria eliminada correctamente");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
         }
     }
 
-    // ======================== ESPECIFICACIONES ========================
+    // ======================== CRUD ESPECIFICACIONES ========================
 
     @GetMapping("/especificaciones")
     @Operation(summary = "Listar especificaciones", description = "Obtiene todas las especificaciones")
@@ -171,7 +171,7 @@ public class AdminProductController {
     }
 
     @GetMapping("/especificaciones/{id}")
-    @Operation(summary = "Obtener especificación por ID", description = "Obtiene una especificación específica")
+    @Operation(summary = "Obtener especificacion por ID", description = "Obtiene una especificacion específica")
     public ResponseEntity<?> obtenerEspecificacion(@PathVariable Long id) {
         try {
             Especificacion especificacion = especificacionService.buscarPorId(id);
@@ -182,7 +182,7 @@ public class AdminProductController {
     }
 
     @PostMapping("/especificaciones")
-    @Operation(summary = "Crear especificación", description = "Crea una nueva especificación")
+    @Operation(summary = "Crear especificacion", description = "Crea una nueva especificacion")
     public ResponseEntity<?> crearEspecificacion(@RequestBody Especificacion especificacion) {
         try {
             Especificacion nuevaEspecificacion = especificacionService.guardarEspecificacion(especificacion);
@@ -193,7 +193,7 @@ public class AdminProductController {
     }
 
     @PutMapping("/especificaciones/{id}")
-    @Operation(summary = "Actualizar especificación", description = "Actualiza una especificación existente")
+    @Operation(summary = "Actualizar especificacion", description = "Actualiza una especificacion existente")
     public ResponseEntity<?> actualizarEspecificacion(@PathVariable Long id,
             @RequestBody Especificacion especificacion) {
         try {
@@ -206,21 +206,20 @@ public class AdminProductController {
     }
 
     @DeleteMapping("/especificaciones/{id}")
-    @Operation(summary = "Eliminar especificación", description = "Elimina una especificación del sistema")
+    @Operation(summary = "Eliminar especificacion", description = "Elimina una especificacion del sistema")
     public ResponseEntity<?> eliminarEspecificacion(@PathVariable Long id) {
         try {
             especificacionService.eliminarEspecificacion(id);
-            return ResponseEntity.ok("Especificación eliminada correctamente");
+            return ResponseEntity.ok("especificacion eliminada correctamente");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
         }
     }
 
-    // ======================== PRODUCTO CATEGORÍA (SUBCATEGORÍAS)
-    // ========================
+    // ======================== CRUD SUBCATEOGORIA ========================
 
     @GetMapping("/producto-categorias")
-    @Operation(summary = "Listar subcategorías de productos", description = "Obtiene todas las subcategorías")
+    @Operation(summary = "Listar subCategorias de productos", description = "Obtiene todas las subCategorias")
     public ResponseEntity<?> listarProductoCategorias() {
         List<ProductoCategoria> productoCategorias = productoCategoriaService.buscarTodos();
         if (productoCategorias.isEmpty()) {
@@ -230,7 +229,7 @@ public class AdminProductController {
     }
 
     @GetMapping("/producto-categorias/{id}")
-    @Operation(summary = "Obtener subcategoría por ID", description = "Obtiene una subcategoría específica")
+    @Operation(summary = "Buscar subCategoria por ID", description = "Obtiene una subCategoria en especifico")
     public ResponseEntity<?> obtenerProductoCategoria(@PathVariable Long id) {
         try {
             ProductoCategoria productoCategoria = productoCategoriaService.buscarPorId(id);
@@ -241,7 +240,7 @@ public class AdminProductController {
     }
 
     @PostMapping(value = "/producto-categorias", consumes = "multipart/form-data")
-    @Operation(summary = "Crear subcategoría", description = "Crea una nueva subcategoría para una categoría existente")
+    @Operation(summary = "Crear subCategoria", description = "Crea una nueva subCategoria que ya existe")
     public ResponseEntity<?> crearProductoCategoria(@RequestPart ProductoCategoria productoCategoria,
             @Parameter(description = "ID de la categoría padre") @RequestPart Categoria categoria) {
         try {
@@ -268,11 +267,11 @@ public class AdminProductController {
     }
 
     @DeleteMapping("/producto-categorias/{id}")
-    @Operation(summary = "Eliminar subcategoría", description = "Elimina una subCategoria del sistema")
+    @Operation(summary = "Eliminar subCategoria", description = "Elimina una subCategoria del sistema")
     public ResponseEntity<?> eliminarProductoCategoria(@PathVariable Long id) {
         try {
             productoCategoriaService.eliminarProductoCategoria(id);
-            return ResponseEntity.ok("Subcategoría eliminada correctamente");
+            return ResponseEntity.ok("subCategoria eliminada correctamente");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
         }

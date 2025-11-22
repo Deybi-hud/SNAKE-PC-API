@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/admin/roles")
+@RequestMapping("/api/v1/admin/roles")
 @PreAuthorize("hasRole('ADMIN')")
 public class RolController {
 

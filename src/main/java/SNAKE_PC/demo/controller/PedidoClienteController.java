@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/cliente/pedidos")
+@RequestMapping("/api/v1/cliente/pedidos")
 public class PedidoClienteController {
 
     @Autowired

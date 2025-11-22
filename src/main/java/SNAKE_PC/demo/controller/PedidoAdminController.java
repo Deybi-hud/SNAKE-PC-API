@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/admin/pedidos")
+@RequestMapping("/api/v1/admin/pedidos")
 public class PedidoAdminController {
 
     @Autowired

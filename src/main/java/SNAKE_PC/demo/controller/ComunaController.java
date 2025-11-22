@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/public/ubicacion")
+@RequestMapping("/api/v1/public/ubicacion")
 public class ComunaController {
 
     @Autowired

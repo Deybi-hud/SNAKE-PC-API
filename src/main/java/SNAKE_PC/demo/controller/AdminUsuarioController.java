@@ -7,15 +7,20 @@ import org.springframework.web.bind.annotation.*;
 
 import SNAKE_PC.demo.model.usuario.Contacto;
 import SNAKE_PC.demo.model.usuario.Usuario;
+import SNAKE_PC.demo.model.usuario.Direccion;
 import SNAKE_PC.demo.service.usuario.UsuarioContactoService;
 import SNAKE_PC.demo.service.usuario.UsuarioService;
+import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
+import SNAKE_PC.demo.repository.usuario.ContactoRepository;
+import SNAKE_PC.demo.repository.usuario.DireccionRepository;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/admin/usuarios")
+@RequestMapping("/api/v1/admin/usuarios")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminUsuarioController {
 
@@ -24,6 +29,15 @@ public class AdminUsuarioController {
 
     @Autowired
     private UsuarioContactoService usuarioContactoService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private ContactoRepository contactoRepository;
+
+    @Autowired
+    private DireccionRepository direccionRepository;
 
     @GetMapping("/contactos")
     public ResponseEntity<?> listarTodosLosContactos() {
@@ -87,6 +101,40 @@ public class AdminUsuarioController {
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{usuarioId}")
+    public ResponseEntity<?> borrarUsuario(@PathVariable Long usuarioId) {
+        try {
+            Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
+
+            if (!usuarioOpt.isPresent()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Usuario usuario = usuarioOpt.get();
+            Contacto contacto = usuario.getContacto();
+
+            if (contacto != null && contacto.getDireccion() != null) {
+                Direccion direccion = contacto.getDireccion();
+                direccionRepository.delete(direccion);
+            }
+
+            if (contacto != null) {
+                contactoRepository.delete(contacto);
+            }
+
+            usuarioRepository.delete(usuario);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("mensaje", "Usuario eliminado exitosamente");
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Error al eliminar usuario: " + e.getMessage()));
         }
     }
 }
