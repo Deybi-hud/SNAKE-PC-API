@@ -44,10 +44,10 @@ public class PedidoController {
         try {
             String correoUsuario = authentication.getName();
 
-            @SuppressWarnings("unchecked")
-            Map<Long, Integer> productosYCantidades = (Map<Long, Integer>) pedidoRequest.get("productos");
+            @SuppressWarnings({ "unchecked", "unlikely-arg-type" })
+            Map<Long, Integer> productosYCantidades = (Map<Long, Integer>) pedidoRequest.get("produ1ctos");
 
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings({ "unchecked", "unlikely-arg-type" })
             Map<Long, Long> metodosEnvio = (Map<Long, Long>) pedidoRequest.get("metodosEnvio");
 
             if (productosYCantidades == null || metodosEnvio == null) {

@@ -83,14 +83,10 @@ public class ProductoService {
 
     }
 
-    public void borrarProducto(Long id) {
-        Producto producto = productoRepository.findById(id).orElse(null);
-        if (producto == null) {
-            throw new IllegalArgumentException("Producto no encontrado.");
-        }
-
-        especificacionRepository.deleteById(producto.getEspecificacion().getId());
-
+        public void borrarProducto(Long id) {
+        Producto producto = productoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        especificacionRepository.delete(producto.getEspecificacion());
         productoRepository.deleteById(id);
     }
 
