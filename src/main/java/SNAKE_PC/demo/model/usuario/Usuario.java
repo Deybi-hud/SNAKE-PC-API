@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "usuario")
@@ -42,6 +43,7 @@ public class Usuario {
     private boolean activo = true;
 
     @OneToOne(mappedBy = "usuario")
+    @JsonIgnore
     private Contacto contacto;
 
     @ManyToOne

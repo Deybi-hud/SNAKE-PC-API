@@ -3,6 +3,8 @@ package SNAKE_PC.demo.repository.producto;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import SNAKE_PC.demo.model.producto.Especificacion;
@@ -17,6 +19,7 @@ public interface EspecificacionRepository extends JpaRepository<Especificacion, 
         boolean existsByFrecuenciaAndCapacidadAlmacenamientoAndConsumo(String frecuencia, String capacidad,
                         String consumo);
 
-        void deleteByProductoId(Long productoId);
+        @Query("DELETE FROM Especificacion e WHERE e.id IN (SELECT DISTINCT e.id FROM Especificacion e JOIN e.productos p WHERE p.id = :productoId)")
+        void deleteByProductoId(@Param("productoId") Long productoId);
 
 }
