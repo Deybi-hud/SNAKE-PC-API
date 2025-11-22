@@ -1,5 +1,8 @@
 package SNAKE_PC.demo.model.pedido;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import SNAKE_PC.demo.model.producto.Producto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,10 +31,10 @@ public class DetallePedido {
     private Integer cantidad;
 
     @Column(name = "precio_unitario", nullable = false)
-    private Double precioUnitario;
+    private BigDecimal precioUnitario;
 
     @Column(name ="subtotal", nullable = false)
-    private Double subtotal;
+    private BigDecimal subtotal;
 
     @ManyToOne
     @JoinColumn(name = "id_pedido", nullable = false)
@@ -40,4 +43,10 @@ public class DetallePedido {
     @ManyToOne
     @JoinColumn(name = "id_producto", nullable = false)
     private Producto producto;
+
+    @ManyToOne
+    @JoinColumn(name = "id_metodo_envio", nullable = false)
+    private MetodoEnvio metodoEnvio;
+
+    
 }

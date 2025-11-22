@@ -16,7 +16,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,10 +46,6 @@ public class Pedido {
     @ManyToOne
     @JoinColumn(name = "id_estado_pedido", nullable = false)
     private EstadoPedido estado;
-
-    @OneToOne(optional = false)
-    @JoinColumn(name = "id_pedido_metodo_envio", nullable = false)
-    private PedidoMetodoEnvio pedidoMetodoEnvio;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetallePedido> detalles = new ArrayList<>();
