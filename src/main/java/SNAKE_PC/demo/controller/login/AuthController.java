@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,28 +30,36 @@ public class AuthController {
     @Autowired
     private UsuarioContactoService usuarioContactoService;
 
-    @PostMapping(value = "/registrar", consumes = "multipart/form-data")
-    public ResponseEntity<?> registrarCliente(
-            @RequestPart(value = "imagenUsuario", required = false) String imagenUsuario,
-            @RequestPart Contacto contacto,
-            @RequestPart Usuario usuario,
-            @RequestPart Direccion direccion,
-            @RequestPart Long comunaId) {
+    @PostMapping("/registrar")
+    public ResponseEntity<?> registrarCliente(@RequestBody Map<String, Object> datos) {
 
         try {
+            Contacto contacto = new Contacto();
+            contacto.setNombre((String) datos.get("nombre"));
+            contacto.setApellido((String) datos.get("apellido"));
+            contacto.setTelefono((String) datos.get("telefono"));
+
+            Usuario usuario = new Usuario();
+            usuario.setNombreUsuario((String) datos.get("nombreUsuario"));
+            usuario.setCorreo((String) datos.get("correo"));
+            usuario.setContrasena((String) datos.get("contrasena"));
+
+            Direccion direccion = new Direccion();
+            direccion.setCalle((String) datos.get("calle"));
+            direccion.setNumero((String) datos.get("numero"));
+
+            String confirmarContrasena = (String) datos.get("confirmarContrasena");
+            Long comunaId = ((Number) datos.get("comunaId")).longValue();
+
             Contacto nuevoContacto = usuarioContactoService.RegistrarCliente(
-                    contacto, usuario, "", direccion, comunaId);
+                    contacto, usuario, confirmarContrasena, direccion, comunaId);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     Map.of(
                             "mensaje", "Cliente registrado exitosamente",
                             "contactoId", nuevoContacto.getId(),
-                            "usuarioId", nuevoContacto.getUsuario().getId(),
-                            "imagenUsuario", imagenUsuario));
+                            "usuarioId", nuevoContacto.getUsuario().getId()));
 
-        } catch (IOException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Error al procesar: " + e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));

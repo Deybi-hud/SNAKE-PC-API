@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import SNAKE_PC.demo.model.usuario.Contacto;
 import jakarta.persistence.CascadeType;
@@ -52,5 +53,6 @@ public class Pedido {
     private EstadoPedido estado;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<DetallePedido> detalles = new ArrayList<>();
 }
