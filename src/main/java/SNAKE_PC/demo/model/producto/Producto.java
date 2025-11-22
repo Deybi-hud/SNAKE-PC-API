@@ -1,5 +1,7 @@
 package SNAKE_PC.demo.model.producto;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,7 +32,7 @@ public class Producto {
     private Integer stock;
 
     @Column(name = "precio", nullable = false)
-    private Double precio;
+    private BigDecimal precio;
 
     @Column(name = "sku", nullable = false, unique = true)
     private String sku;

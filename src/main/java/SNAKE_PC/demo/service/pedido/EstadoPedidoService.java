@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import SNAKE_PC.demo.model.pedido.EstadoPedido;
 import SNAKE_PC.demo.repository.pedido.EstadoPedidoRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -16,64 +17,41 @@ public class EstadoPedidoService {
     private EstadoPedidoRepository estadoPedidoRepository;
 
 
-    public EstadoPedido guardarEstado(EstadoPedido estadoPedido){
-        if(estadoPedido.getNombre() == null || estadoPedido.getNombre().trim().isBlank()){
-            throw new RuntimeException("Debe asignar un estado");
-        }
-        if(estadoPedido.getDescripcion() == null || estadoPedido.getDescripcion().isBlank()){
-            throw new RuntimeException("Por favor añada un descripcion breve.");
-        }
-        return estadoPedidoRepository.findByNombreIgnoreCase(estadoPedido.getNombre())
-            .map(estadoExistente ->{
-                estadoExistente.setDescripcion(estadoPedido.getDescripcion());
-                return estadoPedidoRepository.save(estadoExistente);
-            })
-            .orElseGet(()-> {
-                EstadoPedido nuevoEstadoPedido = new EstadoPedido();
-                nuevoEstadoPedido.setNombre(estadoPedido.getNombre());
-                nuevoEstadoPedido.setDescripcion(estadoPedido.getDescripcion());
-                return estadoPedidoRepository.save(nuevoEstadoPedido);
-            });
+    @PostConstruct
+    public void inicializarEstados(){
+        crearEstadoSiNoExiste("PENDIENTE", "El pedido está siendo procesado");
+        crearEstadoSiNoExiste("DESPACHADO","El pedido va en camino");
+        crearEstadoSiNoExiste("ENTREGADO", "El pedido fue entregado exitosamente");
+        crearEstadoSiNoExiste("CANCELADO", "El pedido fue cancelado");
     }
 
+    private void crearEstadoSiNoExiste(String nombre, String descripcion){
+        if(!estadoPedidoRepository.existsByNombreIgnoreCase(nombre)){
+            EstadoPedido estado = new EstadoPedido();
+            estado.setNombre(nombre.toUpperCase().trim());
+            estado.setDescripcion(descripcion);
+            estadoPedidoRepository.save(estado);
+        }
+    }
 
     public EstadoPedido obtenerEstadoPendiente(){
-        return estadoPedidoRepository.findByNombreIgnoreCase("PENDIENTE")
-        .orElseGet(()-> {
-            EstadoPedido nuevo = new EstadoPedido();
-            nuevo.setNombre("PENDIENTE");
-            nuevo.setDescripcion("El pedido se está preparando");
-            return guardarEstado(nuevo);
-        }); 
-    }
-
-    public EstadoPedido obtenerEstadoCanelado(){
-        return estadoPedidoRepository.findByNombreIgnoreCase("CANCELADO")
-        .orElseGet(()-> {
-            EstadoPedido nuevo = new EstadoPedido();
-            nuevo.setNombre("CANCELADO");
-            nuevo.setDescripcion("Pedido cancelado");
-            return guardarEstado(nuevo);
-        }); 
-    }
-
-    public EstadoPedido obtenerEstadoEntregado(){
-        return estadoPedidoRepository.findByNombreIgnoreCase("ENTREGADO")
-        .orElseGet(()-> {
-            EstadoPedido nuevo = new EstadoPedido();
-            nuevo.setNombre("ENTREGADO");
-            nuevo.setDescripcion("El pedido se entrego correctamente.");
-            return guardarEstado(nuevo);
-        }); 
+        return obtenerPorNombre("PENDIENTE");
     }
 
     public EstadoPedido obtenerEstadoDespachado(){
-        return estadoPedidoRepository.findByNombreIgnoreCase("DESPACHADO")
-        .orElseGet(()-> {
-            EstadoPedido nuevo = new EstadoPedido();
-            nuevo.setNombre("DESPACHADO");
-            nuevo.setDescripcion("El pedido va en camino");
-            return guardarEstado(nuevo);
-        }); 
+        return obtenerPorNombre("DESPACHADO");
+    }
+
+    public EstadoPedido obtenerEstadoEntregado(){
+        return obtenerPorNombre("ENTREGADO");
+    }
+
+    public EstadoPedido obtenerEstadoCancelado(){
+        return obtenerPorNombre("CANCELADO");
+    }
+
+    private EstadoPedido obtenerPorNombre(String nombre){
+        return estadoPedidoRepository.findByNombreIgnoreCase(nombre)
+            .orElseThrow(()-> new RuntimeException("Estado de pedido no encontrado"));
     }
 }

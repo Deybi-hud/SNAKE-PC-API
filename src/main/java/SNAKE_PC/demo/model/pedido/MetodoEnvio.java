@@ -21,6 +21,12 @@ public class MetodoEnvio {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "Metodo", nullable = false)
+    @Column(name = "metodo", nullable = false)
     private String nombreMetodo;
+
+    @Column(name = "costo_envio", nullable = false)
+    private double costoEnvio;
+
+    @Column(name ="activo", nullable =  false)
+    private boolean activo;
 }
