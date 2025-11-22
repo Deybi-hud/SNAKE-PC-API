@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import SNAKE_PC.demo.model.pedido.MetodoPago;
 import SNAKE_PC.demo.model.pedido.Pago;
 import SNAKE_PC.demo.model.pedido.Pedido;
+import SNAKE_PC.demo.repository.pedido.MetodoPagoRepository;
 import SNAKE_PC.demo.repository.pedido.PagoRepository;
 import jakarta.transaction.Transactional;
 
@@ -19,12 +20,17 @@ public class PagoService {
     @Autowired
     private PedidoService pedidoService;
 
-    @Autowired
-    private MetodoPagoService metodoPagoService;
+    @Autowired 
+    private MetodoPagoRepository metodoPagoRepository;
 
     @Autowired
     private PagoRepository pagoRepository;
 
+    @Autowired
+    private PagoService pagoService;
+
+    @Autowired 
+    private EstadoPedidoService estadoPedidoService;
 
     public Pago crearPago(Long pedidoId, String correoUsuario, Long metodoPagoId) {
 
@@ -39,7 +45,7 @@ public class PagoService {
         MetodoPago metodoPago = metodoPagoRepository.findById(metodoPagoId)
                 .orElseThrow(() -> new RuntimeException("Método de pago no válido"));
 
-        Double totalPedido = calcularTotalPedido(pedidoId);
+        Double totalPedido = pagoService.calcularTotalPedido(pedidoId);
 
         Pago pago = new Pago();
         pago.setMonto(totalPedido);
@@ -50,9 +56,14 @@ public class PagoService {
 
         Pago pagoCreado = pagoRepository.save(pago);
 
-        actualizarEstadoPedido(pedidoId, "CONFIRMADO");
+        estadoPedidoService.actualizarEstadoPedido(pedidoId, "CONFIRMADO");
 
         return pagoCreado;
+    }
+
+     private Double calcularTotalPedido(Long pedidoId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'calcularTotalPedido'");
     }
 
      public List<Pago> obtenerPagosPorUsuario(String correoUsuario) {

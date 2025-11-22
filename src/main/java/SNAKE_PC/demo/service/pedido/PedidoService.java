@@ -10,15 +10,17 @@ import SNAKE_PC.demo.model.producto.Producto;
 import SNAKE_PC.demo.model.usuario.Contacto;
 import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.pedido.*;
+import SNAKE_PC.demo.repository.producto.ProductoRepository;
 import SNAKE_PC.demo.repository.usuario.ContactoRepository;
 import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
 import SNAKE_PC.demo.service.producto.ProductoService;
 import SNAKE_PC.demo.service.usuario.UsuarioContactoService;
 import SNAKE_PC.demo.service.usuario.UsuarioService;
 import lombok.RequiredArgsConstructor;
-import SNAKE_PC.demo.repository.producto.ProductoRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,8 +58,14 @@ public class PedidoService {
     @Autowired 
     private PagoRepository pagoRepository;
 
+    @Autowired 
+    private DetalleRepository detalleRepository;
+ 
+    @Autowired 
+    private ProductoRepository productoRepository;
 
-    public Pedido crearPedido(Map<Long, Integer> productosYCantidades, String correoUsuario) {
+
+    public Pedido crearPedido(Map<Long, Integer> productosYCantidades,Map<Long, Long> metodosEnvio, String correoUsuario) {
         Usuario usuario = usuarioService.validarActividad(correoUsuario);
         Contacto contacto = usuarioContactoService.obtenerDatosContacto(usuario.getId());
         EstadoPedido pedidoEstado = estadoPedidoService.obtenerEstadoPendiente();
@@ -71,7 +79,8 @@ public class PedidoService {
         pedido.setNumeroPedido(generarNumeroPedido());
         pedido.setContacto(contacto);
         pedido.setEstado(pedidoEstado);
-        pedidoRepository.save(pedido);
+        pedido.setDetalles(new ArrayList<>());
+       
 
         for (Map.Entry<Long, Integer> entry : productosYCantidades.entrySet()) {
             Long productoId = entry.getKey();
@@ -87,50 +96,10 @@ public class PedidoService {
             }
             productoService.actualizarStock(productoId, cantidad);
 
-
-            DetallePedido detallePedido = new DetallePedido();
-            detallePedido.setPedido(pedido);
-            detallePedido.setProducto(producto);
-            detallePedido.setCantidad(cantidad);
-            detallePedido.setPrecioUnitario(producto.getPrecio());
-
-            DetallePedido detalleGuardado = detallePedidoService.crearDetalle(detallePedido);
+            DetallePedido detalleGuardado = detallePedidoService.crearDetalle(productoId, cantidad, pedido, metodosEnvio);
             pedido.getDetalles().add(detalleGuardado);  
         }
-
-        return pedido;
-    }
-
-    public Pago crearPago(Long pedidoId, String correoUsuario, MetodoPago metodoPago) {
-
-        Pedido pedido = pedidoRepository.findById(pedidoId)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
-
-        if (!pedido.getContacto().getUsuario().getCorreo().equals(correoUsuario)) {
-            throw new RuntimeException("No tiene permisos para pagar este pedido");
-        }
-
-        if (!pedido.getEstado().getNombre().equals("PENDIENTE")) {
-            throw new RuntimeException("Solo se pueden pagar pedidos en estado PENDIENTE");
-        }
-
-        MetodoPago metodoPagoSeleccionado = metodoPagoService.buscarTipoPago(metodoPago);
-               
-
-        Double totalPedido = calcularTotalPedido(pedidoId);
-
-        Pago pago = new Pago();
-        pago.setMonto(totalPedido);
-        pago.setFechaPago(LocalDate.now());
-        pago.setEstadoPago("PAGADO");
-        pago.setMetodoPago(metodoPagoSeleccionado);
-        pago.setPedido(pedido);
-
-        Pago pagoCreado = pagoRepository.save(pago);
-
-        actualizarEstadoPedido(pedidoId, "CONFIRMADO");
-
-        return pagoCreado;
+        return pedidoRepository.save(pedido);
     }
 
 
@@ -241,12 +210,13 @@ public class PedidoService {
         return numeroPedido;
     }
 
-    private void devolverStock(Long pedidoId) {
-        List<DetallePedido> detalles = detallePedidoRepository.findByPedidoId(pedidoId);
-        for (DetallePedido detalle : detalles) {
-            Producto producto = detalle.getProducto();
-            producto.setStock(producto.getStock() + detalle.getCantidad());
-            productoRepository.save(producto);
-        }
-    }
+ private void devolverStock(Long pedidoId) {
+    detalleRepository.findByPedidoId(pedidoId).forEach(detalle -> {
+        Producto p = detalle.getProducto();
+        p.setStock(p.getStock() + detalle.getCantidad());
+        productoRepository.save(p);
+    });
+}
+
+    
 }

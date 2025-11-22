@@ -1,6 +1,7 @@
 package SNAKE_PC.demo.service.producto;
 
 import java.util.List;
+import java.math.BigDecimal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,7 +66,7 @@ public class ProductoService {
         if(producto.getStock() == null || producto.getStock() < 0){
             throw new RuntimeException("El stock debe ser mayor o igual a 0");
         }
-        if(producto.getPrecio() == null || producto.getPrecio() <= 0){
+        if(producto.getPrecio() == null || producto.getPrecio().compareTo(BigDecimal.ZERO) <= 0){
             throw new RuntimeException("El valor del producto no puede ser 0");
         }
         if(producto.getSku() == null || producto.getSku().trim().isBlank()){
@@ -76,6 +77,7 @@ public class ProductoService {
         }
 
     }
+    
 
     public void borrarProducto(Long id) {
         Producto producto = productoRepository.findById(id).orElse(null);

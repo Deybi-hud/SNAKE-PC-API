@@ -13,5 +13,7 @@ public interface EstadoPedidoRepository extends JpaRepository<EstadoPedido, Long
 
     Optional<EstadoPedido> findByNombre(String nombre);
 
+    boolean existsByNombreIgnoreCase(String nombre);
+
 
 }

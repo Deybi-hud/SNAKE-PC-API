@@ -7,12 +7,11 @@ import org.springframework.stereotype.Repository;
 
 import SNAKE_PC.demo.model.pedido.DetallePedido;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface DetalleRepository extends JpaRepository<DetallePedido, Long> {
 
-    Optional<DetallePedido> findByPedidoId(Long pedidoId);
+    List<DetallePedido> findByPedidoId(Long pedidoId);
 
     @Query("SELECT dp FROM DetallePedido dp JOIN FETCH dp.producto WHERE dp.pedido.id = :pedidoId")
     List<DetallePedido> findByPedidoIdWithProducto(@Param("pedidoId") Long pedidoId);

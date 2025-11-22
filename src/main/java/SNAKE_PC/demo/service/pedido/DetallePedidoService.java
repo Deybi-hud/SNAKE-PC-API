@@ -30,35 +30,21 @@ public class DetallePedidoService {
     private MetodoEnvioService metodoEnvioService;
   
     
-    public DetallePedido crearDetalle(Long productoId, Integer cantidad, Pedido pedido, Long IdMetodo){
-        if(cantidad == null || cantidad <= 0){
-            throw new RuntimeException("No se puede generar un detalle con 0 productos");
-        }
-
+   public DetallePedido crearDetalle(Long productoId, Integer cantidad, Pedido pedido, Long metodoEnvioId){  
         Producto producto = productoService.buscarPorId(productoId);
-        MetodoEnvio metodoEnvio = metodoEnvioService.seleccionarMetodoEnvio(IdMetodo);
+        MetodoEnvio metodoEnvio = metodoEnvioService.seleccionarMetodoEnvio(metodoEnvioId);
 
-        if (producto.getStock() == null || producto.getStock() < cantidad) {
-            throw new RuntimeException(
-                "Stock insuficiente para '" + producto.getNombreProducto() + 
-                "'. Disponible: " + producto.getStock() + 
-                ", solicitado: " + cantidad
-            );
-        }
-
-      DetallePedido detalle = new DetallePedido();
+        DetallePedido detalle = new DetallePedido();
         detalle.setProducto(producto);
-        detalle.setCantidad(cantidad);                                       
-        detalle.setPrecioUnitario(producto.getPrecio());                     
-        detalle.setSubtotal(producto.getPrecio().multiply(BigDecimal.valueOf(cantidad))); 
+        detalle.setCantidad(cantidad);
+        detalle.setPrecioUnitario(producto.getPrecio());
+        detalle.setSubtotal(producto.getPrecio().multiply(BigDecimal.valueOf(cantidad)));
         detalle.setPedido(pedido);
         detalle.setMetodoEnvio(metodoEnvio);
-        
-        DetallePedido guardado = detalleRepository.save(detalle);
 
-        return guardado;
+        return detalleRepository.save(detalle);
     }
-    
+        
     public BigDecimal calcularTotalPedido(Long pedidoId) {
         return detalleRepository.findByPedidoId(pedidoId).stream()
             .map(d -> {
