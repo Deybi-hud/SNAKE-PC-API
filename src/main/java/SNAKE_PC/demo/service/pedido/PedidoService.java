@@ -133,18 +133,6 @@ public class PedidoService {
         return pagoCreado;
     }
 
-    public Double calcularTotalPedido(Long pedidoId) {
-        List<DetallePedido> detalles = detallePedidoRepository.findByPedidoId(pedidoId);
-
-        return detalles.stream()
-                .mapToDouble(detalle -> detalle.getPrecioUnitario() * detalle.getCantidad())
-                .sum();
-    }
-
-    public List<Pago> obtenerPagosPorUsuario(String correoUsuario) {
-        return pagoRepository.findByPedidoContactoUsuarioCorreo(correoUsuario);
-    }
-
 
     public Pedido cancelarPedido(Long pedidoId, String correoUsuario) {
         Pedido pedido = pedidoRepository.findById(pedidoId)

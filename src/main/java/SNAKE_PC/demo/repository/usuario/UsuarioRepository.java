@@ -19,4 +19,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
   boolean isActivo(boolean activo);
 
+  boolean existsByCorreoAndIdNot(String normalizado, Long usuarioIdActual);
+
 }
