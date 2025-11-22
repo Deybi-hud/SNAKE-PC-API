@@ -1,6 +1,7 @@
 package SNAKE_PC.demo.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,10 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import SNAKE_PC.demo.model.producto.Categoria;
+import SNAKE_PC.demo.model.producto.Especificacion;
+import SNAKE_PC.demo.model.producto.Marca;
 import SNAKE_PC.demo.model.producto.Producto;
+import SNAKE_PC.demo.model.producto.ProductoCategoria;
 import SNAKE_PC.demo.service.producto.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -32,12 +36,16 @@ public class ProductController {
 
     @GetMapping
     @Operation(summary = "Listar todos los productos", description = "Obtiene la lista de todos los productos (acceso público)")
-    public ResponseEntity<List<Producto>> listar() {
-        List<Producto> productos = productoService.buscarTodo();
-        if (productos.isEmpty()) {
-            return ResponseEntity.noContent().build();
+    public ResponseEntity<?> listar() {
+        try {
+            List<Producto> productos = productoService.buscarTodo();
+            if (productos.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(productos);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
-        return ResponseEntity.ok(productos);
     }
 
     @GetMapping("/{id}")
@@ -45,84 +53,65 @@ public class ProductController {
     public ResponseEntity<?> buscar(@PathVariable long id) {
         try {
             if (id <= 0) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID debe ser mayor a 0");
+                return ResponseEntity.badRequest().body(Map.of("error", "El ID debe ser mayor a 0"));
             }
-
             Producto producto = productoService.buscarPorId(id);
             return ResponseEntity.ok(producto);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }
     }
 
     @PostMapping
-    @Operation(summary = "Crear nuevo producto", description = "Crea un nuevo producto. Nota: ProductoCategoria debe ser creada por separado")
+    @Operation(summary = "Crear nuevo producto", description = "Crea un nuevo producto")
     public ResponseEntity<?> crear(@RequestBody Producto producto,
-            @Parameter(description = "Nombre de la marca") @RequestParam String marcaNombre,
-            @Parameter(description = "Frecuencia") @RequestParam String frecuencia,
-            @Parameter(description = "Capacidad") @RequestParam String capacidad,
-            @Parameter(description = "Consumo") @RequestParam String consumo,
-            @Parameter(description = "ID de marca") @RequestParam Long idMarca,
-            @Parameter(description = "ID de especificación") @RequestParam Long idEspecificacion) {
+            @RequestParam(required = false) Marca marca,
+            @RequestParam(required = false) ProductoCategoria productoCategoria,
+            @RequestParam(required = false) Categoria categoria,
+            @RequestParam(required = false) Especificacion especificacion) {
         try {
-            if (producto == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El producto no puede ser nulo");
-            }
-            if (producto.getNombreProducto() == null || producto.getNombreProducto().isBlank()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El nombre del producto es obligatorio");
-            }
-
-            Producto nuevoProducto = productoService.guardarProducto(producto, marcaNombre, null,
-                    frecuencia, capacidad, consumo, idMarca, null, idEspecificacion);
+            Producto nuevoProducto = productoService.guardarProducto(
+                    producto, productoCategoria, categoria, marca, especificacion, null, null, null);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Actualizar producto", description = "Actualiza completamente un producto existente. Nota: ProductoCategoria debe ser actualizada por separado")
+    @Operation(summary = "Actualizar producto completamente", description = "Actualiza completamente un producto existente")
     public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Producto producto,
-            @Parameter(description = "Nombre de la marca") @RequestParam String marcaNombre,
-            @Parameter(description = "Frecuencia") @RequestParam String frecuencia,
-            @Parameter(description = "Capacidad") @RequestParam String capacidad,
-            @Parameter(description = "Consumo") @RequestParam String consumo,
-            @Parameter(description = "ID de marca") @RequestParam Long idMarca,
-            @Parameter(description = "ID de especificación") @RequestParam Long idEspecificacion) {
+            @RequestParam(required = false) Marca marca,
+            @RequestParam(required = false) ProductoCategoria productoCategoria,
+            @RequestParam(required = false) Categoria categoria,
+            @RequestParam(required = false) Especificacion especificacion) {
         try {
             if (id == null || id <= 0) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID del producto debe ser mayor a 0");
+                return ResponseEntity.badRequest().body(Map.of("error", "El ID del producto debe ser mayor a 0"));
             }
-
-            if (producto == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El producto no puede ser nulo");
-            }
-
             producto.setId(id);
-            Producto updateProducto = productoService.guardarProducto(producto, marcaNombre, null,
-                    frecuencia, capacidad, consumo, idMarca, null, idEspecificacion);
-            if (updateProducto == null) {
-                return ResponseEntity.notFound().build();
-            }
+            Producto updateProducto = productoService.guardarProducto(
+                    producto, productoCategoria, categoria, marca, especificacion, null, null, null);
             return ResponseEntity.ok(updateProducto);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
     @PatchMapping("/{id}")
     @Operation(summary = "Actualizar parcialmente un producto", description = "Actualiza parcialmente un producto existente")
-    public ResponseEntity<?> actualizarParcial(@PathVariable Long id, @RequestBody Producto producto) {
+    public ResponseEntity<?> actualizarParcial(@PathVariable Long id, @RequestBody Producto producto,
+            @RequestParam(required = false) Marca marca,
+            @RequestParam(required = false) Especificacion especificacion) {
         try {
             if (id == null || id <= 0) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID del producto debe ser mayor a 0");
+                return ResponseEntity.badRequest().body(Map.of("error", "El ID del producto debe ser mayor a 0"));
             }
-
             producto.setId(id);
-            Producto updatedProducto = productoService.actualizacionParcialProducto(producto);
+            Producto updatedProducto = productoService.actualizacionParcialProducto(producto, marca, especificacion);
             return ResponseEntity.ok(updatedProducto);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -131,13 +120,12 @@ public class ProductController {
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         try {
             if (id == null || id <= 0) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El ID del producto debe ser mayor a 0");
+                return ResponseEntity.badRequest().body(Map.of("error", "El ID del producto debe ser mayor a 0"));
             }
-
             productoService.borrarProducto(id);
-            return ResponseEntity.ok("Producto eliminado correctamente");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
+            return ResponseEntity.ok(Map.of("mensaje", "Producto eliminado correctamente"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }
     }
 }
