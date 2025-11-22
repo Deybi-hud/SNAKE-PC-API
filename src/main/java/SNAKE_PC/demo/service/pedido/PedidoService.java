@@ -16,10 +16,14 @@ import SNAKE_PC.demo.service.usuario.UsuarioService;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,6 +39,9 @@ public class PedidoService {
     private UsuarioContactoService  usuarioContactoService;
 
     @Autowired
+    private PedidoRepository pedidoRepository;
+
+    @Autowired
     private DetallePedidoService detallePedidoService;
 
     @Autowired 
@@ -45,9 +52,6 @@ public class PedidoService {
 
     @Autowired
     private EstadoPedidoService estadoPedidoService;
-
-    @Autowired 
-    private PedidoRepository pedidoRepository;
 
     @Autowired 
     private DetalleRepository detalleRepository;
@@ -168,38 +172,34 @@ public class PedidoService {
     }
 
     public Map<String, Object> obtenerEstadisticasDelDia() {
-        List<Pedido> pedidosDelDia = obtenerPedidosDelDia();
+        Object[] resultado = pedidoRepository.estadisticasDelDiaNative(); // o estadisticasDelDiaNative()
 
-        long totalPedidos = pedidosDelDia.size();
-        BigDecimal totalVentas = pedidosDelDia.stream()
-                .map(pedido -> calcularTotalPedido(pedido.getId()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Long totalPedidos = (Long) resultado[0];
+        BigDecimal totalVentas = (BigDecimal) resultado[1];
 
-        Map<String, Object> estadisticas = new HashMap<>();
-        estadisticas.put("fecha", LocalDate.now());
-        estadisticas.put("totalPedidos", totalPedidos);
-        estadisticas.put("totalVentas", totalVentas);
-        estadisticas.put("pedidos", pedidosDelDia);
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("fecha", LocalDate.now());
+        stats.put("totalPedidos", totalPedidos);
+        stats.put("totalVentas", totalVentas);
+        stats.put("totalVentasFormateado", formatearPesos(totalVentas));
 
-        return estadisticas;
+        return stats;
     }
 
     public Map<String, Object> obtenerEstadisticasDelMes() {
-        List<Pedido> pedidosDelMes = obtenerPedidosDelMes();
+        Object[] resultado = pedidoRepository.estadisticasDelMesNative(); // o estadisticasDelMesNative()
 
-        long totalPedidos = pedidosDelMes.size();
-       BigDecimal totalVentas = pedidosDelMes.stream()
-                .map(pedido -> calcularTotalPedido(pedido.getId()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Long totalPedidos = (Long) resultado[0];
+        BigDecimal totalVentas = (BigDecimal) resultado[1];
 
-        Map<String, Object> estadisticas = new HashMap<>();
-        estadisticas.put("mes", LocalDate.now().getMonth().toString());
-        estadisticas.put("anio", LocalDate.now().getYear());
-        estadisticas.put("totalPedidos", totalPedidos);
-        estadisticas.put("totalVentas", totalVentas);
-        estadisticas.put("pedidos", pedidosDelMes);
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("mes", LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "CL")).toUpperCase());
+        stats.put("anio", LocalDate.now().getYear());
+        stats.put("totalPedidos", totalPedidos);
+        stats.put("totalVentas", totalVentas);
+        stats.put("totalVentasFormateado", formatearPesos(totalVentas));
 
-        return estadisticas;
+        return stats;
     }
 
     private String generarNumeroPedido() {
@@ -242,5 +242,15 @@ public class PedidoService {
         return total;
     }
 
-    
+    private String formatearPesos(BigDecimal monto) {
+        if (monto == null || monto.compareTo(BigDecimal.ZERO) == 0) {
+            return "$ 0";
+        }
+        DecimalFormat df = new DecimalFormat("$ #,###");
+        df.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(new Locale("es", "CL")));
+        
+        return df.format(monto.longValue());
+    }
+
+
 }

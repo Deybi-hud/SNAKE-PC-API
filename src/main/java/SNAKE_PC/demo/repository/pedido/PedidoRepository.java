@@ -36,4 +36,31 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     @Query("SELECT p FROM Pedido p WHERE p.fechaPedido >= :fechaLimite ORDER BY p.fechaPedido DESC")
     List<Pedido> findPedidosRecientes(@Param("fechaLimite") LocalDate fechaLimite);
+
+    @Query(value = """
+        SELECT 
+        COUNT(p.id) as total_pedidos,
+        COALESCE(SUM(d.precio_unitario * d.cantidad), 0) + 
+        COALESCE(SUM(me.costo_envio), 0) as total_ventas
+        FROM pedido p
+        JOIN detalle_pedido d ON d.id_pedido = p.id
+        LEFT JOIN metodo_envio me ON d.id_metodo_envio = me.id
+        WHERE DATE(p.fecha_pedido) = CURRENT_DATE
+    """, nativeQuery = true)
+    Object[] estadisticasDelDiaNative();
+
+    @Query(value = """
+        SELECT 
+        COUNT(p.id) as total_pedidos,
+        COALESCE(SUM(d.precio_unitario * d.cantidad), 0) + 
+        COALESCE(SUM(me.costo_envio), 0) as total_ventas
+        FROM pedido p
+        JOIN detalle_pedido d ON d.id_pedido = p.id
+        LEFT JOIN metodo_envio me ON d.id_metodo_envio = me.id
+        WHERE p.fecha_pedido >= date_trunc('month', current_date)
+        AND p.fecha_pedido < date_trunc('month', current_date) + interval '1 month'
+        """, nativeQuery = true)
+    Object[] estadisticasDelMesNative();
+
+
 }
