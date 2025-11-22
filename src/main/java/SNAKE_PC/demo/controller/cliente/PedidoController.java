@@ -29,6 +29,7 @@ public class PedidoController {
     @Autowired
     private PagoRepository pagoRepository;
 
+    @SuppressWarnings("null")
     @PostMapping
     public ResponseEntity<?> crearPedido(
             @RequestBody Map<Long, Object> pedidoRequest,

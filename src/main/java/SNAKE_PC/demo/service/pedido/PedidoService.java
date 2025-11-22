@@ -4,11 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import SNAKE_PC.demo.model.pedido.*;
+import SNAKE_PC.demo.model.pedido.DetallePedido;
+import SNAKE_PC.demo.model.pedido.EstadoPedido;
+import SNAKE_PC.demo.model.pedido.Pedido;
 import SNAKE_PC.demo.model.producto.Producto;
 import SNAKE_PC.demo.model.usuario.Contacto;
 import SNAKE_PC.demo.model.usuario.Usuario;
-import SNAKE_PC.demo.repository.pedido.*;
+import SNAKE_PC.demo.repository.pedido.DetalleRepository;
+import SNAKE_PC.demo.repository.pedido.EstadoPedidoRepository;
+import SNAKE_PC.demo.repository.pedido.PedidoRepository;
 import SNAKE_PC.demo.repository.producto.ProductoRepository;
 import SNAKE_PC.demo.service.producto.ProductoService;
 import SNAKE_PC.demo.service.usuario.UsuarioContactoService;
@@ -36,7 +40,7 @@ public class PedidoService {
     private UsuarioService usuarioService;
 
     @Autowired
-    private UsuarioContactoService  usuarioContactoService;
+    private UsuarioContactoService usuarioContactoService;
 
     @Autowired
     private PedidoRepository pedidoRepository;
@@ -44,7 +48,7 @@ public class PedidoService {
     @Autowired
     private DetallePedidoService detallePedidoService;
 
-    @Autowired 
+    @Autowired
     private ProductoService productoService;
 
     @Autowired
@@ -53,29 +57,29 @@ public class PedidoService {
     @Autowired
     private EstadoPedidoService estadoPedidoService;
 
-    @Autowired 
+    @Autowired
     private DetalleRepository detalleRepository;
- 
-    @Autowired 
+
+    @Autowired
     private ProductoRepository productoRepository;
 
-
-    public Pedido crearPedido(Map<Long, Integer> productosYCantidades,Map<Long, Long> metodosEnvio, String correoUsuario) {
+    public Pedido crearPedido(Map<Long, Integer> productosYCantidades, Map<Long, Long> metodosEnvio,
+            String correoUsuario) {
         Usuario usuario = usuarioService.validarActividad(correoUsuario);
         Contacto contacto = usuarioContactoService.obtenerDatosContacto(usuario.getId());
         EstadoPedido pedidoEstado = estadoPedidoService.obtenerEstadoPendiente();
-            
+
         if (productosYCantidades == null || productosYCantidades.isEmpty()) {
             throw new RuntimeException("Debe agregar productos al pedido");
         }
-        
+
         Pedido pedido = new Pedido();
         pedido.setFechaPedido(LocalDate.now());
         pedido.setNumeroPedido(generarNumeroPedido());
         pedido.setContacto(contacto);
         pedido.setEstado(pedidoEstado);
         pedido.setDetalles(new ArrayList<>());
-       
+
         for (Map.Entry<Long, Integer> entry : productosYCantidades.entrySet()) {
             Long productoId = entry.getKey();
             Integer cantidad = entry.getValue();
@@ -93,19 +97,17 @@ public class PedidoService {
                 throw new RuntimeException("Falta método de envío para producto ID: " + productoId);
             }
             DetallePedido detalle = detallePedidoService.crearDetalle(
-                productoId, cantidad, pedido, metodoEnvioId
-            );
+                    productoId, cantidad, pedido, metodoEnvioId);
             pedido.getDetalles().add(detalle);
         }
         pedido = pedidoRepository.save(pedido);
-        for(Map.Entry<Long,Integer> entry : productosYCantidades.entrySet()){
-            productoService.actualizarStock(entry.getKey(),entry.getValue());
+        for (Map.Entry<Long, Integer> entry : productosYCantidades.entrySet()) {
+            productoService.actualizarStock(entry.getKey(), entry.getValue());
         }
 
         pedido.setTotal(calcularTotalPedido(pedido.getId()));
         return pedidoRepository.save(pedido);
     }
-
 
     public Pedido cancelarPedido(Long pedidoId, String correoUsuario) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
@@ -172,7 +174,7 @@ public class PedidoService {
     }
 
     public Map<String, Object> obtenerEstadisticasDelDia() {
-        Object[] resultado = pedidoRepository.estadisticasDelDiaNative(); // o estadisticasDelDiaNative()
+        Object[] resultado = pedidoRepository.estadisticasDelDiaNative();
 
         Long totalPedidos = (Long) resultado[0];
         BigDecimal totalVentas = (BigDecimal) resultado[1];
@@ -187,13 +189,14 @@ public class PedidoService {
     }
 
     public Map<String, Object> obtenerEstadisticasDelMes() {
-        Object[] resultado = pedidoRepository.estadisticasDelMesNative(); // o estadisticasDelMesNative()
+        Object[] resultado = pedidoRepository.estadisticasDelMesNative();
 
         Long totalPedidos = (Long) resultado[0];
         BigDecimal totalVentas = (BigDecimal) resultado[1];
 
         Map<String, Object> stats = new HashMap<>();
-        stats.put("mes", LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "CL")).toUpperCase());
+        stats.put("mes",
+                LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "CL")).toUpperCase());
         stats.put("anio", LocalDate.now().getYear());
         stats.put("totalPedidos", totalPedidos);
         stats.put("totalVentas", totalVentas);
@@ -242,15 +245,15 @@ public class PedidoService {
         return total;
     }
 
+    @SuppressWarnings("deprecation")
     private String formatearPesos(BigDecimal monto) {
         if (monto == null || monto.compareTo(BigDecimal.ZERO) == 0) {
             return "$ 0";
         }
         DecimalFormat df = new DecimalFormat("$ #,###");
         df.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(new Locale("es", "CL")));
-        
+
         return df.format(monto.longValue());
     }
-
 
 }
