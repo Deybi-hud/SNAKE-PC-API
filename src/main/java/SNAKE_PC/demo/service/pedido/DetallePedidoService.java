@@ -2,8 +2,6 @@ package SNAKE_PC.demo.service.pedido;
 
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +27,6 @@ public class DetallePedidoService {
     @Autowired
     private MetodoEnvioService metodoEnvioService;
   
-    
    public DetallePedido crearDetalle(Long productoId, Integer cantidad, Pedido pedido, Long metodoEnvioId){  
         Producto producto = productoService.buscarPorId(productoId);
         MetodoEnvio metodoEnvio = metodoEnvioService.seleccionarMetodoEnvio(metodoEnvioId);
@@ -42,21 +39,9 @@ public class DetallePedidoService {
         detalle.setPedido(pedido);
         detalle.setMetodoEnvio(metodoEnvio);
 
+
         return detalleRepository.save(detalle);
     }
         
-    public BigDecimal calcularTotalPedido(Long pedidoId) {
-        return detalleRepository.findByPedidoId(pedidoId).stream()
-            .map(d -> {
-                BigDecimal precio = Objects.requireNonNullElse(d.getPrecioUnitario(), BigDecimal.ZERO);
-                BigDecimal cantidad = BigDecimal.valueOf(d.getCantidad());
-                BigDecimal costoEnvio = d.getMetodoEnvio() != null 
-                    ? (BigDecimal) Objects.requireNonNullElse(d.getMetodoEnvio().getCostoEnvio(), BigDecimal.ZERO)
-                    : BigDecimal.ZERO;
-
-                return precio.multiply(cantidad).add(costoEnvio);
-            })
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
 
 }

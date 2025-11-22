@@ -1,5 +1,7 @@
 package SNAKE_PC.demo.model.pedido;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,7 +27,7 @@ public class MetodoEnvio {
     private String nombreMetodo;
 
     @Column(name = "costo_envio", nullable = false)
-    private double costoEnvio;
+    private BigDecimal costoEnvio;
 
     @Column(name ="activo", nullable =  false)
     private boolean activo;

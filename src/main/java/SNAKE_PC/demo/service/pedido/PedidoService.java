@@ -1,7 +1,6 @@
 package SNAKE_PC.demo.service.pedido;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,8 +10,6 @@ import SNAKE_PC.demo.model.usuario.Contacto;
 import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.pedido.*;
 import SNAKE_PC.demo.repository.producto.ProductoRepository;
-import SNAKE_PC.demo.repository.usuario.ContactoRepository;
-import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
 import SNAKE_PC.demo.service.producto.ProductoService;
 import SNAKE_PC.demo.service.usuario.UsuarioContactoService;
 import SNAKE_PC.demo.service.usuario.UsuarioService;
@@ -40,9 +37,6 @@ public class PedidoService {
     @Autowired
     private DetallePedidoService detallePedidoService;
 
-    @Autowired
-    private MetodoPagoService metodoPagoService;
-
     @Autowired 
     private ProductoService productoService;
 
@@ -54,9 +48,6 @@ public class PedidoService {
 
     @Autowired 
     private PedidoRepository pedidoRepository;
-
-    @Autowired 
-    private PagoRepository pagoRepository;
 
     @Autowired 
     private DetalleRepository detalleRepository;
@@ -81,7 +72,6 @@ public class PedidoService {
         pedido.setEstado(pedidoEstado);
         pedido.setDetalles(new ArrayList<>());
        
-
         for (Map.Entry<Long, Integer> entry : productosYCantidades.entrySet()) {
             Long productoId = entry.getKey();
             Integer cantidad = entry.getValue();
@@ -89,16 +79,26 @@ public class PedidoService {
             if (cantidad <= 0) {
                 throw new RuntimeException("La cantidad debe ser mayor a 0");
             }
-            Producto producto = productoService.buscarPorId(productoId);
 
+            Producto producto = productoService.buscarPorId(productoId);
             if (producto.getStock() < cantidad) {
                 throw new RuntimeException("Stock insuficiente para: " + producto.getNombreProducto());
             }
-            productoService.actualizarStock(productoId, cantidad);
-
-            DetallePedido detalleGuardado = detallePedidoService.crearDetalle(productoId, cantidad, pedido, metodosEnvio);
-            pedido.getDetalles().add(detalleGuardado);  
+            Long metodoEnvioId = metodosEnvio.get(productoId);
+            if (metodoEnvioId == null) {
+                throw new RuntimeException("Falta método de envío para producto ID: " + productoId);
+            }
+            DetallePedido detalle = detallePedidoService.crearDetalle(
+                productoId, cantidad, pedido, metodoEnvioId
+            );
+            pedido.getDetalles().add(detalle);
         }
+        pedido = pedidoRepository.save(pedido);
+        for(Map.Entry<Long,Integer> entry : productosYCantidades.entrySet()){
+            productoService.actualizarStock(entry.getKey(),entry.getValue());
+        }
+
+        pedido.setTotal(calcularTotalPedido(pedido.getId()));
         return pedidoRepository.save(pedido);
     }
 
@@ -171,9 +171,9 @@ public class PedidoService {
         List<Pedido> pedidosDelDia = obtenerPedidosDelDia();
 
         long totalPedidos = pedidosDelDia.size();
-        double totalVentas = pedidosDelDia.stream()
-                .mapToDouble(pedido -> calcularTotalPedido(pedido.getId()))
-                .sum();
+        BigDecimal totalVentas = pedidosDelDia.stream()
+                .map(pedido -> calcularTotalPedido(pedido.getId()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         Map<String, Object> estadisticas = new HashMap<>();
         estadisticas.put("fecha", LocalDate.now());
@@ -188,9 +188,9 @@ public class PedidoService {
         List<Pedido> pedidosDelMes = obtenerPedidosDelMes();
 
         long totalPedidos = pedidosDelMes.size();
-        double totalVentas = pedidosDelMes.stream()
-                .mapToDouble(pedido -> calcularTotalPedido(pedido.getId()))
-                .sum();
+       BigDecimal totalVentas = pedidosDelMes.stream()
+                .map(pedido -> calcularTotalPedido(pedido.getId()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         Map<String, Object> estadisticas = new HashMap<>();
         estadisticas.put("mes", LocalDate.now().getMonth().toString());
@@ -210,13 +210,37 @@ public class PedidoService {
         return numeroPedido;
     }
 
- private void devolverStock(Long pedidoId) {
-    detalleRepository.findByPedidoId(pedidoId).forEach(detalle -> {
-        Producto p = detalle.getProducto();
-        p.setStock(p.getStock() + detalle.getCantidad());
-        productoRepository.save(p);
-    });
-}
+    private void devolverStock(Long pedidoId) {
+        detalleRepository.findByPedidoId(pedidoId).forEach(detalle -> {
+            Producto p = detalle.getProducto();
+            p.setStock(p.getStock() + detalle.getCantidad());
+            productoRepository.save(p);
+        });
+    }
+
+    public BigDecimal calcularTotalPedido(Long pedidoId) {
+        if (pedidoId == null) {
+            return BigDecimal.ZERO;
+        }
+        List<DetallePedido> detalles = detalleRepository.findByPedidoId(pedidoId);
+        if (detalles == null || detalles.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal total = BigDecimal.ZERO;
+        for (DetallePedido d : detalles) {
+            BigDecimal precio = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
+            BigDecimal cantidad = BigDecimal.valueOf(d.getCantidad());
+            BigDecimal subtotalProductos = precio.multiply(cantidad);
+
+            BigDecimal costoEnvio = BigDecimal.ZERO;
+            if (d.getMetodoEnvio() != null && d.getMetodoEnvio().getCostoEnvio() != null) {
+                costoEnvio = d.getMetodoEnvio().getCostoEnvio();
+            }
+            total = total.add(subtotalProductos).add(costoEnvio);
+        }
+
+        return total;
+    }
 
     
 }

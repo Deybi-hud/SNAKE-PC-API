@@ -1,5 +1,6 @@
 package SNAKE_PC.demo.model.pedido;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,9 @@ public class Pedido {
 
     @Column(name = "numero_pedido", unique = true)
     private String numeroPedido;
+
+    @Column(name = "total", nullable =  false)
+    private BigDecimal total;
 
     @ManyToOne
     @JoinColumn(name = "id_contacto", nullable = false)

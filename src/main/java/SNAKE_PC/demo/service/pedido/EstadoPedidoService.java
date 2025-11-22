@@ -50,13 +50,9 @@ public class EstadoPedidoService {
         return obtenerPorNombre("CANCELADO");
     }
 
-    private EstadoPedido obtenerPorNombre(String nombre){
+    public EstadoPedido obtenerPorNombre(String nombre){
         return estadoPedidoRepository.findByNombreIgnoreCase(nombre)
             .orElseThrow(()-> new RuntimeException("Estado de pedido no encontrado"));
     }
 
-    public void actualizarEstadoPedido(Long pedidoId, String string) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'actualizarEstadoPedido'");
-    }
 }

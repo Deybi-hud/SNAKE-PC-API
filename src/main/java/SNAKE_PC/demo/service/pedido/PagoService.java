@@ -1,5 +1,6 @@
 package SNAKE_PC.demo.service.pedido;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -26,11 +27,7 @@ public class PagoService {
     @Autowired
     private PagoRepository pagoRepository;
 
-    @Autowired
-    private PagoService pagoService;
-
-    @Autowired 
-    private EstadoPedidoService estadoPedidoService;
+ 
 
     public Pago crearPago(Long pedidoId, String correoUsuario, Long metodoPagoId) {
 
@@ -45,28 +42,25 @@ public class PagoService {
         MetodoPago metodoPago = metodoPagoRepository.findById(metodoPagoId)
                 .orElseThrow(() -> new RuntimeException("Método de pago no válido"));
 
-        Double totalPedido = pagoService.calcularTotalPedido(pedidoId);
+        BigDecimal totalPedido = pedidoService.calcularTotalPedido(pedidoId);
 
         Pago pago = new Pago();
         pago.setMonto(totalPedido);
         pago.setFechaPago(LocalDate.now());
-        pago.setEstadoPago("PAGADO");
+        pago.setEstadoPago("CONFIRMADO");
         pago.setMetodoPago(metodoPago);
         pago.setPedido(pedido);
 
+        pedidoService.actualizarEstadoPedido(pedidoId, "PAGADO");
+        
+        pedido.setTotal(totalPedido);
         Pago pagoCreado = pagoRepository.save(pago);
-
-        estadoPedidoService.actualizarEstadoPedido(pedidoId, "CONFIRMADO");
 
         return pagoCreado;
     }
 
-     private Double calcularTotalPedido(Long pedidoId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'calcularTotalPedido'");
-    }
 
-     public List<Pago> obtenerPagosPorUsuario(String correoUsuario) {
+    public List<Pago> obtenerPagosPorUsuario(String correoUsuario) {
         return pagoRepository.findByPedidoContactoUsuarioCorreo(correoUsuario);
     }
 
