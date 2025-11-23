@@ -46,14 +46,18 @@ public class ProductoService {
         validarProducto(producto);
         return productoRepository.findByNombreProducto(producto.getNombreProducto())
                 .orElseGet(() -> {
-
+                    // 1. Guardar producto primero
                     producto.setMarca(marca);
                     Producto productoGuardado = productoRepository.save(producto);
 
+                    // 2. Asignar producto a ProductoCategoria
                     productoCategoria.setProducto(productoGuardado);
 
+                    // 3. Guardar ProductoCategoria
                     ProductoCategoria productoCategoriaGuardada = productoCategoriaService
                             .guardarProductoCategoria(productoCategoria, categoria);
+
+                    // 4. Asignar ProductoCategoria al producto y guardar
                     productoGuardado.setProductoCategoria(productoCategoriaGuardada);
                     return productoRepository.save(productoGuardado);
                 });
