@@ -30,8 +30,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        if (usuario.getRolUsuario() != null) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + usuario.getRolUsuario().getNombreRol()));
+        if (usuario.getRolUsuario() != null && "ADMIN".equals(usuario.getRolUsuario().getNombreRol())) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
 
         return User.builder()
