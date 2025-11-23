@@ -115,8 +115,8 @@ public class PedidoService {
         return pedidoRepository.save(pedido);
     }
 
-    public List<Pedido> obtenerPedidosPorUsuario(String correoUsuario) {
-        return pedidoRepository.findByUsuarioCorreo(correoUsuario);
+    public List<Pedido> obtenerPedidosPorUsuario(Long idUsuario) {
+        return pedidoRepository.findByUsuarioId(idUsuario);
     }
 
     public List<Pedido> obtenerTodosLosPedidos() {
