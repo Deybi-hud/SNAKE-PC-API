@@ -24,7 +24,7 @@ public class PagoController {
     public ResponseEntity<?> obtenerMisPagos(Authentication authentication) {
         try {
             String correoUsuario = authentication.getName();
-            List<Pago> pagos = pagoRepository.findByPedidoContactoUsuarioCorreo(correoUsuario);
+            List<Pago> pagos = pagoRepository.findByPedidoUsuarioCorreo(correoUsuario);
             return ResponseEntity.ok(pagos);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

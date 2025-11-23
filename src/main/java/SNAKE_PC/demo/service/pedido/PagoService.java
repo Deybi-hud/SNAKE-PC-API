@@ -59,7 +59,7 @@ public class PagoService {
 
 
     public List<Pago> obtenerPagosPorUsuario(String correoUsuario) {
-        return pagoRepository.findByPedidoContactoUsuarioCorreo(correoUsuario);
+        return pagoRepository.findByPedidoUsuarioCorreo(correoUsuario);
     }
 
 
