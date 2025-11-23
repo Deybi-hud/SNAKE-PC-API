@@ -85,21 +85,12 @@ public class AdminProductoController {
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody Map<String, Object> payload) {
         try{
-            if (payload.get("nombreProducto") == null || payload.get("sku") == null || 
-                payload.get("precio") == null || payload.get("stock") == null) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Campos requeridos: nombreProducto, sku, precio, stock"));
-            }
-
             Producto producto = new Producto();
             producto.setNombreProducto((String) payload.get("nombreProducto"));
             producto.setSku((String) payload.get("sku"));
             producto.setPrecio(new BigDecimal(payload.get("precio").toString()));
             producto.setStock(((Number) payload.get("stock")).intValue());
-            
-            Object imagenObj = payload.get("imagen");
-            if (imagenObj != null) {
-                producto.setImagen((String) imagenObj);
-            }
+            producto.setImagen((String) payload.get("imagen"));
 
             Marca marca = new Marca();
             marca.setMarcaNombre((String) payload.get("marcaNombre"));
@@ -111,15 +102,14 @@ public class AdminProductoController {
 
             ProductoCategoria subCategoria = new ProductoCategoria();
             subCategoria.setNombreSubCategoria((String) payload.get("subCategoria"));
-            subCategoria.setCategoria(categoriaGuardada);
 
             Producto creado = productoService.guardarProducto(producto, subCategoria, categoriaGuardada, marcaGuardada);
         
             return ResponseEntity.status(201).body(creado);
         }
         catch(Exception e){
-            log.error("Error creando producto", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+ e.getMessage());
+
         }
     }
 
