@@ -20,6 +20,7 @@ import SNAKE_PC.demo.model.pedido.Pago;
 import SNAKE_PC.demo.service.pedido.PedidoService;
 import jakarta.validation.Valid;
 import SNAKE_PC.demo.repository.pedido.PedidoRepository;
+import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
 import SNAKE_PC.demo.repository.pedido.PagoRepository;
 
 import java.util.List;
@@ -38,6 +39,9 @@ public class PedidoController {
 
     @Autowired
     private PagoRepository pagoRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @PostMapping("/pedidos")
     public ResponseEntity<?> crearPedido(
@@ -102,10 +106,11 @@ public class PedidoController {
     }
 
     @GetMapping
-    public ResponseEntity<?> obtenerMisPedidos(Authentication authentication) {
+    public ResponseEntity<?> obtenerMisPedidos(Long idUsuario) {
         try {
-            String correoUsuario = authentication.getName();
-            List<Pedido> pedidos = pedidoService.obtenerPedidosPorUsuario(correoUsuario);
+            Usuario existente = usuarioRepository.findById(idUsuario)
+                .orElseThrow(()-> new RuntimeException("No se encontraron pedidos"));
+            List<Pedido> pedidos = pedidoService.obtenerPedidosPorUsuario(existente.getId());
             return ResponseEntity.ok(pedidos);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
