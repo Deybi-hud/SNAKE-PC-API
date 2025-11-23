@@ -74,7 +74,9 @@ public class AuthController {
                         .body(Map.of("error", "El correo es obligatorio"));
             }
 
-            Usuario usuario = loginService.obtenerPorCorreo(usuarioRequest.getCorreo());
+            Usuario usuario = loginService.iniciarSesion(
+                    usuarioRequest.getCorreo(),
+                    usuarioRequest.getContrasena());
 
             Map<String, Object> response = new HashMap<>();
             response.put("mensaje", "Login exitoso");
@@ -84,7 +86,7 @@ public class AuthController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Error en autenticación: " + e.getMessage()));
+                    .body(Map.of("error", "Correo o contraseña incorrectos"));
         }
     }
 
