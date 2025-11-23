@@ -6,15 +6,15 @@ import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import SNAKE_PC.demo.model.producto.Categoria; 
+import SNAKE_PC.demo.model.producto.Categoria;
+import SNAKE_PC.demo.model.producto.Especificacion;
 import SNAKE_PC.demo.model.producto.Marca;
 import SNAKE_PC.demo.model.producto.Producto;
 import SNAKE_PC.demo.model.producto.ProductoCategoria;
+import SNAKE_PC.demo.repository.producto.EspecificacionRepository;
 import SNAKE_PC.demo.repository.producto.ProductoRepository;
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @SuppressWarnings("null")
 @Service
 @Transactional
@@ -22,6 +22,12 @@ public class ProductoService {
 
     @Autowired
     private ProductoRepository productoRepository;
+
+    @Autowired
+    private EspecificacionRepository especificacionRepository;
+
+    @Autowired
+    private EspecificacionService especificacionService;
 
     @Autowired
     private MarcaService marcaService;
@@ -40,15 +46,22 @@ public class ProductoService {
         return producto;
     }
 
-    public Producto guardarProducto(Producto producto, ProductoCategoria productoCategoria, Categoria categoria, Marca marca) {  
+    public Producto guardarProducto(Producto producto, ProductoCategoria productoCategoria, Categoria categoria,
+            Marca marca, Especificacion especificacion,
+            Long idMarca, Long idCategoria, Long idEspecificacion) {
 
         validarProducto(producto);
-        Marca marcaGuardada = marcaService.guardarMarca(marca);
-        ProductoCategoria productoCategoriaGuardada = productoCategoriaService.guardarProductoCategoria(productoCategoria, categoria);
-        producto.setMarca(marcaGuardada);
-        producto.setProductoCategoria(productoCategoriaGuardada);
+        Marca marcaNueva = marcaService.guardarMarca(marca);
+        Especificacion especificacionNuevaOexistente = especificacionService.guardarEspecificacion(especificacion);
+        ProductoCategoria nuevoProductoCategoria = productoCategoriaService.guardarProductoCategoria(productoCategoria,
+                categoria);
 
-        return producto;
+        producto.setMarca(marcaNueva);
+        producto.setEspecificacion(especificacionNuevaOexistente);
+        producto.setProductoCategoria(nuevoProductoCategoria);
+
+        return productoRepository.save(producto);
+
     }
 
     public void validarProducto(Producto producto) {
@@ -64,42 +77,49 @@ public class ProductoService {
         if (producto.getSku() == null || producto.getSku().trim().isBlank()) {
             throw new RuntimeException("Debe asignar un sku");
         }
-        if (producto.getImagen() == null || producto.getImagen().trim().isBlank()) {
+        if (producto.getPeso() == null || producto.getPeso().trim().isBlank()) {
             throw new RuntimeException("Debe asignar un peso en (kg / gr)");
         }
 
     }
 
     public void borrarProducto(Long id) {
-        productoRepository.findById(id)
+        Producto producto = productoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        especificacionRepository.delete(producto.getEspecificacion());
         productoRepository.deleteById(id);
     }
 
-    public Producto actualizacionParcialProducto(Producto producto, Marca marca) {
-        Producto existenteProducto = productoRepository.findById(producto.getId())
+    public Producto actualizacionParcialProducto(Producto producto, Marca marca, Especificacion especificacion) {
+        Producto existingProducto = productoRepository.findById(producto.getId())
                 .orElseThrow(() -> new RuntimeException("El producto no fue encontrado"));
 
         if (producto.getNombreProducto() != null) {
-            existenteProducto.setNombreProducto(producto.getNombreProducto());
+            existingProducto.setNombreProducto(producto.getNombreProducto());
         }
         if (producto.getStock() != null) {
-            existenteProducto.setStock(producto.getStock());
+            existingProducto.setStock(producto.getStock());
         }
         if (producto.getPrecio() != null) {
-            existenteProducto.setPrecio(producto.getPrecio());
+            existingProducto.setPrecio(producto.getPrecio());
         }
         if (producto.getSku() != null) {
-            existenteProducto.setSku(producto.getSku());
+            existingProducto.setSku(producto.getSku());
         }
         if (producto.getProductoCategoria() != null) {
-            existenteProducto.setProductoCategoria(producto.getProductoCategoria());
+            existingProducto.setProductoCategoria(producto.getProductoCategoria());
         }
         if (marca.getMarcaNombre() != null && !marca.getMarcaNombre().trim().isBlank()) {
             Marca marcaNueva = marcaService.guardarMarca(marca);
-            existenteProducto.setMarca(marcaNueva);
+            existingProducto.setMarca(marcaNueva);
         }
-        return productoRepository.save(existenteProducto);
+        boolean cambiarEspecificaciones = especificacion.getFrecuencia() != null
+                || especificacion.getCapacidadAlmacenamiento() != null || especificacion.getConsumo() != null;
+        if (cambiarEspecificaciones) {
+            Especificacion nuevaEspecificacion = especificacionService.guardarEspecificacion(especificacion);
+            existingProducto.setEspecificacion(nuevaEspecificacion);
+        }
+        return productoRepository.save(existingProducto);
     }
 
     public Producto buscarPorNombre(String nombreProducto) {
