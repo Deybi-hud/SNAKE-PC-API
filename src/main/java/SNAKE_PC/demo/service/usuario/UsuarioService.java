@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import SNAKE_PC.demo.model.usuario.RolUsuario;
 import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
 import jakarta.transaction.Transactional;
@@ -19,10 +18,6 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private RolUsuarioService rolUsuariosService;
-
-
     public Usuario crearUsuario(Usuario usuario, String confirmarContrasena){
         if(usuario.getNombreUsuario() == null || usuario.getNombreUsuario().trim().isBlank()){
             throw new RuntimeException("El nombre de usuario es obligatorio");
@@ -30,10 +25,6 @@ public class UsuarioService {
         if(usuarioRepository.existsByNombreUsuario(usuario.getNombreUsuario())){
             throw new RuntimeException("El nombre de usuario ya existe");
         }
-   
-        RolUsuario rolUsuario = rolUsuariosService.findByNombre("CLIENTE");
-        usuario.setRolUsuario(rolUsuario);
-        
         validarCorreo(usuario.getCorreo());
         validarContrasena(usuario.getContrasena(), confirmarContrasena);
         usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
@@ -54,6 +45,12 @@ public class UsuarioService {
     public Usuario actualizarContrasena(Long usuarioId,String nuevaContrasena, String confirmarContrasena){
         Usuario usuario = usuarioRepository.findById(usuarioId)
         .orElseThrow(()-> new RuntimeException("Usuario no encontrado")); 
+        if(nuevaContrasena == null){
+            throw new RuntimeException("Debe ingresar una contraseña");
+        }
+        if(!nuevaContrasena.equals(confirmarContrasena)){
+            throw new RuntimeException("Las contraseñas no coinciden");
+        }
         validarContrasena(nuevaContrasena, confirmarContrasena);
         usuario.setContrasena(passwordEncoder.encode(confirmarContrasena));
         return usuarioRepository.save(usuario);
@@ -85,8 +82,11 @@ public class UsuarioService {
         }
         if (usuarioRepository.existsByCorreoAndIdNot(normalizado, usuarioIdActual)) {
             throw new RuntimeException("El correo ya está registrado por otro usuario");
-        }
     }
+    }
+
+
+
 
     public void validarContrasena(String contrasena, String confirmarContrasena) {
         if(contrasena == null || contrasena.trim().isEmpty()) {

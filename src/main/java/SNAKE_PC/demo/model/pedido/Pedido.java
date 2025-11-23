@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import SNAKE_PC.demo.model.usuario.Contacto;
-import SNAKE_PC.demo.model.usuario.Usuario;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,7 +46,7 @@ public class Pedido {
 
     @ManyToOne
     @JoinColumn(name = "id_contacto", nullable = false)
-    private Usuario usuario;
+    private Contacto contacto;
 
     @ManyToOne
     @JoinColumn(name = "id_estado_pedido", nullable = false)

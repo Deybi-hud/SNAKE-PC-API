@@ -5,10 +5,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,27 +43,24 @@ public class PerfilController {
     }
 
     @PutMapping("/perfil")
-    public ResponseEntity<?> actualizarMiPerfil(@RequestBody Map<String, Object> datos,
-            @AuthenticationPrincipal Usuario usuarioLogueado) {
+    public ResponseEntity<?> actualizarMiPerfil(
+            @RequestPart Contacto contactoActualizado,
+            @RequestPart(required = false) String calle,
+            @RequestPart(required = false) String numero,
+            @RequestPart(required = false) Long comunaId,
+            Authentication authentication) {
 
         try {
+            Usuario usuario = usuarioService.obtenerPorCorreo(authentication.getName());
 
-            Contacto contactoActualizado = new Contacto();
-            contactoActualizado.setNombre((String) datos.get("nombre"));
-            contactoActualizado.setApellido((String) datos.get("apellido"));
-            contactoActualizado.setTelefono((String) datos.get("telefono"));
+            Direccion direccion = new Direccion();
+            direccion.setCalle(calle);
+            direccion.setNumero(numero);
 
-            Direccion direccionActualizada = new Direccion();
-            direccionActualizada.setCalle((String) datos.get("calle"));
-            direccionActualizada.setNumero((String) datos.get("numero"));
+            Contacto contactoActualizadoResult = usuarioContactoService.ActualizarContacto(
+                    contactoActualizado, usuario, direccion, comunaId, authentication.getName());
 
-            String nuevoCorreo = (String)datos.get("nuevoCorreo");
-
-            Long idComuna = Long.valueOf(datos.get("idComuna").toString());
-            usuarioContactoService.ActualizarContacto(contactoActualizado, direccionActualizada, 
-                nuevoCorreo, idComuna, usuarioLogueado.getId());
-
-            return ResponseEntity.ok(Map.of("mensaje", "Perfil actualizado con éxito"));
+            return ResponseEntity.ok(contactoActualizadoResult);
 
         } catch (Exception e) {
             return ResponseEntity.badRequest()

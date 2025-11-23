@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,10 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import SNAKE_PC.demo.model.pedido.Pedido;
-import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.model.pedido.Pago;
 import SNAKE_PC.demo.service.pedido.PedidoService;
-import jakarta.validation.Valid;
 import SNAKE_PC.demo.repository.pedido.PedidoRepository;
 import SNAKE_PC.demo.repository.pedido.PagoRepository;
 
@@ -39,27 +36,37 @@ public class PedidoController {
     @Autowired
     private PagoRepository pagoRepository;
 
-    @PostMapping("/pedidos")
+    @SuppressWarnings("null")
+    @PostMapping
     public ResponseEntity<?> crearPedido(
-            @Valid @RequestBody Pedido pedido,
-            @AuthenticationPrincipal Usuario usuarioLogueado) {
+            @RequestBody Map<Long, Object> pedidoRequest,
+            Authentication authentication) {
+        try {
+            String correoUsuario = authentication.getName();
 
-        if (usuarioLogueado == null) {
-            return ResponseEntity.status(401).body(Map.of("error", "Logueate wn"));
+            @SuppressWarnings({ "unchecked", "unlikely-arg-type" })
+            Map<Long, Integer> productosYCantidades = (Map<Long, Integer>) pedidoRequest.get("produ1ctos");
+
+            @SuppressWarnings({ "unchecked", "unlikely-arg-type" })
+            Map<Long, Long> metodosEnvio = (Map<Long, Long>) pedidoRequest.get("metodosEnvio");
+
+            if (productosYCantidades == null || metodosEnvio == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Se requieren 'productos' y 'metodosEnvio' en el request"));
+            }
+
+            Pedido pedido = pedidoService.crearPedido(productosYCantidades, metodosEnvio, correoUsuario);
+            return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
-
-        Pedido creado = pedidoService.crearPedido(pedido, usuarioLogueado.getId());
-
-        return ResponseEntity.status(201).body(Map.of(
-            "mensaje", "Pedido creado con éxito",
-            "pedido", creado.getNumeroPedido(),
-            "total", creado.getTotal()
-        ));
     }
-        
 
     @PostMapping("/{pedidoId}/pagar")
-    public ResponseEntity<?> pagarPedido(@PathVariable Long pedidoId, @RequestParam Long metodoPagoId, Authentication authentication) {
+    public ResponseEntity<?> pagarPedido(
+            @PathVariable Long pedidoId,
+            @RequestParam Long metodoPagoId,
+            Authentication authentication) {
         try {
             String correoUsuario = authentication.getName();
             Optional<Pedido> pedidoOpt = pedidoRepository.findById(pedidoId);
@@ -70,7 +77,7 @@ public class PedidoController {
 
             Pedido pedido = pedidoOpt.get();
 
-            if (!pedido.getUsuario().getCorreo().equals(correoUsuario)) {
+            if (!pedido.getContacto().getUsuario().getCorreo().equals(correoUsuario)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(Map.of("error", "No tienes permiso para pagar este pedido"));
             }

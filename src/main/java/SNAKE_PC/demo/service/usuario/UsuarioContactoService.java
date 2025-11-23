@@ -10,9 +10,10 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import SNAKE_PC.demo.model.usuario.Contacto;
 import SNAKE_PC.demo.model.usuario.Direccion;
+import SNAKE_PC.demo.model.usuario.RolUsuario;
 import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.usuario.ContactoRepository;
-import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
+import SNAKE_PC.demo.repository.usuario.RolRepository;
 
 @Service
 @Transactional
@@ -22,46 +23,54 @@ public class UsuarioContactoService {
     private ContactoRepository contactoRepository;
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
     private UsuarioService usuarioService;
 
     @Autowired
     private DireccionService direccionService;
 
-    public Contacto crearContacto(Contacto contacto,
-        Direccion direccion, Long idComuna, Long idUsuario) throws IOException {
-        Usuario existente = usuarioRepository.findById(idUsuario)
-            .orElseThrow(()-> new RuntimeException("No se encontro un usuario"));
+    @Autowired
+    private RolRepository rolRepository;
+
+    public Contacto RegistrarCliente(Contacto contacto, Usuario usuario, String confirmarContrasena,
+        Direccion direccion, Long idComuna) throws IOException {
+
         validarDatosContacto(contacto);
+        RolUsuario rolCliente = rolRepository.findByNombreRol("CLIENTE")
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        Usuario usuarioNuevo = usuarioService.crearUsuario(usuario, confirmarContrasena);
+        usuarioNuevo.setRolUsuario(rolCliente);
 
         Direccion direccionNuevo = direccionService.crearDireccion(direccion, idComuna);
-        contacto.setUsuario(existente);
+        contacto.setUsuario(usuarioNuevo);
         contacto.setDireccion(direccionNuevo);
+        usuarioNuevo.setContacto(contacto);
+
         return contactoRepository.save(contacto);
     }
 
-    public Contacto ActualizarContacto(Contacto contactoActualizado,
-        Direccion direccionActualizada, String nuevoCorreo, Long idComuna, Long idUsuarioLogueado) {
+    public Contacto ActualizarContacto(Contacto contactoActualizado, Usuario usuarioConCorreoNuevo,
+        Direccion direccionActualizada, Long idComuna, String correoUsuarioLogueado) {
             
-        Contacto contactoexistente = contactoRepository.findByUsuarioId(idUsuarioLogueado)
-            .orElseThrow(()-> new RuntimeException("Sin datos de contacto"));
+        Contacto contactoexistente = contactoRepository
+                .findByIdAndUsuarioCorreo(contactoActualizado.getId(), correoUsuarioLogueado)
+                .orElseThrow(() -> new RuntimeException("Contacto no encontrado o no tienes permisos"));
 
         validarDatosContactoParaActualizacion(contactoActualizado, contactoexistente.getId());
+
         contactoexistente.setNombre(contactoActualizado.getNombre().trim());
         contactoexistente.setApellido(contactoActualizado.getApellido().trim());
         contactoexistente.setTelefono(contactoActualizado.getTelefono());
 
-        Usuario usuarioExistente = contactoexistente.getUsuario();
-        String correoActual = nuevoCorreo != null ? nuevoCorreo.trim() : usuarioExistente.getCorreo();
-
-        if (!usuarioExistente.getCorreo().equalsIgnoreCase(correoActual)) {
-            usuarioService.validarCorreoParaActualizacion(nuevoCorreo, usuarioExistente.getId());
-            usuarioService.actualizarCorreo(usuarioExistente.getId(), nuevoCorreo);
+        Usuario usuarioReal = contactoexistente.getUsuario();
+        String correoActual = usuarioReal.getCorreo().trim();
+        String correoNuevo = usuarioConCorreoNuevo.getCorreo().trim();
+        if (!correoActual.equalsIgnoreCase(correoNuevo)) {
+            usuarioService.validarCorreoParaActualizacion(correoNuevo, usuarioReal.getId());
+            usuarioService.actualizarCorreo(usuarioReal.getId(), correoNuevo);
         }
         Direccion nuevaDireccion = direccionService.crearDireccion(direccionActualizada, idComuna);
         contactoexistente.setDireccion(nuevaDireccion);
+
         return contactoRepository.save(contactoexistente);
     }
 

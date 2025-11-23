@@ -32,7 +32,9 @@ public class PagoService {
     public Pago crearPago(Long pedidoId, String correoUsuario, Long metodoPagoId) {
 
         Pedido pedido = pedidoService.obtenerPedidoPorId(pedidoId,correoUsuario);
-
+        if (!pedido.getContacto().getUsuario().getCorreo().equals(correoUsuario)) {
+            throw new RuntimeException("No tiene permisos para pagar este pedido");
+        }
         if (!pedido.getEstado().getNombre().equals("PENDIENTE")) {
             throw new RuntimeException("Solo se pueden pagar pedidos en estado PENDIENTE");
         }

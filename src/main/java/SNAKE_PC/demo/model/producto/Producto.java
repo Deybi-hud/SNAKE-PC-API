@@ -42,8 +42,8 @@ public class Producto {
     @Column(name = "sku", nullable = false, unique = true)
     private String sku;
 
-    @Column(name = "Imagen", nullable = true)
-    private String imagen;
+    @Column(name = "peso", nullable = true)
+    private String peso;
 
     @ManyToOne
     @JoinColumn(name = "id_productoCategoria", nullable = true)
@@ -52,5 +52,12 @@ public class Producto {
     @ManyToOne
     @JoinColumn(name = "id_marca", nullable = true)
     private Marca marca;
+
+    @OneToOne
+    @JoinColumn(name = "id_especificacion", nullable = true)
+    private Especificacion especificacion;
+
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Imagen> imagenes = new HashSet<>();
 
 }
