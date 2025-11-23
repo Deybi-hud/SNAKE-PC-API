@@ -90,17 +90,20 @@ public class AdminProductoController {
             producto.setSku((String) payload.get("sku"));
             producto.setPrecio(new BigDecimal(payload.get("precio").toString()));
             producto.setStock(((Number) payload.get("stock")).intValue());
+            producto.setImagen((String) payload.get("imagen"));
 
             Marca marca = new Marca();
             marca.setMarcaNombre((String) payload.get("marcaNombre"));
+            Marca marcaGuardada = marcaService.guardarMarca(marca);
 
             Categoria categoria = new Categoria();
             categoria.setNombreCategoria((String) payload.get("nombreCategoria"));
+            Categoria categoriaGuardada = categoriaService.guardarCategoria(categoria);
 
             ProductoCategoria subCategoria = new ProductoCategoria();
             subCategoria.setNombreSubCategoria((String) payload.get("subCategoria"));
 
-            Producto creado = productoService.guardarProducto(producto, subCategoria, categoria, marca);
+            Producto creado = productoService.guardarProducto(producto, subCategoria, categoriaGuardada, marcaGuardada);
         
             return ResponseEntity.status(201).body(creado);
         }

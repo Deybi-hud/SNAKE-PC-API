@@ -19,7 +19,7 @@ import SNAKE_PC.demo.service.usuario.ComunaService;
 import SNAKE_PC.demo.service.usuario.RegionService;
 
 @RestController
-@RequestMapping("/api/v1/ubicacion")
+@RequestMapping("/api/v1/ubicaciones")
 public class UbicacionController {
 
     @Autowired

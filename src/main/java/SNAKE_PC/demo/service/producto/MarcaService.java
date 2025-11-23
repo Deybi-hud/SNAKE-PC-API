@@ -30,12 +30,12 @@ public class MarcaService {
     }
 
     public Marca buscarPorNombre(String marcaNombre) {
-        if(marcaNombre == null || marcaNombre.trim().isEmpty()) {
+        if (marcaNombre == null || marcaNombre.trim().isEmpty()) {
             throw new RuntimeException("Debe ingresar el nombre de la marca");
         }
         String nombre = marcaNombre.trim().toUpperCase();
         return marcaRepository.findByMarcaNombre(nombre)
-            .orElseThrow(()->new RuntimeException("No se encontro la marca."));
+                .orElseThrow(() -> new RuntimeException("No se encontro la marca."));
     }
 
     public Marca guardarMarca(Marca marca) {
@@ -43,19 +43,18 @@ public class MarcaService {
             throw new RuntimeException("El nombre de la marca no puede estar vacío.");
         }
 
-        String normalizado = marca.getMarcaNombre().trim();
+        String normalizado = marca.getMarcaNombre().trim().toLowerCase();
         return marcaRepository.findByMarcaNombre(normalizado)
-            .orElseGet(()->{
-                Marca nuevaMarca = new Marca();
-                nuevaMarca.setMarcaNombre(marca.getMarcaNombre());
-                return marcaRepository.save(nuevaMarca);
-            });
+                .orElseGet(() -> {
+                    Marca nuevaMarca = new Marca();
+                    nuevaMarca.setMarcaNombre(marca.getMarcaNombre().trim());
+                    return marcaRepository.save(nuevaMarca);
+                });
     }
-
 
     public Marca actualizarMarca(Long id, Marca marca) {
         Marca marcaExistente = marcaRepository.findById(id)
-            .orElseThrow(()-> new RuntimeException("Marca no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Marca no encontrada"));
         if (marca.getMarcaNombre() != null && !marca.getMarcaNombre().isBlank()) {
             marcaExistente.setMarcaNombre(marca.getMarcaNombre());
         }

@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import SNAKE_PC.demo.model.producto.Categoria; 
+import SNAKE_PC.demo.model.producto.Categoria;
 import SNAKE_PC.demo.model.producto.Marca;
 import SNAKE_PC.demo.model.producto.Producto;
 import SNAKE_PC.demo.model.producto.ProductoCategoria;
@@ -40,15 +40,19 @@ public class ProductoService {
         return producto;
     }
 
-    public Producto guardarProducto(Producto producto, ProductoCategoria productoCategoria, Categoria categoria, Marca marca) {  
+    public Producto guardarProducto(Producto producto, ProductoCategoria productoCategoria, Categoria categoria,
+            Marca marca) {
 
         validarProducto(producto);
-        Marca marcaGuardada = marcaService.guardarMarca(marca);
-        ProductoCategoria productoCategoriaGuardada = productoCategoriaService.guardarProductoCategoria(productoCategoria, categoria);
-        producto.setMarca(marcaGuardada);
-        producto.setProductoCategoria(productoCategoriaGuardada);
+        return productoRepository.findByNombreProducto(producto.getNombreProducto())
+                .orElseGet(() -> {
+                    ProductoCategoria productoCategoriaGuardada = productoCategoriaService
+                            .guardarProductoCategoria(productoCategoria, categoria);
+                    producto.setMarca(marca);
+                    producto.setProductoCategoria(productoCategoriaGuardada);
+                    return productoRepository.save(producto);
+                });
 
-        return producto;
     }
 
     public void validarProducto(Producto producto) {
@@ -64,15 +68,11 @@ public class ProductoService {
         if (producto.getSku() == null || producto.getSku().trim().isBlank()) {
             throw new RuntimeException("Debe asignar un sku");
         }
-        if (producto.getImagen() == null || producto.getImagen().trim().isBlank()) {
-            throw new RuntimeException("Debe asignar un peso en (kg / gr)");
-        }
-
     }
 
     public void borrarProducto(Long id) {
         productoRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
         productoRepository.deleteById(id);
     }
 

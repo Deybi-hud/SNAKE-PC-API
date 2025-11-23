@@ -37,16 +37,15 @@ public class ProductoCategoriaService {
         if (productoCategoria.getNombreSubCategoria() == null|| productoCategoria.getNombreSubCategoria().trim().isBlank()) {
             throw new RuntimeException("El nombre de la subcategoría no puede estar vacío.");
         }
-        if(productoCategoriaRepository.existsByNombreSubCategoriaAndCategoria(productoCategoria.getNombreSubCategoria(), categoria)){
-            throw new RuntimeException("Ya existe la subcategoria");
-        }
-        Categoria nuevaCategoria = categoriaService.guardarCategoria(categoria);
- 
-        ProductoCategoria nuevoProductoCategoria = new ProductoCategoria();
-        nuevoProductoCategoria.setCategoria(nuevaCategoria);
-        nuevoProductoCategoria.setNombreSubCategoria(productoCategoria.getNombreSubCategoria().trim());
-        return productoCategoriaRepository.save(nuevoProductoCategoria);
-       
+        
+        String nombreSubCategoriaNormalizado = productoCategoria.getNombreSubCategoria().trim();
+        return productoCategoriaRepository.findByNombreSubCategoriaAndCategoria(nombreSubCategoriaNormalizado, categoria)
+            .orElseGet(() -> {
+                ProductoCategoria nuevoProductoCategoria = new ProductoCategoria();
+                nuevoProductoCategoria.setCategoria(categoria);
+                nuevoProductoCategoria.setNombreSubCategoria(nombreSubCategoriaNormalizado);
+                return productoCategoriaRepository.save(nuevoProductoCategoria);
+            });
     }
 
     public ProductoCategoria actualizarProductoCategoria(String nombreSubCategoria, Categoria categoria) {
