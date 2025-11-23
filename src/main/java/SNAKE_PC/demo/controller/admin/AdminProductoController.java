@@ -1,5 +1,6 @@
 package SNAKE_PC.demo.controller.admin;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,18 +18,18 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import SNAKE_PC.demo.model.producto.Categoria;
-import SNAKE_PC.demo.model.producto.Especificacion;
 import SNAKE_PC.demo.model.producto.Marca;
 import SNAKE_PC.demo.model.producto.Producto;
 import SNAKE_PC.demo.model.producto.ProductoCategoria;
 import SNAKE_PC.demo.service.producto.CategoriaService;
-import SNAKE_PC.demo.service.producto.EspecificacionService;
 import SNAKE_PC.demo.service.producto.MarcaService;
 import SNAKE_PC.demo.service.producto.ProductoCategoriaService;
 import SNAKE_PC.demo.service.producto.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("api/v1/admin/producto")
 @PreAuthorize("hasRole('ADMIN')")
@@ -41,45 +42,32 @@ public class AdminProductoController {
     private CategoriaService categoriaService;
 
     @Autowired
-    private EspecificacionService especificacionService;
-
-    @Autowired
     private ProductoCategoriaService productoCategoriaService;
 
     @Autowired
     private ProductoService productoService;
 
-    // ======================== CRUD PRODUCTOS ========================
 
-    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
-    @Operation(summary = "Actualizar producto completamente", description = "Actualiza completamente un producto existente")
-    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestPart Producto producto,
-            @RequestPart(required = false) Marca marca,
-            @RequestPart(required = false) ProductoCategoria productoCategoria,
-            @RequestPart(required = false) Categoria categoria,
-            @RequestPart(required = false) Especificacion especificacion) {
-        try {
-            producto.setId(id);
-            Producto updateProducto = productoService.guardarProducto(
-                    producto, productoCategoria, categoria, marca, especificacion, null, null, null);
-            return ResponseEntity.ok(updateProducto);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
-    }
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> actualizarParcial(@PathVariable Long id, @RequestBody Map<String, Object> datos) {
 
-    @PatchMapping(value = "/{id}", consumes = "multipart/form-data")
-    @Operation(summary = "Actualizar parcialmente un producto", description = "Actualiza parcialmente un producto existente")
-    public ResponseEntity<?> actualizarParcial(@PathVariable Long id, @RequestPart Producto producto,
-            @RequestPart(required = false) Marca marca,
-            @RequestPart(required = false) Especificacion especificacion) {
-        try {
-            producto.setId(id);
-            Producto updatedProducto = productoService.actualizacionParcialProducto(producto, marca, especificacion);
-            return ResponseEntity.ok(updatedProducto);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        Producto productoParcial = new Producto();
+        productoParcial.setId(id); 
+
+        if(datos.containsKey("nombreProducto")) productoParcial.setNombreProducto((String) datos.get("nombreProducto"));
+        if(datos.containsKey("stock")) productoParcial.setStock(((Number) datos.get("stock")).intValue());
+        if(datos.containsKey("precio")) productoParcial.setPrecio(new BigDecimal(datos.get("precio").toString()));
+        if(datos.containsKey("sku")) productoParcial.setSku((String) datos.get("sku"));
+        if(datos.containsKey("imagen")) productoParcial.setImagen((String) datos.get("imagen"));
+
+        Marca marcaParcial = new Marca();
+        if (datos.containsKey("marcaNombre")) {
+            marcaParcial.setMarcaNombre((String) datos.get("marcaNombre"));
         }
+
+        Producto actualizado = productoService.actualizacionParcialProducto(productoParcial, marcaParcial);
+
+        return ResponseEntity.ok(actualizado);
     }
 
     @DeleteMapping("/{id}")
@@ -93,19 +81,32 @@ public class AdminProductoController {
         }
     }
 
-    @PostMapping(consumes = "multipart/form-data")
-    @Operation(summary = "Crear nuevo producto", description = "Crea un nuevo producto")
-    public ResponseEntity<?> crear(@RequestPart Producto producto,
-            @RequestPart(required = false) Marca marca,
-            @RequestPart(required = false) ProductoCategoria productoCategoria,
-            @RequestPart(required = false) Categoria categoria,
-            @RequestPart(required = false) Especificacion especificacion) {
-        try {
-            Producto nuevoProducto = productoService.guardarProducto(
-                    producto, productoCategoria, categoria, marca, especificacion, null, null, null);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+
+    @PostMapping
+    public ResponseEntity<?> crear(@RequestBody Map<String, Object> payload) {
+        try{
+            Producto producto = new Producto();
+            producto.setNombreProducto((String) payload.get("nombreProducto"));
+            producto.setSku((String) payload.get("sku"));
+            producto.setPrecio(new BigDecimal(payload.get("precio").toString()));
+            producto.setStock(((Number) payload.get("stock")).intValue());
+
+            Marca marca = new Marca();
+            marca.setMarcaNombre((String) payload.get("marcaNombre"));
+
+            Categoria categoria = new Categoria();
+            categoria.setNombreCategoria((String) payload.get("nombreCategoria"));
+
+            ProductoCategoria subCategoria = new ProductoCategoria();
+            subCategoria.setNombreSubCategoria((String) payload.get("subCategoria"));
+
+            Producto creado = productoService.guardarProducto(producto, subCategoria, categoria, marca);
+        
+            return ResponseEntity.status(201).body(creado);
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+ e.getMessage());
+
         }
     }
 
@@ -179,42 +180,6 @@ public class AdminProductoController {
         }
     }
 
-    // ======================== CRUD ESPECIFICACIONES ========================
-
-    @PostMapping("/especificaciones")
-    @Operation(summary = "Crear especificacion", description = "Crea una nueva especificacion")
-    public ResponseEntity<?> crearEspecificacion(@RequestBody Especificacion especificacion) {
-        try {
-            Especificacion nuevaEspecificacion = especificacionService.guardarEspecificacion(especificacion);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaEspecificacion);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
-        }
-    }
-
-    @PutMapping("/especificaciones/{id}")
-    @Operation(summary = "Actualizar especificacion", description = "Actualiza una especificacion existente")
-    public ResponseEntity<?> actualizarEspecificacion(@PathVariable Long id,
-            @RequestBody Especificacion especificacion) {
-        try {
-            Especificacion especificacionActualizada = especificacionService.actualizarEspecificacion(id,
-                    especificacion);
-            return ResponseEntity.ok(especificacionActualizada);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/especificaciones/{id}")
-    @Operation(summary = "Eliminar especificacion", description = "Elimina una especificacion del sistema")
-    public ResponseEntity<?> eliminarEspecificacion(@PathVariable Long id) {
-        try {
-            especificacionService.eliminarEspecificacion(id);
-            return ResponseEntity.ok("especificacion eliminada correctamente");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
-        }
-    }
 
     // ======================== CRUD SUBCATEOGORIA ========================
 

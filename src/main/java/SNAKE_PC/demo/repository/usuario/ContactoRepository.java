@@ -31,4 +31,6 @@ public interface ContactoRepository extends JpaRepository<Contacto, Long> {
     boolean existsByTelefonoAndId(String telefono, Long contactoIdActual);
 
     boolean existsByTelefonoAndIdNot(String telefono, Long contactoIdActual);
+
+    Optional<Contacto> findByUsuarioId(Long idUsuarioLogueado);
 }
