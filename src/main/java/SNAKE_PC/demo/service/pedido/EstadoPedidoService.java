@@ -19,7 +19,8 @@ public class EstadoPedidoService {
 
     @PostConstruct
     public void inicializarEstados(){
-        crearEstadoSiNoExiste("PENDIENTE", "El pedido está siendo procesado");
+        crearEstadoSiNoExiste("PENDIENTE", "El pedido está esperando ser procesado");
+        crearEstadoSiNoExiste("PAGADO", "El pedido ha sido pagado");
         crearEstadoSiNoExiste("DESPACHADO","El pedido va en camino");
         crearEstadoSiNoExiste("ENTREGADO", "El pedido fue entregado exitosamente");
         crearEstadoSiNoExiste("CANCELADO", "El pedido fue cancelado");
@@ -36,6 +37,10 @@ public class EstadoPedidoService {
 
     public EstadoPedido obtenerEstadoPendiente(){
         return obtenerPorNombre("PENDIENTE");
+    }
+
+    public EstadoPedido obtenerEstadoPagado(){
+        return obtenerPorNombre("PAGADO");
     }
 
     public EstadoPedido obtenerEstadoDespachado(){

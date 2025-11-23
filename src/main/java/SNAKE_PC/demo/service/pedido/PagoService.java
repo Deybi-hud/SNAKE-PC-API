@@ -31,10 +31,14 @@ public class PagoService {
 
     public Pago crearPago(Long pedidoId, String correoUsuario, Long metodoPagoId) {
 
-        Pedido pedido = pedidoService.obtenerPedidoPorId(pedidoId,correoUsuario);
+        if (metodoPagoId == null || metodoPagoId <= 0) {
+            throw new RuntimeException("Debe proporcionar un método de pago válido");
+        }
+
+        Pedido pedido = pedidoService.obtenerPedidoPorId(pedidoId, correoUsuario);
 
         if (!pedido.getEstado().getNombre().equals("PENDIENTE")) {
-            throw new RuntimeException("Solo se pueden pagar pedidos en estado PENDIENTE");
+            throw new RuntimeException("Solo se pueden pagar pedidos en estado PENDIENTE. Estado actual: " + pedido.getEstado().getNombre());
         }
 
         MetodoPago metodoPago = metodoPagoRepository.findById(metodoPagoId)
@@ -49,10 +53,9 @@ public class PagoService {
         pago.setMetodoPago(metodoPago);
         pago.setPedido(pedido);
 
-        pedidoService.actualizarEstadoPedido(pedidoId, "PAGADO");
-        
-        pedido.setTotal(totalPedido);
         Pago pagoCreado = pagoRepository.save(pago);
+        
+        pedidoService.actualizarEstadoPedido(pedidoId, "PAGADO");
 
         return pagoCreado;
     }

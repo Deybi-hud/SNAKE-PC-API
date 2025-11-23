@@ -32,7 +32,6 @@ public class PedidoService {
     @Autowired
     private PedidoRepository pedidoRepository;
 
-
     @Autowired
     private ProductoService productoService;
 
@@ -51,7 +50,7 @@ public class PedidoService {
     @Transactional
     public Pedido crearPedido(Pedido pedido, Long idUsuario) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         if (usuario.getContacto() == null) {
             throw new RuntimeException("Completa tus datos de contacto antes de comprar");
@@ -60,13 +59,23 @@ public class PedidoService {
         pedido.setEstado(estadoPedidoService.obtenerEstadoPendiente());
         pedido.setFechaPedido(LocalDate.now());
         pedido.setNumeroPedido(generarNumeroPedido());
-        
+
         if (pedido.getDetalles() == null || pedido.getDetalles().isEmpty()) {
             throw new RuntimeException("Agrega al menos un producto");
         }
         for (DetallePedido detalle : pedido.getDetalles()) {
+            if (detalle.getProducto() == null || detalle.getProducto().getId() == null) {
+                throw new RuntimeException("Cada detalle debe tener un producto");
+            }
+            if (detalle.getMetodoEnvio() == null || detalle.getMetodoEnvio().getId() == null) {
+                throw new RuntimeException("Cada producto debe tener un método de envío");
+            }
+            if (detalle.getCantidad() == null || detalle.getCantidad() <= 0) {
+                throw new RuntimeException("La cantidad debe ser mayor a 0");
+            }
+
             Producto producto = productoService.buscarPorId(detalle.getProducto().getId());
-            
+
             if (producto.getStock() < detalle.getCantidad()) {
                 throw new RuntimeException("Sin stock para: " + producto.getNombreProducto());
             }
@@ -74,15 +83,21 @@ public class PedidoService {
             detalle.setPedido(pedido);
             detalle.setProducto(producto);
             detalle.setPrecioUnitario(producto.getPrecio());
+            detalle.setSubtotal(producto.getPrecio().multiply(BigDecimal.valueOf(detalle.getCantidad())));
         }
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
-        pedido.getDetalles().forEach(detalle -> 
-            productoService.actualizarStock(detalle.getProducto().getId(), detalle.getCantidad())
-        );
-        BigDecimal total = pedido.getDetalles().stream()
-            .map(d -> d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
+        pedido.getDetalles().forEach(
+                detalle -> productoService.actualizarStock(detalle.getProducto().getId(), detalle.getCantidad()));
+
+        BigDecimal total = BigDecimal.ZERO;
+        for (DetallePedido detalle : pedido.getDetalles()) {
+            BigDecimal subtotal = detalle.getPrecioUnitario().multiply(BigDecimal.valueOf(detalle.getCantidad()));
+            BigDecimal costoEnvio = detalle.getMetodoEnvio() != null && detalle.getMetodoEnvio().getCostoEnvio() != null
+                    ? detalle.getMetodoEnvio().getCostoEnvio()
+                    : BigDecimal.ZERO;
+            total = total.add(subtotal).add(costoEnvio);
+        }
+
         pedidoGuardado.setTotal(total);
 
         return pedidoRepository.save(pedidoGuardado);
@@ -109,7 +124,7 @@ public class PedidoService {
     public Pedido actualizarEstadoPedido(Long pedidoId, String nuevoEstado) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
-        
+
         EstadoPedido estado = estadoPedidoService.obtenerPorNombre(nuevoEstado.toUpperCase());
         pedido.setEstado(estado);
         return pedidoRepository.save(pedido);
@@ -127,8 +142,8 @@ public class PedidoService {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
 
-        if (!pedido.getUsuario().getCorreo().equals(correoUsuario) && 
-            !usuarioService.obtenerPorCorreo(correoUsuario).getRolUsuario().getNombreRol().equals("ADMIN")) {
+        if (!pedido.getUsuario().getCorreo().equals(correoUsuario) &&
+                !usuarioService.obtenerPorCorreo(correoUsuario).getRolUsuario().getNombreRol().equals("ADMIN")) {
             throw new RuntimeException("No tiene permisos para ver este pedido");
         }
 
@@ -219,4 +234,5 @@ public class PedidoService {
 
         return total;
     }
+
 }
