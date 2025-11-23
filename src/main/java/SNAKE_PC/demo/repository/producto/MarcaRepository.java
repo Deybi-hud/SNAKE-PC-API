@@ -12,5 +12,6 @@ public interface MarcaRepository extends JpaRepository<Marca, Long> {
 
     Optional<Marca> findByMarcaNombre(String marcaNombre);
     boolean existsByMarcaNombre(String marcaNombre);
+    Marca findByProductoId(Long id);
 
 }

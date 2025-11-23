@@ -8,10 +8,6 @@ import org.springframework.stereotype.Service;
 
 import SNAKE_PC.demo.model.producto.Categoria;
 import SNAKE_PC.demo.model.producto.Especificacion;
-<<<<<<< HEAD
-=======
-import SNAKE_PC.demo.model.producto.Imagen;
->>>>>>> parent of e8606bd (asdasd)
 import SNAKE_PC.demo.model.producto.Marca;
 import SNAKE_PC.demo.model.producto.Producto;
 import SNAKE_PC.demo.model.producto.ProductoCategoria;
@@ -39,9 +35,6 @@ public class ProductoService {
     @Autowired
     private ProductoCategoriaService productoCategoriaService;
 
-    @Autowired
-    private ImagenService imagenService;
-
     public List<Producto> buscarTodo() {
         List<Producto> productos = productoRepository.findAll();
         return productos;
@@ -53,7 +46,6 @@ public class ProductoService {
         return producto;
     }
 
-<<<<<<< HEAD
     public Producto guardarProducto(Producto producto, ProductoCategoria productoCategoria, Categoria categoria,
             Marca marca, Especificacion especificacion,
             Long idMarca, Long idCategoria, Long idEspecificacion) {
@@ -70,48 +62,6 @@ public class ProductoService {
 
         return productoRepository.save(producto);
 
-=======
-    public Producto guardarProducto(
-            Producto producto,
-            ProductoCategoria productoCategoria,
-            Categoria categoria,
-            Marca marca,
-            Especificacion especificacion,
-            List<String> urlsImagenes) {   // ← IDIOMA CHILENO: SOLO LO QUE SE USA
-
-        validarProducto(producto);
-
-        // Tus servicios ya buscan por nombre → no por ID → PERFECTO
-        Marca marcaGuardada = marcaService.guardarMarca(marca);
-        Especificacion especificacionGuardada = especificacionService.guardarEspecificacion(especificacion);
-        
-        // Aquí está la magia: pasas el objeto categoria → el service lo busca o crea por nombre
-        ProductoCategoria productoCategoriaGuardada = productoCategoriaService.guardarProductoCategoria(
-                productoCategoria, categoria);
-
-        // Asignaciones
-        producto.setMarca(marcaGuardada);
-        producto.setEspecificacion(especificacionGuardada);
-        producto.setProductoCategoria(productoCategoriaGuardada);
-
-        // Guardar producto primero para tener ID
-        Producto productoGuardado = productoRepository.saveAndFlush(producto);
-
-        // Guardar imágenes (si las hay)
-        if (urlsImagenes != null && !urlsImagenes.isEmpty()) {
-            List<Imagen> imagenesGuardadas = imagenService.guardarImagenesParaProducto(urlsImagenes, productoGuardado);
-            productoGuardado.getImagenes().addAll(imagenesGuardadas);
-        }
-
-        log.info("Producto creado ÉXITO TOTAL → ID: {} | '{}' | Categoría: '{}' | Sub: '{}' | {} imágenes",
-            productoGuardado.getId(),
-            productoGuardado.getNombreProducto(),
-            categoria.getNombreCategoria(),
-            productoCategoria.getNombreSubCategoria(),
-            productoGuardado.getImagenes().size());
-
-        return productoGuardado;
->>>>>>> parent of e8606bd (asdasd)
     }
 
     public void validarProducto(Producto producto) {
@@ -136,10 +86,6 @@ public class ProductoService {
     public void borrarProducto(Long id) {
         Producto producto = productoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-<<<<<<< HEAD
-=======
-        imagenService.eliminarImagenesDeProducto(id);
->>>>>>> parent of e8606bd (asdasd)
         especificacionRepository.delete(producto.getEspecificacion());
         productoRepository.deleteById(id);
     }
