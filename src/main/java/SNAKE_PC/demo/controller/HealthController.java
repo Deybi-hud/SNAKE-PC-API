@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/cliente/health")
+@RequestMapping("/api/v1/cliente/healths")
 public class HealthController {
 
     @GetMapping("/health")

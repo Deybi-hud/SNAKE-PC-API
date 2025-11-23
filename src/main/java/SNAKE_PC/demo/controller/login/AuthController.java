@@ -1,6 +1,5 @@
 package SNAKE_PC.demo.controller.login;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,13 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
 import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.service.usuario.LoginService;
 import SNAKE_PC.demo.service.usuario.UsuarioService;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1/auths")
 public class AuthController {
 
     @Autowired

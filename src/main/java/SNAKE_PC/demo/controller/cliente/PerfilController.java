@@ -20,7 +20,7 @@ import SNAKE_PC.demo.service.usuario.UsuarioContactoService;
 import SNAKE_PC.demo.service.usuario.UsuarioService;
 
 @RestController
-@RequestMapping("/api/v1/perfil")
+@RequestMapping("/api/v1/perfiles")
 public class PerfilController {
 
     @Autowired
@@ -59,11 +59,11 @@ public class PerfilController {
             direccionActualizada.setCalle((String) datos.get("calle"));
             direccionActualizada.setNumero((String) datos.get("numero"));
 
-            String nuevoCorreo = (String)datos.get("nuevoCorreo");
+            String nuevoCorreo = (String) datos.get("nuevoCorreo");
 
             Long idComuna = Long.valueOf(datos.get("idComuna").toString());
-            usuarioContactoService.ActualizarContacto(contactoActualizado, direccionActualizada, 
-                nuevoCorreo, idComuna, usuarioLogueado.getId());
+            usuarioContactoService.ActualizarContacto(contactoActualizado, direccionActualizada,
+                    nuevoCorreo, idComuna, usuarioLogueado.getId());
 
             return ResponseEntity.ok(Map.of("mensaje", "Perfil actualizado con éxito"));
 

@@ -22,7 +22,7 @@ import SNAKE_PC.demo.service.usuario.ComunaService;
 import SNAKE_PC.demo.service.usuario.RegionService;
 
 @RestController
-@RequestMapping("/api/v1/admin/ubicacion")
+@RequestMapping("/api/v1/admin/ubicaciones")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminUbicacionController {
 
