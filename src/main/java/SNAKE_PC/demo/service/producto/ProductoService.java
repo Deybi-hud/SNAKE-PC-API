@@ -71,7 +71,7 @@ public class ProductoService {
         producto.setEspecificacion(especificacionGuardada);
         producto.setProductoCategoria(productoCategoriaGuardada);
 
- 
+  
         Producto productoGuardado = productoRepository.save(producto);
 
         List<Imagen> imagenesGuardadas = imagenService.guardarImagenesParaProducto(urlsImagenes, productoGuardado);

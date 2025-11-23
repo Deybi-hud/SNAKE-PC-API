@@ -1,5 +1,6 @@
 package SNAKE_PC.demo.controller.admin;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,30 +52,57 @@ public class AdminProductoController {
 
     // ======================== CRUD PRODUCTOS ========================
 
-    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
+    @PutMapping("/{id}")
     @Operation(summary = "Actualizar producto completamente", description = "Actualiza completamente un producto existente")
-    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestPart Producto producto,
-            @RequestPart(required = false) Marca marca,
-            @RequestPart(required = false) ProductoCategoria productoCategoria,
-            @RequestPart(required = false) Categoria categoria,
-            @RequestPart(required = false) Especificacion especificacion) {
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Map<String, Object> datos) {
         try {
-            producto.setId(id);
+            Producto producto = productoService.buscarPorId(id);
+            producto.setNombreProducto((String) datos.getOrDefault("nombreProducto", producto.getNombreProducto()));
+            producto.setSku((String) datos.getOrDefault("sku", producto.getSku()));
+            producto.setPrecio(new BigDecimal(datos.getOrDefault("precio", producto.getPrecio()).toString()));
+            producto.setStock(((Number) datos.getOrDefault("stock", producto.getStock())).intValue());
+            if (datos.containsKey("peso") && datos.get("peso") != null) {
+                producto.setPeso((String) datos.get("peso"));
+            }
+
+            Marca marca = null;
+            Especificacion especificacion = null;
+            ProductoCategoria productoCategoria = null;
+            Categoria categoria = null;
+
             Producto updateProducto = productoService.guardarProducto(
-                    producto, productoCategoria, categoria, marca, especificacion, null, null, null);
+                    producto, productoCategoria, categoria, marca, especificacion, null, null);
             return ResponseEntity.ok(updateProducto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    @PatchMapping(value = "/{id}", consumes = "multipart/form-data")
+    @PatchMapping("/{id}")
     @Operation(summary = "Actualizar parcialmente un producto", description = "Actualiza parcialmente un producto existente")
-    public ResponseEntity<?> actualizarParcial(@PathVariable Long id, @RequestPart Producto producto,
-            @RequestPart(required = false) Marca marca,
-            @RequestPart(required = false) Especificacion especificacion) {
+    public ResponseEntity<?> actualizarParcial(@PathVariable Long id, @RequestBody Map<String, Object> datos) {
         try {
-            producto.setId(id);
+            Producto producto = productoService.buscarPorId(id);
+
+            if (datos.containsKey("nombreProducto")) {
+                producto.setNombreProducto((String) datos.get("nombreProducto"));
+            }
+            if (datos.containsKey("precio")) {
+                producto.setPrecio(new BigDecimal(datos.get("precio").toString()));
+            }
+            if (datos.containsKey("stock")) {
+                producto.setStock(((Number) datos.get("stock")).intValue());
+            }
+            if (datos.containsKey("sku")) {
+                producto.setSku((String) datos.get("sku"));
+            }
+            if (datos.containsKey("peso")) {
+                producto.setPeso((String) datos.get("peso"));
+            }
+
+            Marca marca = null;
+            Especificacion especificacion = null;
+
             Producto updatedProducto = productoService.actualizacionParcialProducto(producto, marca, especificacion);
             return ResponseEntity.ok(updatedProducto);
         } catch (Exception e) {
@@ -93,16 +121,35 @@ public class AdminProductoController {
         }
     }
 
-    @PostMapping(consumes = "multipart/form-data")
+    @PostMapping
     @Operation(summary = "Crear nuevo producto", description = "Crea un nuevo producto")
-    public ResponseEntity<?> crear(@RequestPart Producto producto,
-            @RequestPart(required = false) Marca marca,
-            @RequestPart(required = false) ProductoCategoria productoCategoria,
-            @RequestPart(required = false) Categoria categoria,
-            @RequestPart(required = false) Especificacion especificacion) {
+    public ResponseEntity<?> crear(@RequestBody Map<String, Object> datos) {
         try {
+            Producto producto = new Producto();
+            producto.setNombreProducto((String) datos.get("nombreProducto"));
+            producto.setSku((String) datos.get("sku"));
+            producto.setPrecio(new BigDecimal(datos.get("precio").toString()));
+            producto.setStock(((Number) datos.get("stock")).intValue());
+
+            Imagen imagen = new Imagen();
+            imagen.setUrl((String) datos.get("imagenUrl"));
+
+            Marca marca = new Marca();
+            marca.setMarcaNombre((String) datos.get("marcaNombre"));
+
+            Especificacion especificacion = new Especificacion();
+            especificacion.setFrecuencia((String) datos.get("frecuencia"));
+            especificacion.setCapacidadAlmacenamiento((String) datos.get("capacidadAlmacenamiento"));
+            especificacion.setConsumo((String) datos.get("consumo"));
+
+            ProductoCategoria productoCategoria = new ProductoCategoria();
+            productoCategoria.setNombreSubCategoria((String) datos.get("nombreSubCategoria"));
+
+            Categoria categoria = new Categoria();
+            categoria.setNombreCategoria((String) datos.get("nombreCategoria"));
+
             Producto nuevoProducto = productoService.guardarProducto(
-                    producto, productoCategoria, categoria, marca, especificacion, null, null, null);
+                    producto, productoCategoria, categoria, marca, especificacion, imagen, null);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
