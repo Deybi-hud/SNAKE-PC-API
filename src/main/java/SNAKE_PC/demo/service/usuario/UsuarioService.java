@@ -3,7 +3,6 @@ package SNAKE_PC.demo.service.usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import SNAKE_PC.demo.model.usuario.RolUsuario;
 import SNAKE_PC.demo.model.usuario.Usuario;
