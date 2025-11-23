@@ -3,56 +3,38 @@ package SNAKE_PC.demo.service.pedido;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import SNAKE_PC.demo.model.pedido.DetallePedido;
 import SNAKE_PC.demo.model.pedido.EstadoPedido;
 import SNAKE_PC.demo.model.pedido.Pedido;
 import SNAKE_PC.demo.model.producto.Producto;
-import SNAKE_PC.demo.model.usuario.Contacto;
 import SNAKE_PC.demo.model.usuario.Usuario;
 import SNAKE_PC.demo.repository.pedido.DetalleRepository;
-import SNAKE_PC.demo.repository.pedido.EstadoPedidoRepository;
 import SNAKE_PC.demo.repository.pedido.PedidoRepository;
 import SNAKE_PC.demo.repository.producto.ProductoRepository;
+import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
 import SNAKE_PC.demo.service.producto.ProductoService;
-import SNAKE_PC.demo.service.usuario.UsuarioContactoService;
 import SNAKE_PC.demo.service.usuario.UsuarioService;
-import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
-import java.time.format.TextStyle;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class PedidoService {
 
     @Autowired
     private UsuarioService usuarioService;
 
     @Autowired
-    private UsuarioContactoService usuarioContactoService;
-
-    @Autowired
     private PedidoRepository pedidoRepository;
 
-    @Autowired
-    private DetallePedidoService detallePedidoService;
 
     @Autowired
     private ProductoService productoService;
-
-    @Autowired
-    private EstadoPedidoRepository estadoPedidoRepository;
 
     @Autowired
     private EstadoPedidoService estadoPedidoService;
@@ -63,68 +45,62 @@ public class PedidoService {
     @Autowired
     private ProductoRepository productoRepository;
 
-    public Pedido crearPedido(Map<Long, Integer> productosYCantidades, Map<Long, Long> metodosEnvio,
-            String correoUsuario) {
-        Usuario usuario = usuarioService.validarActividad(correoUsuario);
-        Contacto contacto = usuarioContactoService.obtenerDatosContacto(usuario.getId());
-        EstadoPedido pedidoEstado = estadoPedidoService.obtenerEstadoPendiente();
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-        if (productosYCantidades == null || productosYCantidades.isEmpty()) {
-            throw new RuntimeException("Debe agregar productos al pedido");
+    @Transactional
+    public Pedido crearPedido(Pedido pedido, Long idUsuario) {
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (usuario.getContacto() == null) {
+            throw new RuntimeException("Completa tus datos de contacto antes de comprar");
         }
-
-        Pedido pedido = new Pedido();
+        pedido.setUsuario(usuario);
+        pedido.setEstado(estadoPedidoService.obtenerEstadoPendiente());
         pedido.setFechaPedido(LocalDate.now());
         pedido.setNumeroPedido(generarNumeroPedido());
-        pedido.setContacto(contacto);
-        pedido.setEstado(pedidoEstado);
-        pedido.setDetalles(new ArrayList<>());
-
-        for (Map.Entry<Long, Integer> entry : productosYCantidades.entrySet()) {
-            Long productoId = entry.getKey();
-            Integer cantidad = entry.getValue();
-
-            if (cantidad <= 0) {
-                throw new RuntimeException("La cantidad debe ser mayor a 0");
-            }
-
-            Producto producto = productoService.buscarPorId(productoId);
-            if (producto.getStock() < cantidad) {
-                throw new RuntimeException("Stock insuficiente para: " + producto.getNombreProducto());
-            }
-            Long metodoEnvioId = metodosEnvio.get(productoId);
-            if (metodoEnvioId == null) {
-                throw new RuntimeException("Falta método de envío para producto ID: " + productoId);
-            }
-            DetallePedido detalle = detallePedidoService.crearDetalle(
-                    productoId, cantidad, pedido, metodoEnvioId);
-            pedido.getDetalles().add(detalle);
+        
+        if (pedido.getDetalles() == null || pedido.getDetalles().isEmpty()) {
+            throw new RuntimeException("Agrega al menos un producto");
         }
-        pedido = pedidoRepository.save(pedido);
-        for (Map.Entry<Long, Integer> entry : productosYCantidades.entrySet()) {
-            productoService.actualizarStock(entry.getKey(), entry.getValue());
-        }
+        for (DetallePedido detalle : pedido.getDetalles()) {
+            Producto producto = productoService.buscarPorId(detalle.getProducto().getId());
+            
+            if (producto.getStock() < detalle.getCantidad()) {
+                throw new RuntimeException("Sin stock para: " + producto.getNombreProducto());
+            }
 
-        pedido.setTotal(calcularTotalPedido(pedido.getId()));
-        return pedidoRepository.save(pedido);
+            detalle.setPedido(pedido);
+            detalle.setProducto(producto);
+            detalle.setPrecioUnitario(producto.getPrecio());
+        }
+        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+        pedido.getDetalles().forEach(detalle -> 
+            productoService.actualizarStock(detalle.getProducto().getId(), detalle.getCantidad())
+        );
+        BigDecimal total = pedido.getDetalles().stream()
+            .map(d -> d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad())))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        pedidoGuardado.setTotal(total);
+
+        return pedidoRepository.save(pedidoGuardado);
     }
 
     public Pedido cancelarPedido(Long pedidoId, String correoUsuario) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
 
-        if (!pedido.getContacto().getUsuario().getCorreo().equals(correoUsuario)) {
+        if (!pedido.getUsuario().getCorreo().equals(correoUsuario)) {
             throw new RuntimeException("No tiene permisos para cancelar este pedido");
         }
 
-        if (!pedido.getEstado().getNombre().equals("PENDIENTE") &&
-                !pedido.getEstado().getNombre().equals("CONFIRMADO")) {
-            throw new RuntimeException("No se puede cancelar un pedido en estado: " + pedido.getEstado().getNombre());
+        if (!pedido.getEstado().getNombre().equals("PENDIENTE")) {
+            throw new RuntimeException("Solo se pueden cancelar pedidos en estado PENDIENTE");
         }
 
-        EstadoPedido estadoCancelado = estadoPedidoRepository.findByNombre("CANCELADO")
-                .orElseThrow(() -> new RuntimeException("Estado CANCELADO no configurado"));
-
+        EstadoPedido estadoCancelado = estadoPedidoService.obtenerEstadoCancelado();
         devolverStock(pedidoId);
         pedido.setEstado(estadoCancelado);
         return pedidoRepository.save(pedido);
@@ -133,9 +109,8 @@ public class PedidoService {
     public Pedido actualizarEstadoPedido(Long pedidoId, String nuevoEstado) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
-        EstadoPedido estado = estadoPedidoRepository.findByNombre(nuevoEstado.toUpperCase())
-                .orElseThrow(() -> new RuntimeException("Estado no válido: " + nuevoEstado));
-
+        
+        EstadoPedido estado = estadoPedidoService.obtenerPorNombre(nuevoEstado.toUpperCase());
         pedido.setEstado(estado);
         return pedidoRepository.save(pedido);
     }
@@ -151,7 +126,9 @@ public class PedidoService {
     public Pedido obtenerPedidoPorId(Long pedidoId, String correoUsuario) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
-        if (!pedido.getContacto().getUsuario().getCorreo().equals(correoUsuario)) {
+
+        if (!pedido.getUsuario().getCorreo().equals(correoUsuario) && 
+            !usuarioService.obtenerPorCorreo(correoUsuario).getRolUsuario().getNombreRol().equals("ADMIN")) {
             throw new RuntimeException("No tiene permisos para ver este pedido");
         }
 
@@ -176,14 +153,14 @@ public class PedidoService {
     public Map<String, Object> obtenerEstadisticasDelDia() {
         Object[] resultado = pedidoRepository.estadisticasDelDiaNative();
 
-        Long totalPedidos = (Long) resultado[0];
-        BigDecimal totalVentas = (BigDecimal) resultado[1];
+        Long totalPedidos = resultado[0] != null ? ((Number) resultado[0]).longValue() : 0L;
+        BigDecimal totalVentas = resultado[1] != null ? (BigDecimal) resultado[1] : BigDecimal.ZERO;
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("fecha", LocalDate.now());
         stats.put("totalPedidos", totalPedidos);
         stats.put("totalVentas", totalVentas);
-        stats.put("totalVentasFormateado", formatearPesos(totalVentas));
+        stats.put("totalVentasFormateado", "$ " + totalVentas);
 
         return stats;
     }
@@ -191,16 +168,15 @@ public class PedidoService {
     public Map<String, Object> obtenerEstadisticasDelMes() {
         Object[] resultado = pedidoRepository.estadisticasDelMesNative();
 
-        Long totalPedidos = (Long) resultado[0];
-        BigDecimal totalVentas = (BigDecimal) resultado[1];
+        Long totalPedidos = resultado[0] != null ? ((Number) resultado[0]).longValue() : 0L;
+        BigDecimal totalVentas = resultado[1] != null ? (BigDecimal) resultado[1] : BigDecimal.ZERO;
 
         Map<String, Object> stats = new HashMap<>();
-        stats.put("mes",
-                LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "CL")).toUpperCase());
+        stats.put("mes", LocalDate.now().getMonth().toString());
         stats.put("anio", LocalDate.now().getYear());
         stats.put("totalPedidos", totalPedidos);
         stats.put("totalVentas", totalVentas);
-        stats.put("totalVentasFormateado", formatearPesos(totalVentas));
+        stats.put("totalVentasFormateado", "$ " + totalVentas);
 
         return stats;
     }
@@ -215,45 +191,32 @@ public class PedidoService {
 
     private void devolverStock(Long pedidoId) {
         detalleRepository.findByPedidoId(pedidoId).forEach(detalle -> {
-            Producto p = detalle.getProducto();
-            p.setStock(p.getStock() + detalle.getCantidad());
-            productoRepository.save(p);
+            Producto producto = detalle.getProducto();
+            producto.setStock(producto.getStock() + detalle.getCantidad());
+            productoRepository.save(producto);
         });
     }
 
     public BigDecimal calcularTotalPedido(Long pedidoId) {
-        if (pedidoId == null) {
-            return BigDecimal.ZERO;
-        }
         List<DetallePedido> detalles = detalleRepository.findByPedidoId(pedidoId);
         if (detalles == null || detalles.isEmpty()) {
             return BigDecimal.ZERO;
         }
+
         BigDecimal total = BigDecimal.ZERO;
-        for (DetallePedido d : detalles) {
-            BigDecimal precio = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
-            BigDecimal cantidad = BigDecimal.valueOf(d.getCantidad());
+        for (DetallePedido detalle : detalles) {
+            BigDecimal precio = detalle.getPrecioUnitario() != null ? detalle.getPrecioUnitario() : BigDecimal.ZERO;
+            BigDecimal cantidad = BigDecimal.valueOf(detalle.getCantidad());
             BigDecimal subtotalProductos = precio.multiply(cantidad);
 
             BigDecimal costoEnvio = BigDecimal.ZERO;
-            if (d.getMetodoEnvio() != null && d.getMetodoEnvio().getCostoEnvio() != null) {
-                costoEnvio = d.getMetodoEnvio().getCostoEnvio();
+            if (detalle.getMetodoEnvio() != null && detalle.getMetodoEnvio().getCostoEnvio() != null) {
+                costoEnvio = detalle.getMetodoEnvio().getCostoEnvio();
             }
+
             total = total.add(subtotalProductos).add(costoEnvio);
         }
 
         return total;
     }
-
-    @SuppressWarnings("deprecation")
-    private String formatearPesos(BigDecimal monto) {
-        if (monto == null || monto.compareTo(BigDecimal.ZERO) == 0) {
-            return "$ 0";
-        }
-        DecimalFormat df = new DecimalFormat("$ #,###");
-        df.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(new Locale("es", "CL")));
-
-        return df.format(monto.longValue());
-    }
-
 }
