@@ -58,27 +58,38 @@ public class ProductoService {
             Categoria categoria,
             Marca marca,
             Especificacion especificacion,
-            Long idCategoria,
-            List<String> urlsImagenes) {
+            List<String> urlsImagenes) {   // ← IDIOMA CHILENO: SOLO LO QUE SE USA
 
         validarProducto(producto);
+
+        // Tus servicios ya buscan por nombre → no por ID → PERFECTO
         Marca marcaGuardada = marcaService.guardarMarca(marca);
         Especificacion especificacionGuardada = especificacionService.guardarEspecificacion(especificacion);
+        
+        // Aquí está la magia: pasas el objeto categoria → el service lo busca o crea por nombre
         ProductoCategoria productoCategoriaGuardada = productoCategoriaService.guardarProductoCategoria(
-            productoCategoria, categoria);
+                productoCategoria, categoria);
 
+        // Asignaciones
         producto.setMarca(marcaGuardada);
         producto.setEspecificacion(especificacionGuardada);
         producto.setProductoCategoria(productoCategoriaGuardada);
 
-  
-        Producto productoGuardado = productoRepository.save(producto);
+        // Guardar producto primero para tener ID
+        Producto productoGuardado = productoRepository.saveAndFlush(producto);
 
-        List<Imagen> imagenesGuardadas = imagenService.guardarImagenesParaProducto(urlsImagenes, productoGuardado);
-        
-        productoGuardado.getImagenes().addAll(imagenesGuardadas);
-        log.info("Producto creado con éxito → ID: {} | {} imágenes", 
-            productoGuardado.getId(), imagenesGuardadas.size());
+        // Guardar imágenes (si las hay)
+        if (urlsImagenes != null && !urlsImagenes.isEmpty()) {
+            List<Imagen> imagenesGuardadas = imagenService.guardarImagenesParaProducto(urlsImagenes, productoGuardado);
+            productoGuardado.getImagenes().addAll(imagenesGuardadas);
+        }
+
+        log.info("Producto creado ÉXITO TOTAL → ID: {} | '{}' | Categoría: '{}' | Sub: '{}' | {} imágenes",
+            productoGuardado.getId(),
+            productoGuardado.getNombreProducto(),
+            categoria.getNombreCategoria(),
+            productoCategoria.getNombreSubCategoria(),
+            productoGuardado.getImagenes().size());
 
         return productoGuardado;
     }

@@ -75,7 +75,7 @@ public class AdminProductoController {
             Categoria categoria = null;
 
             Producto updateProducto = productoService.guardarProducto(
-                    producto, productoCategoria, categoria, marca, especificacion, null, null);
+                    producto, productoCategoria, categoria, marca, especificacion);
             return ResponseEntity.ok(updateProducto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -125,62 +125,38 @@ public class AdminProductoController {
         }
     }
 
+
     @PostMapping
-@Operation(summary = "Crear nuevo producto", description = "Solo admin")
-public ResponseEntity<?> crear(@RequestBody Map<String, Object> payload) {
-    try {
-        // === PRODUCTO ===
+    public ResponseEntity<?> crear(@RequestBody Map<String, Object> payload) {
+
         Producto producto = new Producto();
         producto.setNombreProducto((String) payload.get("nombreProducto"));
         producto.setSku((String) payload.get("sku"));
         producto.setPrecio(new BigDecimal(payload.get("precio").toString()));
         producto.setStock(((Number) payload.get("stock")).intValue());
 
-        // === MARCA ===
         Marca marca = new Marca();
         marca.setMarcaNombre((String) payload.get("marcaNombre"));
 
-        // === ESPECIFICACIÓN ===
-        Especificacion especificacion = new Especificacion();
-        especificacion.setFrecuencia((String) payload.get("frecuencia"));
-        especificacion.setCapacidadAlmacenamiento((String) payload.get("capacidadAlmacenamiento"));
-        especificacion.setConsumo((String) payload.get("consumo"));
-
-        // === CATEGORÍA Y SUBCATEGORÍA ===
-        ProductoCategoria productoCategoria = new ProductoCategoria();
-        productoCategoria.setNombreSubCategoria((String) payload.get("nombreSubCategoria"));
+        Especificacion espec = new Especificacion();
+        espec.setFrecuencia((String) payload.get("frecuencia"));
+        espec.setCapacidadAlmacenamiento((String) payload.get("capacidadAlmacenamiento"));
+        espec.setConsumo((String) payload.get("consumo"));
 
         Categoria categoria = new Categoria();
         categoria.setNombreCategoria((String) payload.get("nombreCategoria"));
 
-        // === IMÁGENES → LO MÁS IMPORTANTE: LE MANDAMOS LA LISTA TAL CUAL ===
-        List<String> urlsImagenes = (List<String>) payload.get("urlsImagenes");
-        // Si viene nulo, lo dejamos vacío para que no explote
-        if (urlsImagenes == null) {
-            urlsImagenes = new ArrayList<>();
-        }
+        ProductoCategoria subCategoria = new ProductoCategoria();
+        subCategoria.setNombreSubCategoria((String) payload.get("subCategoria"));
 
-        // LLAMADA AL SERVICE (100% COMPATIBLE CON TU MÉTODO)
+        List<String> urls = (List<String>) payload.get("urlsImagenes");
+
         Producto creado = productoService.guardarProducto(
-            producto,
-            productoCategoria,
-            categoria,
-            marca,
-            especificacion,
-            null,  // idCategoria (no lo usas, pasas el objeto categoria)
-            urlsImagenes   // ← AQUÍ LE LLEGA PERFECTO AL imagenService
+            producto, subCategoria, categoria, marca, espec, urls
         );
 
-        log.info("Producto creado SIN DTO → ID: {} | {} imágenes", creado.getId(), urlsImagenes.size());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
-
-    } catch (Exception e) {
-        log.error("Error creando producto: {}", e.getMessage());
-        return ResponseEntity.badRequest()
-            .body(Map.of("error", "No se pudo crear el producto", "detalle", e.getMessage()));
+        return ResponseEntity.status(201).body(creado);
     }
-}
 
     // ======================== CRUD MARCAS ========================
 
