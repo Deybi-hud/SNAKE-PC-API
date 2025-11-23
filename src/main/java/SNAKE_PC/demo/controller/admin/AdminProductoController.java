@@ -1,6 +1,8 @@
 package SNAKE_PC.demo.controller.admin;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,9 @@ import SNAKE_PC.demo.service.producto.ProductoCategoriaService;
 import SNAKE_PC.demo.service.producto.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("api/v1/admin/producto")
 @PreAuthorize("hasRole('ADMIN')")
@@ -122,39 +126,61 @@ public class AdminProductoController {
     }
 
     @PostMapping
-    @Operation(summary = "Crear nuevo producto", description = "Crea un nuevo producto")
-    public ResponseEntity<?> crear(@RequestBody Map<String, Object> datos) {
-        try {
-            Producto producto = new Producto();
-            producto.setNombreProducto((String) datos.get("nombreProducto"));
-            producto.setSku((String) datos.get("sku"));
-            producto.setPrecio(new BigDecimal(datos.get("precio").toString()));
-            producto.setStock(((Number) datos.get("stock")).intValue());
+@Operation(summary = "Crear nuevo producto", description = "Solo admin")
+public ResponseEntity<?> crear(@RequestBody Map<String, Object> payload) {
+    try {
+        // === PRODUCTO ===
+        Producto producto = new Producto();
+        producto.setNombreProducto((String) payload.get("nombreProducto"));
+        producto.setSku((String) payload.get("sku"));
+        producto.setPrecio(new BigDecimal(payload.get("precio").toString()));
+        producto.setStock(((Number) payload.get("stock")).intValue());
 
-            Imagen imagen = new Imagen();
-            imagen.setUrl((String) datos.get("imagenUrl"));
+        // === MARCA ===
+        Marca marca = new Marca();
+        marca.setMarcaNombre((String) payload.get("marcaNombre"));
 
-            Marca marca = new Marca();
-            marca.setMarcaNombre((String) datos.get("marcaNombre"));
+        // === ESPECIFICACIÓN ===
+        Especificacion especificacion = new Especificacion();
+        especificacion.setFrecuencia((String) payload.get("frecuencia"));
+        especificacion.setCapacidadAlmacenamiento((String) payload.get("capacidadAlmacenamiento"));
+        especificacion.setConsumo((String) payload.get("consumo"));
 
-            Especificacion especificacion = new Especificacion();
-            especificacion.setFrecuencia((String) datos.get("frecuencia"));
-            especificacion.setCapacidadAlmacenamiento((String) datos.get("capacidadAlmacenamiento"));
-            especificacion.setConsumo((String) datos.get("consumo"));
+        // === CATEGORÍA Y SUBCATEGORÍA ===
+        ProductoCategoria productoCategoria = new ProductoCategoria();
+        productoCategoria.setNombreSubCategoria((String) payload.get("nombreSubCategoria"));
 
-            ProductoCategoria productoCategoria = new ProductoCategoria();
-            productoCategoria.setNombreSubCategoria((String) datos.get("nombreSubCategoria"));
+        Categoria categoria = new Categoria();
+        categoria.setNombreCategoria((String) payload.get("nombreCategoria"));
 
-            Categoria categoria = new Categoria();
-            categoria.setNombreCategoria((String) datos.get("nombreCategoria"));
-
-            Producto nuevoProducto = productoService.guardarProducto(
-                    producto, productoCategoria, categoria, marca, especificacion, imagen, null);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        // === IMÁGENES → LO MÁS IMPORTANTE: LE MANDAMOS LA LISTA TAL CUAL ===
+        List<String> urlsImagenes = (List<String>) payload.get("urlsImagenes");
+        // Si viene nulo, lo dejamos vacío para que no explote
+        if (urlsImagenes == null) {
+            urlsImagenes = new ArrayList<>();
         }
+
+        // LLAMADA AL SERVICE (100% COMPATIBLE CON TU MÉTODO)
+        Producto creado = productoService.guardarProducto(
+            producto,
+            productoCategoria,
+            categoria,
+            marca,
+            especificacion,
+            null,  // idCategoria (no lo usas, pasas el objeto categoria)
+            urlsImagenes   // ← AQUÍ LE LLEGA PERFECTO AL imagenService
+        );
+
+        log.info("Producto creado SIN DTO → ID: {} | {} imágenes", creado.getId(), urlsImagenes.size());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+
+    } catch (Exception e) {
+        log.error("Error creando producto: {}", e.getMessage());
+        return ResponseEntity.badRequest()
+            .body(Map.of("error", "No se pudo crear el producto", "detalle", e.getMessage()));
     }
+}
 
     // ======================== CRUD MARCAS ========================
 
