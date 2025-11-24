@@ -111,7 +111,7 @@ public class PerfilController {
         }
     }
 
-    @PutMapping(value = "/cambiar-contrasena", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/cambiar-contrasena")
     public ResponseEntity<?> cambiarContrasena(
             @RequestPart String nuevaContrasena,
             @RequestPart String confirmarContrasena,
