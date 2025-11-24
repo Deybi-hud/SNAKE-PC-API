@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -101,22 +102,16 @@ public class PerfilController {
 
                 return ResponseEntity.ok(Map.of(
                         "mensaje", "Foto actualizada correctamente",
-                        "url", url
-                ));
+                        "url", url));
 
             } catch (Exception e) {
                 return ResponseEntity.badRequest().body(Map.of(
-                        "error", e.getMessage()
-                ));
+                        "error", e.getMessage()));
             }
         }
     }
 
-
-
-
-
-    @PutMapping("/cambiar-contrasena")
+    @PutMapping(value = "/cambiar-contrasena", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> cambiarContrasena(
             @RequestPart String nuevaContrasena,
             @RequestPart String confirmarContrasena,
