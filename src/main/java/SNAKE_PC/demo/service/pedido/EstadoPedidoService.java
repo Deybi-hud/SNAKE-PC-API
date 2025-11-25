@@ -19,10 +19,15 @@ public class EstadoPedidoService {
 
     @PostConstruct
     public void inicializarEstados(){
-        crearEstadoSiNoExiste("PENDIENTE", "El pedido está siendo procesado");
-        crearEstadoSiNoExiste("DESPACHADO","El pedido va en camino");
-        crearEstadoSiNoExiste("ENTREGADO", "El pedido fue entregado exitosamente");
-        crearEstadoSiNoExiste("CANCELADO", "El pedido fue cancelado");
+        try {
+            crearEstadoSiNoExiste("PENDIENTE", "El pedido está esperando ser procesado");
+            crearEstadoSiNoExiste("PAGADO", "El pedido ha sido pagado");
+            crearEstadoSiNoExiste("DESPACHADO","El pedido va en camino");
+            crearEstadoSiNoExiste("ENTREGADO", "El pedido fue entregado exitosamente");
+            crearEstadoSiNoExiste("CANCELADO", "El pedido fue cancelado");
+        } catch (Exception e) {
+            System.err.println("Error al inicializar estados de pedido: " + e.getMessage());
+        }
     }
 
     private void crearEstadoSiNoExiste(String nombre, String descripcion){
@@ -36,6 +41,10 @@ public class EstadoPedidoService {
 
     public EstadoPedido obtenerEstadoPendiente(){
         return obtenerPorNombre("PENDIENTE");
+    }
+
+    public EstadoPedido obtenerEstadoPagado(){
+        return obtenerPorNombre("PAGADO");
     }
 
     public EstadoPedido obtenerEstadoDespachado(){

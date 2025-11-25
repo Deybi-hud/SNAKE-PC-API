@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/admin/producto")
+@RequestMapping("api/v1/admin/productos")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminProductoController {
 
@@ -47,18 +47,22 @@ public class AdminProductoController {
     @Autowired
     private ProductoService productoService;
 
-
     @PatchMapping("/{id}")
     public ResponseEntity<?> actualizarParcial(@PathVariable Long id, @RequestBody Map<String, Object> datos) {
 
         Producto productoParcial = new Producto();
-        productoParcial.setId(id); 
+        productoParcial.setId(id);
 
-        if(datos.containsKey("nombreProducto")) productoParcial.setNombreProducto((String) datos.get("nombreProducto"));
-        if(datos.containsKey("stock")) productoParcial.setStock(((Number) datos.get("stock")).intValue());
-        if(datos.containsKey("precio")) productoParcial.setPrecio(new BigDecimal(datos.get("precio").toString()));
-        if(datos.containsKey("sku")) productoParcial.setSku((String) datos.get("sku"));
-        if(datos.containsKey("imagen")) productoParcial.setImagen((String) datos.get("imagen"));
+        if (datos.containsKey("nombreProducto"))
+            productoParcial.setNombreProducto((String) datos.get("nombreProducto"));
+        if (datos.containsKey("stock"))
+            productoParcial.setStock(((Number) datos.get("stock")).intValue());
+        if (datos.containsKey("precio"))
+            productoParcial.setPrecio(new BigDecimal(datos.get("precio").toString()));
+        if (datos.containsKey("sku"))
+            productoParcial.setSku((String) datos.get("sku"));
+        if (datos.containsKey("imagen"))
+            productoParcial.setImagen((String) datos.get("imagen"));
 
         Marca marcaParcial = new Marca();
         if (datos.containsKey("marcaNombre")) {
@@ -81,31 +85,45 @@ public class AdminProductoController {
         }
     }
 
-
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody Map<String, Object> payload) {
-        try{
+        try {
+
+            if (payload.get("nombreProducto") == null || payload.get("sku") == null ||
+                    payload.get("precio") == null || payload.get("stock") == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Campos requeridos: nombreProducto, sku, precio, stock"));
+            }
+
             Producto producto = new Producto();
             producto.setNombreProducto((String) payload.get("nombreProducto"));
             producto.setSku((String) payload.get("sku"));
             producto.setPrecio(new BigDecimal(payload.get("precio").toString()));
             producto.setStock(((Number) payload.get("stock")).intValue());
 
+            Object imagenObj = payload.get("imagen");
+            if (imagenObj != null) {
+                producto.setImagen((String) imagenObj);
+            }
+
             Marca marca = new Marca();
             marca.setMarcaNombre((String) payload.get("marcaNombre"));
+            Marca marcaGuardada = marcaService.guardarMarca(marca);
 
             Categoria categoria = new Categoria();
             categoria.setNombreCategoria((String) payload.get("nombreCategoria"));
+            Categoria categoriaGuardada = categoriaService.guardarCategoria(categoria);
 
             ProductoCategoria subCategoria = new ProductoCategoria();
             subCategoria.setNombreSubCategoria((String) payload.get("subCategoria"));
+            subCategoria.setCategoria(categoriaGuardada);
 
-            Producto creado = productoService.guardarProducto(producto, subCategoria, categoria, marca);
-        
+            Producto creado = productoService.guardarProducto(producto, subCategoria, categoriaGuardada, marcaGuardada);
+
             return ResponseEntity.status(201).body(creado);
-        }
-        catch(Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: "+ e.getMessage());
+        } catch (Exception e) {
+            log.error("Error creando producto", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
 
         }
     }
@@ -179,7 +197,6 @@ public class AdminProductoController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
         }
     }
-
 
     // ======================== CRUD SUBCATEOGORIA ========================
 

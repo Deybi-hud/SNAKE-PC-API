@@ -17,7 +17,7 @@ import SNAKE_PC.demo.model.pedido.Pedido;
 import SNAKE_PC.demo.service.pedido.PedidoService;
 
 @RestController
-@RequestMapping("/api/v1/admin/dashboard")
+@RequestMapping("/api/v1/admin/dashboards")
 @PreAuthorize("hasRole('ADMIN')")
 public class DashboardController {
 

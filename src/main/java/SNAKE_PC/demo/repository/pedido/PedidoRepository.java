@@ -20,13 +20,10 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     List<Pedido> findByFechaPedidoBetweenOrderByFechaPedidoDesc(LocalDate fechaInicio, LocalDate fechaFin);
 
-    @Query("SELECT p FROM Pedido p WHERE p.contacto.usuario.id = :usuarioId")
+    @Query("SELECT p FROM Pedido p WHERE p.usuario.id = :usuarioId")
     List<Pedido> findByUsuarioId(@Param("usuarioId") Long usuarioId);
 
-    @Query("SELECT p FROM Pedido p WHERE p.contacto.usuario.correo = :correo")
-    List<Pedido> findByUsuarioCorreo(@Param("correo") String correo);
-
-    @Query("SELECT p FROM Pedido p JOIN FETCH p.contacto c JOIN FETCH c.usuario u JOIN FETCH p.estado ORDER BY p.fechaPedido DESC")
+    @Query("SELECT p FROM Pedido p JOIN FETCH p.usuario u JOIN FETCH p.estado ORDER BY p.fechaPedido DESC")
     List<Pedido> findAllWithDetails();
 
     @Query("SELECT p FROM Pedido p WHERE p.estado.nombre = :estado")

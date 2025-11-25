@@ -16,32 +16,16 @@ public class MetodoPagoService {
     
     public MetodoPago crearMetodoPago(MetodoPago metodoPago){
         if(metodoPago.getTipoPago() == null || metodoPago.getTipoPago().trim().isEmpty()){
-            throw new RuntimeException("Debe ingresar un metodo valído");
+            throw new RuntimeException("Debe ingresar un tipo de pago válido");
         }
-        String tipoPagoNormalizado = metodoPago.getTipoPago().trim().toLowerCase();
-        return metodoPagoRepository.findByTipoPago(tipoPagoNormalizado)
-            .orElseGet(()->{
-                MetodoPago nuevoMetodoPago = new MetodoPago();
-                nuevoMetodoPago.setTipoPago(metodoPago.getTipoPago());
-                return metodoPagoRepository.save(nuevoMetodoPago);
-            });
+        String tipoPago = metodoPago.getTipoPago().trim();
+        boolean yaExiste = metodoPagoRepository.existsByTipoPago(tipoPago);
+        if(yaExiste){
+            throw new RuntimeException("El método de pago '" + tipoPago + "' ya existe");
+        }
+        MetodoPago nuevoMetodoPago = new MetodoPago();
+        nuevoMetodoPago.setTipoPago(tipoPago);
+        return metodoPagoRepository.save(nuevoMetodoPago);
     } 
-
-    public MetodoPago guardarMetodoSeleccionado(MetodoPago metodoPago){
-        return metodoPagoRepository.findByTipoPago(metodoPago.getTipoPago())
-            .orElseThrow(()->new RuntimeException("Metodo de pago invalido"));
-    }
-           
-
-
-    public MetodoPago buscarTipoPago(MetodoPago metodoPago){
-        if(metodoPagoRepository.existsByTipoPago(metodoPago.getTipoPago())){
-            throw new RuntimeException("El metodo no existe");
-        }
-        return metodoPago;
-    }
-
-
-    
 
 }

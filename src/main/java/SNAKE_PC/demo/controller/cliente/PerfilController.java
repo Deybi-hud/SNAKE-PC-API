@@ -10,17 +10,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import SNAKE_PC.demo.model.usuario.Contacto;
 import SNAKE_PC.demo.model.usuario.Direccion;
 import SNAKE_PC.demo.model.usuario.Usuario;
+import SNAKE_PC.demo.repository.usuario.UsuarioRepository;
+import SNAKE_PC.demo.service.ImagenService;
 import SNAKE_PC.demo.service.usuario.UsuarioContactoService;
 import SNAKE_PC.demo.service.usuario.UsuarioService;
 
 @RestController
-@RequestMapping("/api/v1/perfil")
+@RequestMapping("/api/v1/perfiles")
 public class PerfilController {
 
     @Autowired
@@ -59,17 +63,50 @@ public class PerfilController {
             direccionActualizada.setCalle((String) datos.get("calle"));
             direccionActualizada.setNumero((String) datos.get("numero"));
 
-            String nuevoCorreo = (String)datos.get("nuevoCorreo");
+            String nuevoCorreo = (String) datos.get("nuevoCorreo");
 
             Long idComuna = Long.valueOf(datos.get("idComuna").toString());
-            usuarioContactoService.ActualizarContacto(contactoActualizado, direccionActualizada, 
-                nuevoCorreo, idComuna, usuarioLogueado.getId());
+            usuarioContactoService.ActualizarContacto(contactoActualizado, direccionActualizada,
+                    nuevoCorreo, idComuna, usuarioLogueado.getId());
 
             return ResponseEntity.ok(Map.of("mensaje", "Perfil actualizado con éxito"));
 
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @RestController
+    @RequestMapping("/usuario")
+    public class UsuarioController {
+
+        @Autowired
+        private ImagenService imagenService;
+
+        @Autowired
+        private UsuarioRepository usuarioRepository;
+
+        @PutMapping("/subir-foto")
+        public ResponseEntity<?> subirFoto(
+                @RequestParam("file") MultipartFile file,
+                Authentication authentication) {
+
+            try {
+
+                String url = imagenService.subirImagen(file);
+                Usuario usuario = (Usuario) authentication.getPrincipal();
+                usuario.setImagenUsuario(url);
+                usuarioRepository.save(usuario);
+
+                return ResponseEntity.ok(Map.of(
+                        "mensaje", "Foto actualizada correctamente",
+                        "url", url));
+
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "error", e.getMessage()));
+            }
         }
     }
 

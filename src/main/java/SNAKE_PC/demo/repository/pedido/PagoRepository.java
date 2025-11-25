@@ -8,7 +8,7 @@ import java.util.List;
 @Repository
 public interface PagoRepository extends JpaRepository<Pago, Long> {
 
-    List<Pago> findByPedidoContactoUsuarioCorreo(String correo);
+    List<Pago> findByPedidoUsuarioCorreo(String correo);
 
     List<Pago> findByPedidoId(Long pedidoId);
 

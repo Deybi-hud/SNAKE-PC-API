@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import SNAKE_PC.demo.model.producto.Categoria;
 import SNAKE_PC.demo.model.producto.Producto;
@@ -15,6 +17,8 @@ import SNAKE_PC.demo.service.producto.CategoriaService;
 import SNAKE_PC.demo.service.producto.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
 
+@RestController
+@RequestMapping("/api/v1/productos")
 public class ProductoController {
 
     @Autowired

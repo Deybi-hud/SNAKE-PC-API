@@ -31,12 +31,12 @@ public class CategoriaService {
 
     public Categoria buscarPorNombre(String nombre) {
         Categoria categoria = categoriaRepository.findByNombreCategoria(nombre)
-            .orElseThrow(()-> new RuntimeException("Categoría no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
         return categoria;
     }
 
     public Categoria guardarCategoria(Categoria categoria) {
-        if(categoria == null){
+        if (categoria == null) {
             throw new RuntimeException("La categoría no puede estar nula");
         }
         if (categoria.getNombreCategoria() == null || categoria.getNombreCategoria().trim().isBlank()) {
@@ -44,11 +44,11 @@ public class CategoriaService {
         }
         String normalizado = categoria.getNombreCategoria().trim().toLowerCase();
         return categoriaRepository.findByNombreCategoria(normalizado)
-                .orElseGet(()->{
+                .orElseGet(() -> {
                     Categoria nuevaCategoria = new Categoria();
                     nuevaCategoria.setNombreCategoria(categoria.getNombreCategoria().trim());
                     return categoriaRepository.save(nuevaCategoria);
-        });  
+                });
     }
 
     public Categoria actualizarCategoria(Long id, Categoria categoria) {
